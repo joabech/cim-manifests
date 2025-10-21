@@ -1,0 +1,27 @@
+mirror: $HOME/tmp/mirror
+os_dependencies: !include os-dependencies.yml
+
+envsetup:
+  - echo "Setting up ${TARGET_NAME} environment"
+  - mkdir -p build/logs
+
+test:
+  - echo "Running tests for ${TARGET_NAME}"
+  - make test
+
+gits:
+  - name: example-repo
+    url: https://github.com/example/repo.git
+    commit: main
+    build:
+      - echo "Building example repo"
+      - make all
+
+  - name: example-lib
+    url: https://github.com/example/lib.git
+    commit: v1.0.0
+    depends_on:
+      - example-repo
+    build:
+      - echo "Building example lib"
+      - cmake . && make

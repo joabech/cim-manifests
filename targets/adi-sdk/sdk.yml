@@ -1,0 +1,67 @@
+mirror: $HOME/tmp/mirror
+
+os_dependencies: !include os-dependencies.yml
+
+# Extra makefile(s) to be included to the generated Makefile. This can be used
+# to add custom targets or override existing ones. The will be included as
+# "safe inclusion", meaning that if the generated Makefile doens't find the
+# files here, then it will just skip them without error.
+makefile_include:
+  - include tbd.mk
+
+# This setup the toolchain, currently only Arm 32bit toolchains are supported.
+# Other toolchains should be added in the future as needed.
+envsetup: |
+  @echo "Setting up ADI build environment"; \
+  if [ "$$(uname)" = "Darwin" ] && [ "$$(uname -m)" = "arm64" ]; then \
+    AARCH32_TOOLCHAIN_FILE="https://developer.arm.com/-/media/Files/downloads/gnu/14.3.rel1/binrel/arm-gnu-toolchain-14.3.rel1-darwin-arm64-arm-none-eabi.tar.xz"; \
+    AARCH32_TOOLCHAIN_FILENAME="arm-gnu-toolchain-14.3.rel1-darwin-arm64-arm-none-eabi.tar.xz"; \
+  else \
+    AARCH32_TOOLCHAIN_FILE="https://armkeil.blob.core.windows.net/developer/Files/downloads/gnu/13.3.rel1/binrel/arm-gnu-toolchain-13.3.rel1-x86_64-arm-none-eabi.tar.xz"; \
+    AARCH32_TOOLCHAIN_FILENAME="arm-gnu-toolchain-13.3.rel1-x86_64-arm-none-eabi.tar.xz"; \
+  fi; \
+  echo "Downloading Arm toolchain..."; \
+  mkdir -p $$HOME/tmp/mirror $(CURDIR)/toolchains/aarch32 $(CURDIR)/toolchains/aarch64; \
+  wget -nc -P "$$HOME/tmp/mirror" "$$AARCH32_TOOLCHAIN_FILE" || exit 1; \
+  tar -xf "$$HOME/tmp/mirror/$$AARCH32_TOOLCHAIN_FILENAME" -C $(CURDIR)/toolchains/aarch32 --strip-components=1; \
+  echo "✓ Toolchains have been installed"
+  @echo "Creating Python virtual environment..."
+  @sdk-manager install pip
+  @echo "In a shell session, run:"
+  @echo "  source .venv/bin/activate"
+
+# For now, let's test just "hello-world" build for the host architecture.
+test: |
+  @echo "Running tests"
+  $(MAKE) -C adi-build clean
+  $(MAKE) -C adi-build test DARCH=host
+
+# Git repositories with build commands
+gits:
+  - name: "drivers"
+    url: "https://github.com/adi-innersource/core-sw-sdk-bm-drivers.git"
+    commit: "main"
+    build: |
+      @echo "Building ADI drivers"
+      @echo "✓ Drivers built as part of SOC projects - no standalone build"
+    
+  - name: "CMSIS_6"
+    url: "https://github.com/ARM-software/CMSIS_6.git" 
+    commit: "main"
+    build: |
+      @echo "Building CMSIS_6"
+      @echo "✓ CMSIS_6 is a header-only library - no build required"
+    
+  - name: "adi-examples"
+    url: "https://github.com/Joakim-Bech_adi/adi-examples.git"
+    commit: "main"
+    build: |
+      @echo "Building examples"
+      @echo "✓ Examples built via SOC projects"
+    
+  - name: "adi-build"
+    url: "https://github.com/Joakim-Bech_adi/adi-build.git"
+    commit: "main"
+    build: |
+      @echo "Building adi-build"
+      $(MAKE) -C adi-build DARCH=$(or $(DARCH),arm) PROJECT=$(or $(PROJECT),hello-world) CONFIG=$(or $(CONFIG),max32657_defconfig) SOC=$(or $(SOC),max32657) $(MAKEFLAGS)

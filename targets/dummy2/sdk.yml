@@ -1,0 +1,14 @@
+mirror: $HOME/tmp/mirror
+os_dependencies: !include os-dependencies.yml
+
+envsetup:
+  - "@echo \"Setting up dummy example 02\""
+  - export DUMMY_VAR=example02
+
+gits:
+  - name: dummy-repo-02
+    url: https://github.com/kevin-bates/git-sandbox.git
+    commit: master
+    build:
+      - "@echo \"Building dummy repo 02\""
+      - cat README.md
