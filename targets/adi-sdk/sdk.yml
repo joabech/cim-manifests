@@ -9,22 +9,25 @@ os_dependencies: !include os-dependencies.yml
 makefile_include:
   - include tbd.mk
 
-# This setup the toolchain, currently only Arm 32bit toolchains are supported.
-# Other toolchains should be added in the future as needed.
+# Toolchain configurations with OS and architecture filtering
+toolchains:
+  - name: arm-gnu-toolchain-14.3.rel1-darwin-arm64-arm-none-eabi.tar.xz
+    url: https://developer.arm.com/-/media/Files/downloads/gnu/14.3.rel1/binrel/arm-gnu-toolchain-14.3.rel1-darwin-arm64-arm-none-eabi.tar.xz
+    destination: toolchains/aarch32
+    strip_components: 1
+    os: darwin
+    arch: arm64
+
+  - name: arm-gnu-toolchain-13.3.rel1-x86_64-arm-none-eabi.tar.xz  
+    url: https://armkeil.blob.core.windows.net/developer/Files/downloads/gnu/13.3.rel1/binrel/arm-gnu-toolchain-13.3.rel1-x86_64-arm-none-eabi.tar.xz
+    destination: toolchains/aarch32
+    strip_components: 1
+    os: linux
+    arch: x86_64
+
+# Environment setup without toolchain installation (now handled by 'sdk-manager install toolchains')
 envsetup: |
-  @echo "Setting up ADI build environment"; \
-  if [ "$$(uname)" = "Darwin" ] && [ "$$(uname -m)" = "arm64" ]; then \
-    AARCH32_TOOLCHAIN_FILE="https://developer.arm.com/-/media/Files/downloads/gnu/14.3.rel1/binrel/arm-gnu-toolchain-14.3.rel1-darwin-arm64-arm-none-eabi.tar.xz"; \
-    AARCH32_TOOLCHAIN_FILENAME="arm-gnu-toolchain-14.3.rel1-darwin-arm64-arm-none-eabi.tar.xz"; \
-  else \
-    AARCH32_TOOLCHAIN_FILE="https://armkeil.blob.core.windows.net/developer/Files/downloads/gnu/13.3.rel1/binrel/arm-gnu-toolchain-13.3.rel1-x86_64-arm-none-eabi.tar.xz"; \
-    AARCH32_TOOLCHAIN_FILENAME="arm-gnu-toolchain-13.3.rel1-x86_64-arm-none-eabi.tar.xz"; \
-  fi; \
-  echo "Downloading Arm toolchain..."; \
-  mkdir -p $$HOME/tmp/mirror $(CURDIR)/toolchains/aarch32 $(CURDIR)/toolchains/aarch64; \
-  wget -nc -P "$$HOME/tmp/mirror" "$$AARCH32_TOOLCHAIN_FILE" || exit 1; \
-  tar -xf "$$HOME/tmp/mirror/$$AARCH32_TOOLCHAIN_FILENAME" -C $(CURDIR)/toolchains/aarch32 --strip-components=1; \
-  echo "✓ Toolchains have been installed"
+  @echo "Setting up ADI build environment"
   @echo "Creating Python virtual environment..."
   @sdk-manager install pip
   @echo "In a shell session, run:"
