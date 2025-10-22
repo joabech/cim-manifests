@@ -12,14 +12,14 @@ makefile_include:
 # Toolchain configurations with OS and architecture filtering
 toolchains:
   - name: arm-gnu-toolchain-14.3.rel1-darwin-arm64-arm-none-eabi.tar.xz
-    url: https://developer.arm.com/-/media/Files/downloads/gnu/14.3.rel1/binrel/arm-gnu-toolchain-14.3.rel1-darwin-arm64-arm-none-eabi.tar.xz
+    url: https://developer.arm.com/-/media/Files/downloads/gnu/14.3.rel1/binrel/
     destination: toolchains/aarch32
     strip_components: 1
     os: darwin
     arch: arm64
 
   - name: arm-gnu-toolchain-13.3.rel1-x86_64-arm-none-eabi.tar.xz  
-    url: https://armkeil.blob.core.windows.net/developer/Files/downloads/gnu/13.3.rel1/binrel/arm-gnu-toolchain-13.3.rel1-x86_64-arm-none-eabi.tar.xz
+    url: https://armkeil.blob.core.windows.net/developer/Files/downloads/gnu/13.3.rel1/binrel
     destination: toolchains/aarch32
     strip_components: 1
     os: linux
