@@ -25,13 +25,17 @@ toolchains:
     os: linux
     arch: x86_64
 
-# Environment setup without toolchain installation (now handled by 'sdk-manager install toolchains')
 envsetup: |
   @echo "Setting up ADI build environment"
-  @echo "Creating Python virtual environment..."
-  @sdk-manager install pip
   @echo "In a shell session, run:"
   @echo "  source .venv/bin/activate"
+  @echo ""
+  @echo "Then, the development environment is ready to be used, try:"
+  @echo "  # Default hello-world example"
+  @echo "  make sdk-test"
+  @echo ""
+  @echo "  # Or the I2C demo using the core-sw-sdk-bm-drivers"
+  @echo "  make -C adi-build max32657 CONFIG=max32657_i2c_demo_defconfig"
 
 # For now, let's test just "hello-world" build for the host architecture.
 test: |
