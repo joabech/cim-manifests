@@ -35,13 +35,13 @@ envsetup: |
   @echo "  make sdk-test"
   @echo ""
   @echo "  # Or the I2C demo using the core-sw-sdk-bm-drivers"
-  @echo "  make -C adi-build max32657 CONFIG=max32657_i2c_demo_defconfig"
+  @echo "  make -C dsdk-builder-bm max32657 CONFIG=max32657_i2c_demo_defconfig"
 
 # For now, let's test just "hello-world" build for the host architecture.
 test: |
   @echo "Running tests"
-  $(MAKE) -C adi-build clean
-  $(MAKE) -C adi-build test DARCH=host
+  $(MAKE) -C dsdk-builder-bm clean
+  $(MAKE) -C dsdk-builder-bm test DARCH=host
 
 # Git repositories with build commands
 gits:
@@ -59,16 +59,16 @@ gits:
       @echo "Building CMSIS_6"
       @echo "✓ CMSIS_6 is a header-only library - no build required"
     
-  - name: "adi-examples"
-    url: "https://github.com/Joakim-Bech_adi/adi-examples.git"
+  - name: "sdp-examples-bm"
+    url: "https://github.com/adi-innersource/sdp-examples-bm.git"
     commit: "main"
     build: |
       @echo "Building examples"
       @echo "✓ Examples built via SOC projects"
     
-  - name: "adi-build"
-    url: "https://github.com/Joakim-Bech_adi/adi-build.git"
+  - name: "dsdk-builder-bm"
+    url: "https://github.com/adi-innersource/dsdk-builder-bm.git"
     commit: "main"
     build: |
       @echo "Building adi-build"
-      $(MAKE) -C adi-build DARCH=$(or $(DARCH),arm) PROJECT=$(or $(PROJECT),hello-world) CONFIG=$(or $(CONFIG),max32657_defconfig) SOC=$(or $(SOC),max32657) $(MAKEFLAGS)
+      $(MAKE) -C dsdk-builder-bm DARCH=$(or $(DARCH),arm) PROJECT=$(or $(PROJECT),hello-world) CONFIG=$(or $(CONFIG),max32657_defconfig) SOC=$(or $(SOC),max32657) $(MAKEFLAGS)
