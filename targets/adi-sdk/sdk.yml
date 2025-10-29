@@ -43,6 +43,18 @@ test: |
   $(MAKE) -C dsdk-builder-bm clean
   $(MAKE) -C dsdk-builder-bm test DARCH=host
 
+clean: |
+  @echo "Cleaning ADI build environment"
+  $(MAKE) -C dsdk-builder-bm clean
+
+build: |
+  @echo "Building ADI SDK"
+  $(MAKE) -C dsdk-builder-bm DARCH=$(or $(DARCH),arm) PROJECT=$(or $(PROJECT),hello-world) CONFIG=$(or $(CONFIG),max32657_defconfig) SOC=$(or $(SOC),max32657) $(MAKEFLAGS)
+
+flash: |
+  @echo "Flashing ADI SDK"
+  @echo "Flash command not yet implemented - this is a placeholder"
+
 # Git repositories with build commands
 gits:
   - name: "drivers"
