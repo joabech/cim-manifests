@@ -11,7 +11,7 @@ test:
 gits:
   - name: build
     url: https://github.com/OP-TEE/build.git
-    commit: 4.8.0
+    commit: refs/tags/4.6.0
     build:
       - make -C build -j`nproc` $(MAKEFLAGS)
 
@@ -21,7 +21,7 @@ gits:
 
   - name: optee_client
     url: https://github.com/OP-TEE/optee_client.git
-    commit: 4.8.0
+    commit: refs/tags/4.6.0
     depends_on:
       - optee_os
     build:
@@ -29,32 +29,32 @@ gits:
 
   - name: optee_os
     url: https://github.com/OP-TEE/optee_os.git
-    commit: 4.8.0
+    commit: refs/tags/4.6.0
     build:
       - make -C build optee-os $(MAKEFLAGS)
 
   - name: optee_ftpm
     url: https://github.com/OP-TEE/optee_ftpm.git
-    commit: 4.8.0
+    commit: refs/tags/4.6.0
     depends_on:
       - optee_os
 
   - name: optee_test
     url: https://github.com/OP-TEE/optee_test.git
-    commit: 4.8.0
+    commit: refs/tags/4.6.0
     depends_on:
       - optee_os
 
   # linaro-swg gits from common.xml
   - name: linux
     url: https://github.com/linaro-swg/linux.git
-    commit: refs/tags/optee-4.8.0
+    commit: refs/tags/optee-4.6.0
     build:
       - make -C build linux $(MAKEFLAGS)
 
   - name: optee_examples
     url: https://github.com/linaro-swg/optee_examples.git
-    commit: 4.8.0
+    commit: refs/tags/4.6.0
     depends_on:
       - optee_os
       - optee_client
@@ -62,7 +62,7 @@ gits:
   # buildroot git from common.xml
   - name: buildroot
     url: https://github.com/buildroot/buildroot.git
-    commit: refs/tags/2025.05
+    commit: refs/tags/2024.05
     build:
       - make -C build buildroot $(MAKEFLAGS)
 
@@ -76,23 +76,23 @@ gits:
   # Misc gits from qemu_v8.xml
   - name: optee_rust
     url: https://github.com/apache/incubator-teaclave-trustzone-sdk.git
-    commit: a8cb34150770ba729b2cc9b3c1d7c014bd32d95b
+    commit: ec3eefd9de68a18d5acee1a151e0d93f6898807f
 
   - name: qemu
     url: https://github.com/qemu/qemu.git
-    commit: refs/tags/v10.0.0
+    commit: refs/tags/v9.2.0
     build:
       - make -C build qemu $(MAKEFLAGS)
 
   - name: hafnium
     url: https://github.com/TF-Hafnium/hafnium.git
-    commit: refs/tags/v2.12
+    commit: a33eca9976006ac9b08ed4afe6260a2e8b9d2b3a
     build:
       - make -C build hafnium $(MAKEFLAGS)
 
   - name: trusted-firmware-a
     url: https://github.com/TrustedFirmware-A/trusted-firmware-a.git
-    commit: refs/tags/v2.13-rc0
+    commit: refs/tags/v2.12
     build:
       - make -C build arm-tf $(MAKEFLAGS)
 
@@ -102,7 +102,7 @@ gits:
 
   - name: u-boot
     url: https://github.com/u-boot/u-boot.git
-    commit: refs/tags/v2025.07
+    commit: refs/tags/v2023.07.02
     build:
       - make -C build u-boot $(MAKEFLAGS)
 
