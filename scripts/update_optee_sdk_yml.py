@@ -523,11 +523,14 @@ def get_all_git_entries(sdk_path: str) -> List[Tuple[str, str]]:
     return entries
 
 
-def print_changes_summary(changes: List[Tuple[str, str, str]], sdk_path: str, projects: Dict[str, str], dry_run: bool = False) -> None:
+def print_changes_summary(changes: List[Tuple[str, str, str]], sdk_path: str, projects: Dict[str, str], dry_run: bool = False, original_entries: List[Tuple[str, str]] = None) -> None:
     """Print a summary of all git entries, showing icons only for changed ones."""
 
-    # Get all git entries from the YAML file
-    all_entries = get_all_git_entries(sdk_path)
+    # Get all git entries from the YAML file (use original entries if provided, otherwise read current state)
+    if original_entries is not None:
+        all_entries = original_entries
+    else:
+        all_entries = get_all_git_entries(sdk_path)
 
     if not all_entries:
         console.print("\n[yellow]⚠[/yellow] No git entries found in SDK file")
@@ -562,6 +565,11 @@ def print_changes_summary(changes: List[Tuple[str, str, str]], sdk_path: str, pr
             # This entry is changing
             old_commit, new_commit = changes_dict[name]
 
+            # For the display, use the original commit (current_commit from all_entries)
+            # and the new commit from projects dict
+            display_current = current_commit
+            display_new = projects.get(name, new_commit)  # Use projects dict or fallback to changes
+
             # Classify the change type
             change_type = classify_change_type(old_commit, new_commit)
 
@@ -588,8 +596,8 @@ def print_changes_summary(changes: List[Tuple[str, str, str]], sdk_path: str, pr
                 major_changes += 1
 
             # Truncate long commit hashes for display
-            current_display = current_commit[:37] + "..." if len(current_commit) > 40 else current_commit
-            new_display = new_commit[:37] + "..." if len(new_commit) > 40 else new_commit
+            current_display = display_current[:37] + "..." if len(display_current) > 40 else display_current
+            new_display = display_new[:37] + "..." if len(display_new) > 40 else display_new
 
             table.add_row(
                 icon,
@@ -942,12 +950,15 @@ def main() -> None:
             console.print("[red]✗ No projects found in XML files[/red]")
             sys.exit(1)
 
+        # Capture original state before any updates
+        original_entries = get_all_git_entries(args.sdk_path)
+
         # Update SDK file
         changes = update_sdk_yml(projects, args.sdk_path, args.dry_run)
 
         # Show summary unless quiet
         if not args.quiet:
-            print_changes_summary(changes, args.sdk_path, projects, args.dry_run)
+            print_changes_summary(changes, args.sdk_path, projects, args.dry_run, original_entries)
 
         if args.dry_run and changes:
             console.print(f"\n[yellow]💡 To apply these changes, run without --dry-run:[/yellow]")
