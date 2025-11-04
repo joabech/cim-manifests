@@ -1,12 +1,21 @@
 mirror: $HOME/tmp/mirror
-os_dependencies: !include os-dependencies.yml
 
 envsetup:
   - ln -sf qemu_v8.mk build/Makefile
-  - make -C build -j3 toolchains $(MAKEFLAGS)
+  - $(MAKE) -C build toolchains $(MAKEFLAGS)
+
+build:
+  - $(MAKE) -C build all $(MAKEFLAGS)
 
 test:
-  - make -C build check $(MAKEFLAGS)
+  - $(MAKE) -C build check $(MAKEFLAGS)
+
+clean:
+  - $(MAKE) -C build clean $(MAKEFLAGS)
+
+flash: |
+  @echo "This is a QEMU setup, no flashing needed"
+
 
 gits:
   - name: build
@@ -76,7 +85,7 @@ gits:
   # Misc gits from qemu_v8.xml
   - name: optee_rust
     url: https://github.com/apache/incubator-teaclave-trustzone-sdk.git
-    commit: e67293c0d2f8168f47586be2e5b1a4231c8bd8e9
+    commit: main
 
   - name: qemu
     url: https://github.com/qemu/qemu.git
