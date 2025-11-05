@@ -1,12 +1,19 @@
 mirror: $HOME/tmp/mirror
 
+makefile_include:
+  - include extra.mk
+
+copy_files:
+  - source: extra.mk
+    dest: extra.mk
+
 envsetup:
   - "@echo \"Setting up dummy example 01\""
 
 gits:
   - name: git-sandbox
     url: https://github.com/kevin-bates/git-sandbox.git
-    commit: main
+    commit: master
     build:
       - "@echo \"Building git-sandbox 01\""
       - make all
