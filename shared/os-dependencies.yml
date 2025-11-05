@@ -1,99 +1,64 @@
+# Common package lists using YAML anchors for DRY
+ubuntu_packages: &ubuntu_pkgs
+  - build-essential
+  - cmake
+  - curl
+  - git
+  - libboost-all-dev
+  - libssl-dev
+  - pkg-config
+  - python3
+  - python3-pip
+  - vim
+
+fedora_packages: &fedora_pkgs
+  - cmake
+  - curl
+  - gcc
+  - gcc-c++
+  - git
+  - boost-devel
+  - openssl-devel
+  - pkgconfig
+  - python3
+  - python3-pip
+  - vim
+
 # Linux x86_64 (Intel/AMD) dependencies
 linux-x86_64:
   ubuntu:
     version: "22.04"
     command: "apt-get install"
-    packages:
-      - build-essential
-      - cmake
-      - curl
-      - git
-      - libboost-all-dev
-      - libssl-dev
-      - pkg-config
-      - python3
-      - python3-pip
-      - vim
+    packages: *ubuntu_pkgs
   
   fedora:
     version: "42"
     command: "dnf install"
-    packages:
-      - cmake
-      - curl
-      - gcc
-      - gcc-c++
-      - git
-      - boost-devel
-      - openssl-devel
-      - pkgconfig
-      - python3
-      - python3-pip
-      - vim
+    packages: *fedora_pkgs
 
 # Linux ARM64 (Apple Silicon, ARM servers) dependencies  
 linux-aarch64:
   ubuntu:
     version: "22.04"
     command: "apt-get install"
-    packages:
-      - build-essential
-      - cmake
-      - curl
-      - git
-      - libboost-all-dev
-      - libssl-dev
-      - pkg-config
-      - python3
-      - python3-pip
-      - vim
+    packages: *ubuntu_pkgs
   
   fedora:
     version: "42"
     command: "dnf install"
-    packages:
-      - cmake
-      - curl
-      - gcc
-      - gcc-c++
-      - git
-      - boost-devel
-      - openssl-devel
-      - pkgconfig
-      - python3
-      - python3-pip
-      - vim# Backward compatibility - generic linux (defaults to x86_64 behavior)
+    packages: *fedora_pkgs
+
+# Backward compatibility - generic linux (defaults to x86_64 behavior)
 linux:
   ubuntu:
     version: "22.04"
     command: "apt-get install"
-    packages:
-      - build-essential
-      - cmake
-      - curl
-      - git
-      - libboost-all-dev
-      - libssl-dev
-      - pkg-config
-      - python3
-      - python3-pip
-      - vim
+    packages: *ubuntu_pkgs
   
   fedora:
     version: "42"
     command: "dnf install"
-    packages:
-      - cmake
-      - curl
-      - gcc
-      - gcc-c++
-      - git
-      - boost-devel
-      - openssl-devel
-      - pkgconfig
-      - python3
-      - python3-pip
-      - vim
+    packages: *fedora_pkgs
 
 macos:
   macos:
@@ -103,4 +68,3 @@ macos:
       - cmake
       - git
       - python3
-      - vim

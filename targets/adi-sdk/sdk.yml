@@ -41,8 +41,8 @@ build: |
   @echo "Building default configuration"
   $(MAKE) -C dsdk-builder-bm DARCH=$(or $(DARCH),arm) PROJECT=$(or $(PROJECT),hello-world) CONFIG=$(or $(CONFIG),max32657_defconfig) SOC=$(or $(SOC),max32657) $(MAKEFLAGS)
 
-flash: |
-  @echo "Flash command not yet implemented - this is a placeholder"
+flash:
+  - "@echo Flash command not yet implemented - this is a placeholder"
 
 # Extra makefile(s) to be included to the generated Makefile. This can be used
 # to add custom targets or override existing ones. The will be included as
@@ -55,25 +55,25 @@ makefile_include:
 # into the workspace.
 # copy_files:
 
-# Git repositories with build commands
+# Use an yaml-anchor for common build steps
+common_echo_build: &echo_build
+  - "@echo ✓ Built as part of SOC projects - no standalone build"
+
 gits:
   - name: "drivers"
     url: "https://github.com/adi-innersource/core-sw-sdk-bm-drivers.git"
     commit: "main"
-    build: |
-      @echo "✓ Baremetal drivers built as part of SOC projects - no standalone build"
+    build: *echo_build
 
   - name: "CMSIS_6"
     url: "https://github.com/ARM-software/CMSIS_6.git"
     commit: "main"
-    build: |
-      @echo "✓ CMSIS_6 is a header-only library - no build required"
+    build: *echo_build
 
   - name: "sdp-examples-bm"
     url: "https://github.com/adi-innersource/sdp-examples-bm.git"
     commit: "main"
-    build: |
-      @echo "✓ Examples built via SOC projects - no standalone build"
+    build: *echo_build
 
   - name: "dsdk-builder-bm"
     url: "https://github.com/adi-innersource/dsdk-builder-bm.git"
