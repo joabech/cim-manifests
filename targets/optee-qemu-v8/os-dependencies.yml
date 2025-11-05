@@ -1,254 +1,161 @@
 # OP-TEE QEMU v8 specific OS dependencies
 # Includes base dependencies plus OP-TEE-specific packages
 
+# YAML anchors for reusable package lists
+ubuntu_packages: &ubuntu_packages
+  - adb
+  - acpica-tools
+  - autoconf
+  - automake
+  - bc
+  - bison
+  - build-essential
+  - ccache
+  - cpio
+  - cscope
+  - curl
+  - device-tree-compiler
+  - e2tools
+  - expect
+  - fastboot
+  - flex
+  - ftp-upload
+  - gdisk
+  - git
+  - libattr1-dev
+  - libcap-ng-dev
+  - libfdt-dev
+  - libftdi-dev
+  - libglib2.0-dev
+  - libgmp3-dev
+  - libgnutls28-dev
+  - libhidapi-dev
+  - libmpc-dev
+  - libncurses5-dev
+  - libpixman-1-dev
+  - libslirp-dev
+  - libssl-dev
+  - libtool
+  - libusb-1.0-0-dev
+  - make
+  - mtools
+  - netcat
+  - ninja-build
+  - python-is-python3
+  - python3-cryptography
+  - python3-pip
+  - python3-pyelftools
+  - python3-serial
+  - python3-tomli
+  - rsync
+  - swig
+  - unzip
+  - uuid-dev
+  - wget
+  - xdg-utils
+  - xsltproc
+  - xterm
+  - xz-utils
+  - zlib1g-dev
+
+fedora_packages: &fedora_packages
+  - acpica-tools
+  - android-tools
+  - autoconf
+  - automake
+  - bc
+  - bison
+  - ccache
+  - cpio
+  - cscope
+  - curl
+  - dtc
+  - e2tools
+  - expect
+  - flex
+  - gcc
+  - gcc-c++
+  - gdisk
+  - git
+  - glib2-devel
+  - gmp-devel
+  - gnutls-devel
+  - hidapi-devel
+  - lftp
+  - libattr-devel
+  - libcap-ng-devel
+  - libfdt-devel
+  - libftdi-devel
+  - libmpc-devel
+  - libslirp-devel
+  - libtool
+  - libusb1-devel
+  - libuuid-devel
+  - libxslt
+  - make
+  - mtools
+  - ncurses-devel
+  - ninja-build
+  - nmap-ncat
+  - nvim
+  - openssl-devel
+  - openssl-devel-engine
+  - patch
+  - perl-core
+  - pixman-devel
+  - python3-cryptography
+  - python3-devel
+  - python3-pip
+  - python3-pyelftools
+  - python3-pyserial
+  - python3-tomli
+  - rsync
+  - swig
+  - unzip
+  - wget
+  - xdg-utils
+  - xterm
+  - xz
+  - zlib-devel
+
 # Linux x86_64 (Intel/AMD) dependencies
 linux-x86_64:
   ubuntu:
     version: "22.04"
     command: "apt-get install"
-    packages:
-      - adb
-      - acpica-tools
-      - autoconf
-      - automake
-      - bc
-      - bison
-      - build-essential
-      - ccache
-      - cpio
-      - cscope
-      - curl
-      - device-tree-compiler
-      - e2tools
-      - expect
-      - fastboot
-      - flex
-      - ftp-upload
-      - gdisk
-      - git
-      - libattr1-dev
-      - libcap-ng-dev
-      - libfdt-dev
-      - libftdi-dev
-      - libglib2.0-dev
-      - libgmp3-dev
-      - libgnutls28-dev
-      - libhidapi-dev
-      - libmpc-dev
-      - libncurses5-dev
-      - libpixman-1-dev
-      - libslirp-dev
-      - libssl-dev
-      - libtool
-      - libusb-1.0-0-dev
-      - make
-      - mtools
-      - netcat
-      - ninja-build
-      - python-is-python3
-      - python3-cryptography
-      - python3-pip
-      - python3-pyelftools
-      - python3-serial
-      - python3-tomli
-      - rsync
-      - swig
-      - unzip
-      - uuid-dev
-      - wget
-      - xdg-utils
-      - xsltproc
-      - xterm
-      - xz-utils
-      - zlib1g-dev
+    packages: *ubuntu_packages
   
   fedora:
     version: "42"
     command: "dnf install"
-    packages:
-      - acpica-tools
-      - android-tools
-      - autoconf
-      - automake
-      - bc
-      - bison
-      - ccache
-      - cpio
-      - cscope
-      - curl
-      - dtc
-      - e2tools
-      - expect
-      - flex
-      - gcc
-      - gcc-c++
-      - gdisk
-      - git
-      - glib2-devel
-      - gmp-devel
-      - gnutls-devel
-      - hidapi-devel
-      - lftp
-      - libattr-devel
-      - libcap-ng-devel
-      - libfdt-devel
-      - libftdi-devel
-      - libmpc-devel
-      - libslirp-devel
-      - libtool
-      - libusb1-devel
-      - libuuid-devel
-      - libxslt
-      - make
-      - mtools
-      - ncurses-devel
-      - ninja-build
-      - nmap-ncat
-      - nvim
-      - openssl-devel
-      - openssl-devel-engine
-      - patch
-      - perl-core
-      - pixman-devel
-      - python3-cryptography
-      - python3-devel
-      - python3-pip
-      - python3-pyelftools
-      - python3-pyserial
-      - python3-tomli
-      - rsync
-      - swig
-      - unzip
-      - wget
-      - xdg-utils
-      - xterm
-      - xz
-      - zlib-devel
+    packages: *fedora_packages
 
 # Linux ARM64 (Apple Silicon, ARM servers) dependencies  
 linux-aarch64:
   ubuntu:
     version: "22.04"
     command: "apt-get install"
-    packages:
-      - adb
-      - acpica-tools
-      - autoconf
-      - automake
-      - bc
-      - bison
-      - build-essential
-      - ccache
-      - cpio
-      - cscope
-      - curl
-      - device-tree-compiler
-      - e2tools
-      - expect
-      - fastboot
-      - flex
-      - ftp-upload
-      - gdisk
-      - git
-      - libattr1-dev
-      - libcap-ng-dev
-      - libfdt-dev
-      - libftdi-dev
-      - libglib2.0-dev
-      - libgmp3-dev
-      - libgnutls28-dev
-      - libhidapi-dev
-      - libmpc-dev
-      - libncurses5-dev
-      - libpixman-1-dev
-      - libslirp-dev
-      - libssl-dev
-      - libtool
-      - libusb-1.0-0-dev
-      - make
-      - mtools
-      - netcat
-      - ninja-build
-      - python-is-python3
-      - python3-cryptography
-      - python3-pip
-      - python3-pyelftools
-      - python3-serial
-      - python3-tomli
-      - rsync
-      - swig
-      - unzip
-      - uuid-dev
-      - wget
-      - xdg-utils
-      - xsltproc
-      - xterm
-      - xz-utils
-      - zlib1g-dev
+    packages: *ubuntu_packages
   
   fedora:
     version: "42"
     command: "dnf install"
-    packages:
-      - acpica-tools
-      - android-tools
-      - autoconf
-      - automake
-      - bc
-      - bison
-      - ccache
-      - cpio
-      - cscope
-      - curl
-      - dtc
-      - e2tools
-      - expect
-      - flex
-      - gcc
-      - gcc-c++
-      - gdisk
-      - git
-      - glib2-devel
-      - gmp-devel
-      - gnutls-devel
-      - hidapi-devel
-      - lftp
-      - libattr-devel
-      - libcap-ng-devel
-      - libfdt-devel
-      - libftdi-devel
-      - libmpc-devel
-      - libslirp-devel
-      - libtool
-      - libusb1-devel
-      - libuuid-devel
-      - libxslt
-      - make
-      - mtools
-      - ncurses-devel
-      - ninja-build
-      - nmap-ncat
-      - nvim
-      - openssl-devel
-      - openssl-devel-engine
-      - patch
-      - perl-core
-      - pixman-devel
-      - python3-cryptography
-      - python3-devel
-      - python3-pip
-      - python3-pyelftools
-      - python3-pyserial
-      - python3-tomli
-      - rsync
-      - swig
-      - unzip
-      - wget
-      - xdg-utils
-      - xterm
-      - xz
-      - zlib-devel
+    packages: *fedora_packages
+ 
+# Linux legacy
+linux:
+  ubuntu:
+    version: "22.04"
+    command: "apt-get install"
+    packages: *ubuntu_packages
+  
+  fedora:
+    version: "42"
+    command: "dnf install"
+    packages: *fedora_packages
 
+# MacOS dependencies
+# Note that you cannot build OP-TEE QEMU v8 on MacOS natively,
 macos:
   macos:
     version: "any"
