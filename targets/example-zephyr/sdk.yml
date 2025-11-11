@@ -1,0 +1,6 @@
+mirror: $HOME/tmp/mirror
+
+envsetup: |
+  sdk-manager install pip --symlink
+  . .venv/bin/activate && west init zephyrproject
+  cd zephyrproject && . ../.venv/bin/activate && west update
