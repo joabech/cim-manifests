@@ -39,7 +39,7 @@ ubuntu_packages: &ubuntu_packages
   - libusb-1.0-0-dev
   - make
   - mtools
-  - netcat
+  - netcat-openbsd
   - ninja-build
   - python-is-python3
   - python3-cryptography
