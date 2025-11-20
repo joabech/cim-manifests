@@ -1,5 +1,4 @@
 mirror: $HOME/tmp/mirror
-os_dependencies: !include os-dependencies.yml
 
 envsetup:
   - ln -sf qemu_v8.mk build/Makefile
