@@ -273,6 +273,34 @@ copy_files:
     sha256: 5e4034606fc3c1c9fbc4595034e0938313e88f8a5a0ae1b3d080b25e1bd781ee
 
 ################################################################################
+# Toolchains section - downloads and extracts toolchains with optional post-install
+################################################################################
+# NOTE: This section demonstrates how to migrate complex toolchains from the
+# "install" section. The toolchains section supports:
+# - Download variants based on OS/architecture
+# - Symlink installation (--symlink flag) for sharing across workspaces
+# - Mirror-based caching to avoid re-downloading
+# - Post-install commands for complex setup
+#
+# Example migration of Rust from "install" to "toolchains":
+#
+# toolchains:
+#   # Rust with post-install commands to set up environment
+#   - name: rustup.sh
+#     url: https://sh.rustup.rs/
+#     destination: opt/rust
+#     post_install_commands:
+#       - "CARGO_HOME=opt/cargo RUSTUP_HOME=opt/rustup bash rustup.sh -y --default-toolchain 1.86 --no-modify-path"
+#       - ". opt/cargo/env && cargo install uefi-run --root ."
+#       - ". opt/cargo/env && rustup target add riscv32i-unknown-none-elf riscv64imac-unknown-none-elf thumbv6m-none-eabi thumbv7em-none-eabi thumbv7m-none-eabi thumbv8m.main-none-eabi x86_64-unknown-none"
+#
+# Benefits over "install" section:
+# - Leverages download variants (OS/arch filtering)
+# - Supports --symlink for workspace reuse
+# - Post-install commands only run during actual extraction, not on symlink reuse
+# - Better integration with mirror-based caching
+
+################################################################################
 # Installation section - binaries etc, with specific install commands
 ################################################################################
 install:
