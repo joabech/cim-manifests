@@ -1,0 +1,15 @@
+profiles:
+  # Documentation profile - packages for building and serving docs
+  docs:
+    packages:
+      - sphinx
+      - sphinx-rtd-theme
+      - myst-parser
+      - sphinx-autobuild
+
+  # West tool
+  zephyr:
+    packages:
+      - west
+
+default: zephyr

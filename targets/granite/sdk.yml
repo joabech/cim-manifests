@@ -1,0 +1,573 @@
+################################################################################
+# Mirror location for downloads, toolchains and gits.
+################################################################################
+mirror: $HOME/tmp/mirror
+
+################################################################################
+# High-level Makefile targets.
+################################################################################
+# FIXME: This should probably go into an "init" source script
+envsetup: |
+  @echo 'To use Rust, run:'
+  @echo '  export CARGO_HOME=$$(pwd)/opt/cargo RUSTUP_HOME=$$(pwd)/opt/rustup'
+  @echo '  source $$CARGO_HOME/env'
+
+################################################################################
+# Gits for the project
+################################################################################
+gits:
+
+
+################################################################################
+# Copy files section - download files to be used during installation
+################################################################################
+copy_files:
+  # LLVM/Clang installation script
+  - source: https://apt.llvm.org/llvm.sh
+    dest: downloads/llvm.sh
+
+  # Kitware Ninja (x86_64 only)
+  - source: https://github.com/Kitware/ninja/releases/download/v1.11.1.g95dee.kitware.jobserver-1/ninja-1.11.1.g95dee.kitware.jobserver-1_x86_64-linux-gnu.tar.gz
+    dest: downloads/ninja-1.11.1.g95dee.kitware.jobserver-1_x86_64-linux-gnu.tar.gz
+    cache: true
+    symlink: true
+    sha256: 1ba0cd5f6dde9e4395a2cbcb1991468841eb71368f2cc1e8e1c99fd0b5bd2a76
+
+  # ccache (x86_64 only)
+  - source: https://github.com/ccache/ccache/releases/download/v4.9.1/ccache-4.9.1-linux-x86_64.tar.xz
+    dest: downloads/ccache-4.9.1-linux-x86_64.tar.xz
+    cache: true
+    symlink: true
+    sha256: d33f17ca6e02918cdc44738ce3adacb586bca65374ff1ceb0c4b2f1c87a24bef
+
+  # Doxygen (x86_64 only)
+  - source: https://github.com/doxygen/doxygen/releases/download/Release_1_14_0/doxygen-1.14.0.linux.bin.tar.gz
+    dest: downloads/doxygen-1.14.0.linux.bin.tar.gz
+    cache: true
+    symlink: true
+    sha256: e5d6ae24d0bf3f0cdc4d8f146726b89ca323922f19441af99b1872d503665ad6
+
+  # protobuf-compiler
+  - source: https://github.com/protocolbuffers/protobuf/releases/download/v21.7/protoc-21.7-linux-x86_64.zip
+    dest: downloads/protoc-21.7-linux-x86_64.zip
+    cache: true
+    symlink: true
+    sha256: 0a260c6df439bcf1ecdd5e38e7a7648e4edf99c1a22a4cc66ce8e62c53bdb837
+
+  # Renode (x86_64 only)
+  - source: https://github.com/renode/renode/releases/download/v1.15.3/renode-1.15.3.linux-portable-dotnet.tar.gz
+    dest: downloads/renode-1.15.3.linux-portable-dotnet.tar.gz
+    cache: true
+    symlink: true
+    sha256: 34b032b181e802cfc3d7d6e77aa9d89bc4f5dd7c402f59dcc5bdf4cb1769da93
+
+  # Zephyr SDK (x86_64)
+  - source: https://github.com/zephyrproject-rtos/sdk-ng/releases/download/v0.17.2/zephyr-sdk-0.17.2_linux-x86_64.tar.xz
+    dest: downloads/zephyr-sdk-0.17.2_linux-x86_64.tar.xz
+    cache: true
+    symlink: true
+    sha256: fcbcae771199ab14151f1315ecf9ddae6b9c656cd84309bad6b34787b38d930a
+
+  # Zephyr SDK (aarch64)
+  - source: https://github.com/zephyrproject-rtos/sdk-ng/releases/download/v0.17.2/zephyr-sdk-0.17.2_linux-aarch64.tar.xz
+    dest: downloads/zephyr-sdk-0.17.2_linux-aarch64.tar.xz
+    cache: true
+    symlink: true
+    sha256: 409eb543e61dd7a9ce477ecaa541f2cef2e1c19a81bc18355c3baedc1cb8143f
+
+  # AD71260 Virtual Platform
+  - source: https://artifactory.analog.com/artifactory/mead-generic-release/systemc/ad71260_vplatform_v3.0.2_rc.zip
+    dest: downloads/ad71260_vplatform_v3.0.2_rc.zip
+    cache: true
+    symlink: true
+    sha256: 2e008606ab7c1ca7a2e2f57d91e084944a16ed815e8b818ac7de68a289197c7f
+
+  # GRANITE Virtual Platform
+  - source: https://artifactory.analog.com/artifactory/dbu-generic-release/tahoe/virtual-platform/Adi.Dbu.Tahoe.VP-0.4.1-Linux.zip
+    dest: downloads/Adi.Dbu.Tahoe.VP-0.4.1-Linux.zip
+    cache: true
+    symlink: true
+    sha256: dbb9d5ad7ca3a27a6fc5148ab19ad630221c9ab1e5d61c201107aa863c17cc28
+
+  # FastModels
+  - source: https://artifactory.analog.com/artifactory/ssg-products/FastModels_11-19/FastModels_11-19-014_Linux64.tgz
+    dest: downloads/FastModels_11-19-014_Linux64.tgz
+    cache: true
+    symlink: true
+    sha256: 902845e157240097af9fbb4b7b4b3e63de3ee8c47a7a76b37892d088a9d7ec8a
+
+  # armlm libraries for FastModels
+  - source: https://artifactory.analog.com/artifactory/ssg-products/FastModels_11-19/armlm-ipc
+    dest: downloads/armlm-ipc
+    cache: true
+    symlink: true
+    sha256: dbd20e80e52aa6890d1327ed3dced72db058f26271e2b77db6b150c5b5bb6c8a
+
+  - source: https://artifactory.analog.com/artifactory/ssg-products/FastModels_11-19/libarmlm.so
+    dest: downloads/libarmlm.so
+    cache: true
+    symlink: true
+    sha256: 65d1191f755c92d6b7792b1d054cbd3aa6762bb2b0788dedbcaa929497927c98
+
+  # XtensaTools 2024_4
+  - source: https://artifactory.analog.com/artifactory/ssg-products/mead-xtensa-generic/XtensaTools_RJ_2024_4_linux.tgz
+    dest: downloads/XtensaTools_RJ_2024_4_linux.tgz
+    cache: true
+    symlink: true
+    sha256: f8400082865b6aab01267b60946f1089f6dba61578906af393ebf43dd753a60a
+
+  - source: https://artifactory.analog.com/artifactory/ssg-products/mead-xtensa-generic/XtensaTools_RJ_2024_4_patch943452_linux.tgz
+    dest: downloads/XtensaTools_RJ_2024_4_patch943452_linux.tgz
+    cache: true
+    symlink: true
+    sha256: 2e9da5cf71d821243797de3de410975eaf4b98458757b2ad1db0a67141bc7356
+
+  - source: https://artifactory.analog.com/artifactory/ssg-products/mead-xtensa-generic/H5V4_NPUV3_RJ24_4P1_linux.tgz
+    dest: downloads/H5V4_NPUV3_RJ24_4P1_linux.tgz
+    cache: true
+    symlink: true
+    sha256: 70f4ea6a3c8617de839471ea2d8644c1211ae82001f2c460574ac6019f9b5333
+
+  - source: https://artifactory.analog.com/artifactory/ssg-products/mead-xtensa-generic/H5V4_RJ24_4P1_linux.tgz
+    dest: downloads/H5V4_RJ24_4P1_linux.tgz
+    cache: true
+    symlink: true
+    sha256: ebcd4949e6aafa910a311a5003ac80955f05d4519a8d99d8595dbe0ae1e7761c
+
+  - source: https://artifactory.analog.com/artifactory/ssg-products/mead-xtensa-generic/H5sTV1_RJ24_04_linux.tgz
+    dest: downloads/H5sTV1_RJ24_04_linux.tgz
+    cache: true
+    symlink: true
+    sha256: 26b8c315f5e5f7a52d449e96d02acc08bc8306758347314fd6436ae185abc82f
+
+  - source: https://artifactory.analog.com/artifactory/ssg-products/mead-xtensa-generic/stdatomic_h.patch
+    dest: downloads/stdatomic_h.patch
+    cache: true
+    symlink: true
+    sha256: a005e8d33de9182ba11c3a1a59c66768e5a3e058f161bd26b0b6e86b5be37450
+
+  # fastdsp-assembler
+  - source: https://artifactory.analog.com/artifactory/ssg-products/fastdsp-assembler/fastdsp-assembler-linux-generic-v1.0.9.tar
+    dest: downloads/fastdsp-assembler-linux-generic-v1.0.9.tar
+    cache: true
+    symlink: true
+    sha256: ee313151cd500c3fe65f979f308e17f753875533b13986683817b294faa10e96
+
+  # JLink (note: requires POST data for license acceptance in Dockerfile)
+  - source: https://www.segger.com/downloads/jlink/JLink_Linux_V812_x86_64.deb
+    dest: downloads/jlink_setup.deb
+    post_data: "accept_license_agreement=accepted&non_emb_ctr=confirmed"
+    cache: true
+    symlink: true
+    sha256: 6a801fbb52e03efda23e60f24ff4f809aa19a4ef6555aeaf067f83046ea42cb0
+
+  # JLink Configurations for Walleye
+  - source: https://artifactory.analog.com/artifactory/dte-products/standalone/jlink/main/jlink-enablement-main.tar.gz
+    dest: downloads/jlink-enablement-main.tar.gz
+    cache: true
+    symlink: true
+    sha256: dc4496082017b0a89b7fcf70cce00819e7719b3ca4318f360d5372fd5b91d55b
+
+  # JLink Configurations for Granite
+  - source: https://artifactory.analog.com/artifactory/dte-products/standalone/jlink/milestone/granite/jlink-enablement-milestone-granite-110.tar.gz
+    dest: downloads/jlink-enablement-milestone-granite-110.tar.gz
+    cache: true
+    symlink: true
+    sha256: 79b198b5d6f899db3f6328c0b00cd4bfb76b444fa2fe16eaa6984aed62355174
+
+  # OpenOCD for Walleye
+  - source: https://artifactory.analog.com/artifactory/dte-products/standalone/openocd/milestone/walleye/openocd-milestone-walleye-Linux64-release-96.zip
+    dest: downloads/openocd-milestone-walleye-Linux64-release-96.zip
+    cache: true
+    symlink: true
+    sha256: 9c209035694ca30daa362333f88c9015793f66650ed5c6eb4579e9bb861e7321
+
+  # SBT (Secure Boot Tools)
+  - source: https://artifactory.analog.com/artifactory/spb/sbt/linux_ADI_SecureBootTools_3.1.0.zip
+    dest: downloads/sbt-3.1.0.zip
+    cache: true
+    symlink: true
+    sha256: 4b7b7b38a6398d2c449c34656e114f4dcf2f6e0ded65542ebdef8c7d4bf248e4
+
+  # Rust installation
+  - source: https://sh.rustup.rs
+    dest: downloads/rustup.sh
+
+  # Corestone - Linux x86_64 versions
+  - source: https://developer.arm.com/-/cdn-downloads/permalink/FVPs-Corstone-IoT/Corstone-320/FVP_Corstone_SSE-320_11.27_25_Linux64.tgz
+    dest: downloads/FVP_Corstone_SSE-320_11.27_25_Linux64.tgz
+    cache: true
+    symlink: true
+    sha256: 6986af8805de54fa8dcbc54ea2cd63b305ebf5f1c07d3cba09641e2f8cc4e2f5
+
+  - source: https://developer.arm.com/-/cdn-downloads/permalink/FVPs-Corstone-IoT/Corstone-315/FVP_Corstone_SSE-315_11.27_42_Linux64.tgz
+    dest: downloads/FVP_Corstone_SSE-315_11.27_42_Linux64.tgz
+    cache: true
+    symlink: true
+    sha256: 1d49e1790104f6d8fd5c35c5325113493f925c932b275f7e9a63a0aa5f24da81
+  
+  - source: https://developer.arm.com/-/cdn-downloads/permalink/FVPs-Corstone-IoT/Corstone-310/FVP_Corstone_SSE-310_11.27_42_Linux64.tgz
+    dest: downloads/FVP_Corstone_SSE-310_11.27_42_Linux64.tgz
+    cache: true
+    symlink: true
+    sha256: 3d31d2a26a2ea76393335927f6b12a317b6bdab0a3d5198530e73fa04fea713c
+
+  - source: https://developer.arm.com/-/cdn-downloads/permalink/FVPs-Corstone-IoT/Corstone-300/FVP_Corstone_SSE-300_11.27_42_Linux64.tgz
+    dest: downloads/FVP_Corstone_SSE-300_11.27_42_Linux64.tgz
+    cache: true
+    symlink: true
+    sha256: 6dfba80132b38a6c281948b12724dd0f8568572d56e549c73566275c4f273849
+
+  # # Corestone - Linux Arm versions
+  - source: https://developer.arm.com/-/cdn-downloads/permalink/FVPs-Corstone-IoT/Corstone-320/FVP_Corstone_SSE-320_11.27_25_Linux64_armv8l.tgz
+    dest: downloads/FVP_Corstone_SSE-320_11.27_25_Linux64_armv8l.tgz
+    cache: true
+    symlink: true
+    sha256: 6766fd2ba138473c6b01c7e2f98125439ba68b638a08c6d11e3e1aeffb88878a
+
+  - source: https://developer.arm.com/-/cdn-downloads/permalink/FVPs-Corstone-IoT/Corstone-315/FVP_Corstone_SSE-315_11.27_42_Linux64_armv8l.tgz
+    dest: downloads/FVP_Corstone_SSE-315_11.27_42_Linux64_armv8l.tgz
+    cache: true
+    symlink: true
+    sha256: fdd8fe3bce265dded16952ba227491a4180d6ac631a462fe929078da4f8ca11c
+
+  - source: https://developer.arm.com/-/cdn-downloads/permalink/FVPs-Corstone-IoT/Corstone-310/FVP_Corstone_SSE-310_11.27_42_Linux64_armv8l.tgz
+    dest: downloads/FVP_Corstone_SSE-310_11.27_42_Linux64_armv8l.tgz
+    cache: true
+    symlink: true
+    sha256: cc4f8b4dd6c2b0e28deaccd600cfdb35edd6a31cb309955eb091a40d0be6226f
+
+  - source: https://developer.arm.com/-/cdn-downloads/permalink/FVPs-Corstone-IoT/Corstone-300/FVP_Corstone_SSE-300_11.27_42_Linux64_armv8l.tgz
+    dest: downloads/FVP_Corstone_SSE-300_11.27_42_Linux64_armv8l.tgz
+    cache: true
+    symlink: true
+    sha256: 32a5e84d5f5e39c2832beda5747b2cba0deafee1ac8e3909d7c3fbcad844d031
+
+  # Windows versions (not used currently)
+  # See: https://developer.arm.com/Tools%20and%20Software/Fixed%20Virtual%20Platforms/IoT%20FVPs
+
+  # FVP Base downloads - Linux x86_64 versions
+  - source: https://developer.arm.com/-/cdn-downloads/permalink/FVPs-Architecture/FM-11.27/FVP_Base_RevC-2xAEMvA_11.27_19_Linux64.tgz
+    dest: downloads/FVP_Base_RevC-2xAEMvA_11.27_19_Linux64.tgz
+    cache: true
+    symlink: true
+    sha256: c3c7c6721c9ecf8ea2be4a0ea3b7764d6e67cd7e5c1712c59e8783909d1d33de
+
+  - source: https://developer.arm.com/-/cdn-downloads/permalink/FVPs-Architecture/FM-11.27/FVP_Base_AEMv8R_11.27_19_Linux64.tgz
+    dest: downloads/FVP_Base_AEMv8R_11.27_19_Linux64.tgz
+    cache: true
+    symlink: true
+    sha256: 299b6ca7e1015cad1fc076dae94b5187700d26f3e176e71ba99b9310622df054
+
+  # FVP Base downloads - Linux aarch64/armv8l versions
+  - source: https://developer.arm.com/-/cdn-downloads/permalink/FVPs-Architecture/FM-11.27/FVP_Base_RevC-2xAEMvA_11.27_19_Linux64_armv8l.tgz
+    dest: downloads/FVP_Base_RevC-2xAEMvA_11.27_19_Linux64_armv8l.tgz
+    cache: true
+    symlink: true
+    sha256: 66c9939cb2b2104e415dcddb46a2ab52168e8a2b7f30a339e1c05d5d4864ed1d
+
+  - source: https://developer.arm.com/-/cdn-downloads/permalink/FVPs-Architecture/FM-11.27/FVP_Base_AEMv8R_11.27_19_Linux64_armv8l.tgz
+    dest: downloads/FVP_Base_AEMv8R_11.27_19_Linux64_armv8l.tgz
+    cache: true
+    symlink: true
+    sha256: 5e4034606fc3c1c9fbc4595034e0938313e88f8a5a0ae1b3d080b25e1bd781ee
+
+################################################################################
+# Installation section - binaries etc, with specific install commands
+################################################################################
+install:
+  # FIXME: Could and should use git directly
+  - name: ninja
+    sentinel: opt/.ninja-installed
+    commands:
+      - "mkdir -p opt bin"
+      - "tar xf downloads/ninja-1.11.1.g95dee.kitware.jobserver-1_x86_64-linux-gnu.tar.gz -C opt"
+      - "ln -sf ../opt/ninja-1.11.1.g95dee.kitware.jobserver-1_x86_64-linux-gnu/ninja bin/ninja"
+
+  # FIXME: Could and should use git directly
+  - name: ccache
+    sentinel: opt/.ccache-installed
+    commands:
+      - "mkdir -p opt bin"
+      - "tar xf downloads/ccache-4.9.1-linux-x86_64.tar.xz -C opt"
+      - "ln -sf ../opt/ccache-4.9.1-linux-x86_64/ccache bin/ccache"
+
+  # FIXME: Could and should use git directly
+  - name: doxygen
+    sentinel: opt/.doxygen-installed
+    commands:
+      - "mkdir -p opt bin"
+      - "tar xf downloads/doxygen-1.14.0.linux.bin.tar.gz -C opt"
+      - "ln -sf ../opt/doxygen-1.14.0/bin/doxygen bin/doxygen"
+
+  # FIXME: Could and should use git directly
+  - name: protoc
+    commands: |
+      @mkdir -p opt/protoc bin
+      @cd opt/protoc && unzip -q -o ../../downloads/protoc-21.7-linux-x86_64.zip
+      @ln -sf ../opt/protoc/bin/protoc bin/protoc
+
+  # FIXME: Could and should use git directly
+  - name: renode
+    sentinel: opt/.renode-installed
+    commands:
+      - "mkdir -p opt/renode"
+      - "tar xf downloads/renode-1.15.3.linux-portable-dotnet.tar.gz -C opt/renode --strip-components=1"
+
+  - name: ad71260-vp
+    sentinel: opt/.ad71260-vp-installed
+    commands: |
+      DOWNLOADS="../../downloads"
+      mkdir -p opt/vp
+      cd opt/vp && unzip -q -o $$DOWNLOADS/ad71260_vplatform_v3.0.2_rc.zip
+
+  - name: fastdsp-asm
+    sentinel: opt/.fastdsp-asm-installed
+    commands: |
+      DOWNLOADS="downloads"
+      FASTDSP_DIR="opt/fastdsp-assembler"
+      mkdir -p $$FASTDSP_DIR bin
+      tar xf $$DOWNLOADS/fastdsp-assembler-linux-generic-v1.0.9.tar -C $$FASTDSP_DIR --strip-components=1
+      ln -sf ../$$FASTDSP_DIR/fastdsp-assembler bin/fastdsp-assembler
+
+
+  - name: fastmodels
+    depends_on:
+      - ad71260-vp
+    sentinel: opt/.fastmodels-installed
+    commands: |
+      DOWNLOADS="downloads"
+      FM_DIR="opt/vp"
+      FM_ARCHIVE="FastModels_11-19-014_Linux64.tgz"
+      FM_PATH="$$FM_DIR/ad71260_vplatform_v3.0.2_rc/linux/AD71260Platform/bin"
+      mkdir -p $$FM_DIR
+      (cd $$FM_DIR && tar xf ../../$$DOWNLOADS/$$FM_ARCHIVE)
+      if [ "$$(uname -s)" = "Linux" ]; then
+        (cd $$FM_DIR/FastModels_11-19-014_Linux64 && ./setup.sh --i-accept-the-end-user-license-agreement --basepath ../ARM)
+      else
+        echo "Warning: fastmodels not fully installed (Linux-specific setup.sh skipped on $$(uname -s))"
+      fi
+      mkdir -p $$FM_PATH
+      cp $$DOWNLOADS/armlm-ipc $$FM_PATH/
+      chmod +x $$FM_PATH/armlm-ipc
+      cp $$DOWNLOADS/libarmlm.so $$FM_PATH/
+
+  # FIXME: This installs its own Python virtual environment, shouldn't be needed.
+  - name: granite-vp
+    sentinel: opt/.granite-vp-installed
+    commands: |
+      DOWNLOADS="../../downloads"
+      GRANITE_DIR="opt/vp/granite_vplatform_v0.4.1"
+      mkdir -p opt/vp
+      cd opt/vp && unzip -q -o $$DOWNLOADS/Adi.Dbu.Tahoe.VP-0.4.1-Linux.zip -d granite_vplatform_v0.4.1
+      cd $$GRANITE_DIR && python3 -m venv venv
+      cd $$GRANITE_DIR && . venv/bin/activate && pip install -q -r metadata/requirements.txt
+      cd $$GRANITE_DIR/content/scripts && touch granite_vp && chmod +x granite_vp
+
+  - name: sbt
+    sentinel: opt/.sbt-installed
+    commands: |
+      DOWNLOADS="../../downloads"
+      SBT_DIR="opt/sbt"
+      mkdir -p $$SBT_DIR
+      cd $$SBT_DIR && unzip -q -o $$DOWNLOADS/sbt-3.1.0.zip
+
+  - name: rust
+    sentinel: opt/.rust-installed
+    commands: |
+      DOWNLOADS="downloads"
+      CARGO_HOME="opt/cargo"
+      RUSTUP_HOME="opt/rustup"
+      mkdir -p $$CARGO_HOME $$RUSTUP_HOME
+      export CARGO_HOME RUSTUP_HOME
+      bash $$DOWNLOADS/rustup.sh -y --default-toolchain 1.86 --no-modify-path
+      . $$CARGO_HOME/env && cargo install uefi-run --root .
+      . $$CARGO_HOME/env && rustup target add riscv32i-unknown-none-elf riscv64imac-unknown-none-elf thumbv6m-none-eabi thumbv7em-none-eabi thumbv7m-none-eabi thumbv8m.main-none-eabi x86_64-unknown-none
+
+  - name: xtensa-tools
+    sentinel: opt/.xtensa-tools-installed
+    commands: |
+      DOWNLOADS="downloads"
+      VP_DIR="opt/vp"
+      RJ_DIR="$$VP_DIR/RJ-2024.4-linux"
+      mkdir -p $$VP_DIR
+      (cd $$VP_DIR && tar xf ../../$$DOWNLOADS/XtensaTools_RJ_2024_4_linux.tgz)
+      (cd $$VP_DIR && tar xf ../../$$DOWNLOADS/XtensaTools_RJ_2024_4_patch943452_linux.tgz)
+      (cd $$VP_DIR && tar xf ../../$$DOWNLOADS/H5V4_NPUV3_RJ24_4P1_linux.tgz)
+      (cd $$VP_DIR && tar xf ../../$$DOWNLOADS/H5V4_RJ24_4P1_linux.tgz)
+      (cd $$VP_DIR && tar xf ../../$$DOWNLOADS/H5sTV1_RJ24_04_linux.tgz)
+      if [ "$$(uname -s)" = "Linux" ] && [ "$$(uname -m)" = "x86_64" ]; then
+        (cd $$RJ_DIR/H5V4_NPUV3_RJ24_4P1 && ./install --xtensa-tools ../XtensaTools/ --no-replace)
+        (cd $$RJ_DIR/H5V4_RJ24_4P1 && ./install --xtensa-tools ../XtensaTools/ --no-replace)
+        (cd $$RJ_DIR/H5sTV1_RJ24_04 && ./install --xtensa-tools ../XtensaTools/ --no-replace)
+        patch -R $$RJ_DIR/H5V4_RJ24_4P1/xtensa-elf/include/stdatomic.h $$DOWNLOADS/stdatomic_h.patch
+        patch -R $$RJ_DIR/H5V4_NPUV3_RJ24_4P1/xtensa-elf/include/stdatomic.h $$DOWNLOADS/stdatomic_h.patch
+        patch -R $$RJ_DIR/H5sTV1_RJ24_04/xtensa-elf/include/stdatomic.h $$DOWNLOADS/stdatomic_h.patch
+      else
+        echo "Warning: xtensa-tools not fully installed (x86_64 Linux-specific install scripts and patches skipped on $$(uname -s)/$$(uname -m))"
+      fi
+
+  # FIXME: We probably could and should use the <workspace>/toolchains folder
+  - name: zephyr-sdk
+    sentinel: opt/.zephyr-sdk-installed
+    commands: |
+      DOWNLOADS="../../downloads"
+      TOOLCHAINS_DIR="opt/toolchains"
+      ZEPHYR_DIR="$$TOOLCHAINS_DIR/zephyr-sdk-0.17.2"
+      ARCH=$$(uname -m)
+      mkdir -p $$TOOLCHAINS_DIR
+      if [ "$$ARCH" = "x86_64" ]; then
+        (cd $$TOOLCHAINS_DIR && tar xf $$DOWNLOADS/zephyr-sdk-0.17.2_linux-x86_64.tar.xz)
+      elif [ "$$ARCH" = "aarch64" ]; then
+        (cd $$TOOLCHAINS_DIR && tar xf $$DOWNLOADS/zephyr-sdk-0.17.2_linux-aarch64.tar.xz)
+      else
+        echo "Error: Unsupported architecture $$ARCH for zephyr-sdk"
+        exit 1
+      fi
+      if [ "$$(uname -s)" = "Linux" ]; then
+        (cd $$ZEPHYR_DIR && ./setup.sh -t all -h -c)
+      else
+        echo "Warning: zephyr-sdk not fully installed (Linux-specific setup.sh skipped on $$(uname -s))"
+      fi
+
+  # Install LLVM/Clang
+  - name: llvm
+    sentinel: opt/.llvm-installed
+    commands: |
+      DOWNLOADS="downloads"
+      if [ "$$(uname -s)" = "Linux" ]; then
+        chmod +x $$DOWNLOADS/llvm.sh
+        sudo $$DOWNLOADS/llvm.sh 21 all
+      else
+        echo "Warning: llvm not installed (Linux-specific installation skipped on $$(uname -s))"
+      fi
+
+  # Install JLink
+  - name: jlink
+    sentinel: opt/.jlink-installed
+    commands: |
+      DOWNLOADS="downloads"
+      if [ "$$(uname -s)" = "Linux" ] && [ "$$(uname -m)" = "x86_64" ]; then
+        sudo dpkg --unpack $$DOWNLOADS/jlink_setup.deb
+        sudo rm -f /var/lib/dpkg/info/jlink.postinst
+        sudo dpkg --configure jlink
+        sudo apt install -yf
+      else
+        echo "Warning: jlink not installed (Linux x86_64-specific installation skipped on $$(uname -s)/$$(uname -m))"
+      fi
+
+  # Install JLink Configurations for Walleye
+  - name: jlink-walleye-config
+    depends_on:
+      - jlink
+    sentinel: opt/.jlink-walleye-config-installed
+    commands: |
+      CONFIG_DIR="$$HOME/.config/SEGGER"
+      mkdir -p $$CONFIG_DIR
+      (cd $$CONFIG_DIR && tar xf $(pwd)/downloads/jlink-enablement-main.tar.gz)
+      (cd $$CONFIG_DIR && mv Analog/MAX32657 JLinkDevices)
+      (cd $$CONFIG_DIR && rm -rf Analog/)
+
+  # Install JLink Configurations for Granite
+  - name: jlink-granite-config
+    depends_on:
+      - jlink
+    sentinel: opt/.jlink-granite-config-installed
+    commands: |
+      CONFIG_DIR="$$HOME/.config/SEGGER"
+      mkdir -p $$CONFIG_DIR
+      (cd $$CONFIG_DIR && tar xf $(pwd)/downloads/jlink-enablement-milestone-granite-110.tar.gz)
+      (cd $$CONFIG_DIR && mv Analog/ADAU2042 JLinkDevices)
+      (cd $$CONFIG_DIR && rm -rf Analog/)
+
+  # Install OpenOCD for Walleye
+  - name: openocd
+    sentinel: opt/.openocd-installed
+    commands: |
+      DOWNLOADS="downloads"
+      OPENOCD_DIR="opt/openocd"
+      mkdir -p $$OPENOCD_DIR
+      (cd $$OPENOCD_DIR && unzip -q -o ../../$$DOWNLOADS/openocd-milestone-walleye-Linux64-release-96.zip)
+
+  # Install Corestone FVP models (x86_64 and aarch64)
+  - name: corestone-fvp
+    sentinel: opt/.corestone-fvp-installed
+    commands: |
+      DOWNLOADS="downloads"
+      FVP_DIR="opt/fvps"
+      WORKSPACE_ROOT="$$(pwd)"
+      mkdir -p $$FVP_DIR bin
+      if [ "$$(uname -s)" = "Linux" ] && [ "$$(uname -m)" = "x86_64" ]; then
+        # Install Corestone 300 (x86_64)
+        (cd $$FVP_DIR && tar xf ../../$$DOWNLOADS/FVP_Corstone_SSE-300_11.27_42_Linux64.tgz)
+        (cd $$FVP_DIR && ./FVP_Corstone_SSE-300.sh --no-interactive --i-agree-to-the-contained-eula -d $$WORKSPACE_ROOT/$$FVP_DIR/Corstone-300)
+        (cd $$FVP_DIR && rm FVP_Corstone_SSE-300.sh)
+        # Install Corestone 310 (x86_64)
+        (cd $$FVP_DIR && tar xf ../../$$DOWNLOADS/FVP_Corstone_SSE-310_11.27_42_Linux64.tgz)
+        (cd $$FVP_DIR && ./FVP_Corstone_SSE-310.sh --no-interactive --i-agree-to-the-contained-eula -d $$WORKSPACE_ROOT/$$FVP_DIR/Corstone-310)
+        (cd $$FVP_DIR && rm FVP_Corstone_SSE-310.sh)
+        # Install Corestone 315 (x86_64)
+        (cd $$FVP_DIR && tar xf ../../$$DOWNLOADS/FVP_Corstone_SSE-315_11.27_42_Linux64.tgz)
+        (cd $$FVP_DIR && ./FVP_Corstone_SSE-315.sh --no-interactive --i-agree-to-the-contained-eula -d $$WORKSPACE_ROOT/$$FVP_DIR/Corstone-315)
+        (cd $$FVP_DIR && rm FVP_Corstone_SSE-315.sh)
+        # Install Corestone 320 (x86_64)
+        (cd $$FVP_DIR && tar xf ../../$$DOWNLOADS/FVP_Corstone_SSE-320_11.27_25_Linux64.tgz)
+        (cd $$FVP_DIR && ./FVP_Corstone_SSE-320.sh --no-interactive --i-agree-to-the-contained-eula -d $$WORKSPACE_ROOT/$$FVP_DIR/Corstone-320)
+        (cd $$FVP_DIR && rm FVP_Corstone_SSE-320.sh)
+        # Create symlinks to binaries
+        (cd bin && ln -sf ../$$FVP_DIR/Corstone-300/models/*/FVP_* .)
+        (cd bin && ln -sf ../$$FVP_DIR/Corstone-310/models/*/FVP_* .)
+        (cd bin && ln -sf ../$$FVP_DIR/Corstone-315/models/*/FVP_* .)
+        (cd bin && ln -sf ../$$FVP_DIR/Corstone-320/models/*/FVP_* .)
+      elif [ "$$(uname -s)" = "Linux" ] && [ "$$(uname -m)" = "aarch64" ]; then
+        # Install Corestone 300 (aarch64)
+        (cd $$FVP_DIR && tar xf ../../$$DOWNLOADS/FVP_Corstone_SSE-300_11.27_42_Linux64_armv8l.tgz)
+        (cd $$FVP_DIR && ./FVP_Corstone_SSE-300.sh --no-interactive --i-agree-to-the-contained-eula -d $$WORKSPACE_ROOT/$$FVP_DIR/Corstone-300)
+        (cd $$FVP_DIR && rm FVP_Corstone_SSE-300.sh)
+        # Install Corestone 310 (aarch64)
+        (cd $$FVP_DIR && tar xf ../../$$DOWNLOADS/FVP_Corstone_SSE-310_11.27_42_Linux64_armv8l.tgz)
+        (cd $$FVP_DIR && ./FVP_Corstone_SSE-310.sh --no-interactive --i-agree-to-the-contained-eula -d $$WORKSPACE_ROOT/$$FVP_DIR/Corstone-310)
+        (cd $$FVP_DIR && rm FVP_Corstone_SSE-310.sh)
+        # Install Corestone 315 (aarch64)
+        (cd $$FVP_DIR && tar xf ../../$$DOWNLOADS/FVP_Corstone_SSE-315_11.27_42_Linux64_armv8l.tgz)
+        (cd $$FVP_DIR && ./FVP_Corstone_SSE-315.sh --no-interactive --i-agree-to-the-contained-eula -d $$WORKSPACE_ROOT/$$FVP_DIR/Corstone-315)
+        (cd $$FVP_DIR && rm FVP_Corstone_SSE-315.sh)
+        # Install Corestone 320 (aarch64)
+        (cd $$FVP_DIR && tar xf ../../$$DOWNLOADS/FVP_Corstone_SSE-320_11.27_25_Linux64_armv8l.tgz)
+        (cd $$FVP_DIR && ./FVP_Corstone_SSE-320.sh --no-interactive --i-agree-to-the-contained-eula -d $$WORKSPACE_ROOT/$$FVP_DIR/Corstone-320)
+        (cd $$FVP_DIR && rm FVP_Corstone_SSE-320.sh)
+        # Create symlinks to binaries
+        (cd bin && ln -sf ../$$FVP_DIR/Corstone-300/models/*/FVP_* .)
+        (cd bin && ln -sf ../$$FVP_DIR/Corstone-310/models/*/FVP_* .)
+        (cd bin && ln -sf ../$$FVP_DIR/Corstone-315/models/*/FVP_* .)
+        (cd bin && ln -sf ../$$FVP_DIR/Corstone-320/models/*/FVP_* .)
+      else
+        echo "Warning: corestone-fvp not installed (Linux x86_64/aarch64-specific installation skipped on $$(uname -s)/$$(uname -m))"
+      fi
+
+  # Install FVP Base models (x86_64 and aarch64)
+  - name: fvp-base
+    sentinel: opt/.fvp-base-installed
+    commands: |
+      DOWNLOADS="downloads"
+      FVP_DIR="opt/fvps"
+      mkdir -p $$FVP_DIR bin
+      if [ "$$(uname -s)" = "Linux" ]; then
+        ARCH=$$(uname -m)
+        if [ "$$ARCH" = "x86_64" ]; then
+          SUFFIX=""
+        elif [ "$$ARCH" = "aarch64" ]; then
+          SUFFIX="_armv8l"
+        else
+          echo "Warning: fvp-base not installed (unsupported architecture $$ARCH)"
+          exit 0
+        fi
+        # Extract Base RevC
+        (cd $$FVP_DIR && tar xf ../../$$DOWNLOADS/FVP_Base_RevC-2xAEMvA_11.27_19_Linux64$$SUFFIX.tgz)
+        # Extract Base AEMv8R
+        (cd $$FVP_DIR && tar xf ../../$$DOWNLOADS/FVP_Base_AEMv8R_11.27_19_Linux64$$SUFFIX.tgz)
+        # Create symlinks to binaries
+        (cd bin && ln -sf ../$$FVP_DIR/*_pkg/models/*/FVP_* .)
+      else
+        echo "Warning: fvp-base not installed (Linux-specific installation skipped on $$(uname -s))"
+      fi
