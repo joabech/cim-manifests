@@ -17,14 +17,14 @@ toolchains:
     arch: arm64
 
   # Example: Rust toolchain with post-install commands
-  # This demonstrates a simple toolchain with custom setup commands
-  - name: rust-example.sh
-    url: https://raw.githubusercontent.com/rust-lang/rustup/master/
+  # Downloads rustup installer script and runs it to install Rust
+  - name: sh.rustup.rs
+    url: https://sh.rustup.rs
     destination: opt/rust
     post_install_commands:
-      - "echo 'Rust toolchain setup example'"
-      - "echo 'In real scenario, rustup.sh would be executed here'"
-      - "echo 'Environment setup would follow'"
+      - "mkdir -p cargo rustup"
+      - "CARGO_HOME=$PWD/cargo RUSTUP_HOME=$PWD/rustup bash ./sh.rustup.rs -y --no-modify-path"
+      - "echo 'Rust installation complete in $PWD'"
 
 envsetup:
   - "@echo \"Setting up dummy example 01\""
