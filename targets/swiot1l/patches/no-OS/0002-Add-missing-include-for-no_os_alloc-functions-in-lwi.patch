@@ -1,0 +1,33 @@
+From f128de3e3a41fd0d04b4eb7cf466ddab2477ee99 Mon Sep 17 00:00:00 2001
+From: Joakim Bech <Joakim.Bech@analog.com>
+Date: Fri, 19 Dec 2025 14:01:15 +0100
+Subject: [PATCH 2/4] Add missing include for no_os_alloc functions in
+ lwip_socket.c
+
+GCC 14 enforces C99 standard which requires all functions to be declared before
+use. The no_os_free() function was used without including no_os_alloc.h header,
+causing implicit function declaration error in C99 mode.
+
+- Added: #include \"no_os_alloc.h\"
+- Resolves implicit function declaration errors with GCC 14
+
+Signed-off-by: Joakim Bech <Joakim.Bech@analog.com>
+---
+ network/lwip_raw_socket/lwip_socket.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/network/lwip_raw_socket/lwip_socket.c b/network/lwip_raw_socket/lwip_socket.c
+index 6b6038d47..805cfb8d0 100644
+--- a/network/lwip_raw_socket/lwip_socket.c
++++ b/network/lwip_raw_socket/lwip_socket.c
+@@ -62,6 +62,7 @@
+ #include "lwip_socket.h"
+ 
+ #include "no_os_delay.h"
++#include "no_os_alloc.h"
+ #include "tcp_socket.h"
+ 
+ #include "adin1110.h"
+-- 
+2.43.0
+

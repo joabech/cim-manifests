@@ -1,0 +1,54 @@
+From da5d7a3d6fea2606f595f5d8cec653f73a83d286 Mon Sep 17 00:00:00 2001
+From: Joakim Bech <Joakim.Bech@analog.com>
+Date: Fri, 19 Dec 2025 14:01:15 +0100
+Subject: [PATCH 3/4] Add missing MSDK system source files to platform build
+
+The I2C, DMA, SPI, and system peripheral drivers from MSDK reference delay and
+lock management functions (MXC_Delay, MXC_FreeLock, etc.) that were not being
+linked. Added required system source files and headers.
+
+Key changes:
+- Added mxc_delay.c and mxc_lock.c from MSDK
+- Added corresponding header files with TARGET_UPPER conversion
+- Made build portable across different MAX32 targets using shell tr command
+
+This fixes undefined reference linker errors when using MSDK peripherals.
+
+Signed-off-by: Joakim Bech <Joakim.Bech@analog.com>
+---
+ projects/swiot1l/src/platform/maxim/platform_src.mk | 11 +++++++++--
+ 1 file changed, 9 insertions(+), 2 deletions(-)
+
+diff --git a/projects/swiot1l/src/platform/maxim/platform_src.mk b/projects/swiot1l/src/platform/maxim/platform_src.mk
+index 28296e311..a2cfd12c0 100644
+--- a/projects/swiot1l/src/platform/maxim/platform_src.mk
++++ b/projects/swiot1l/src/platform/maxim/platform_src.mk
+@@ -1,3 +1,6 @@
++# Convert TARGET to uppercase for MSDK library paths
++TARGET_UPPER := $(shell echo $(TARGET) | tr a-z A-Z)
++
+ INCS += $(PLATFORM_DRIVERS)/maxim_gpio.h      \
+         $(PLATFORM_DRIVERS)/maxim_spi.h       \
+         $(PLATFORM_DRIVERS)/maxim_gpio_irq.h  \
+@@ -6,7 +9,9 @@ INCS += $(PLATFORM_DRIVERS)/maxim_gpio.h      \
+         $(PLATFORM_DRIVERS)/maxim_i2c.h       \
+         $(PLATFORM_DRIVERS)/maxim_timer.h      \
+         $(PLATFORM_DRIVERS)/maxim_uart.h      \
+-        $(PLATFORM_DRIVERS)/maxim_uart_stdio.h
++        $(PLATFORM_DRIVERS)/maxim_uart_stdio.h \
++        $(MAXIM_LIBRARIES)/PeriphDrivers/Include/$(TARGET_UPPER)/mxc_delay.h \
++        $(MAXIM_LIBRARIES)/PeriphDrivers/Include/$(TARGET_UPPER)/mxc_lock.h
+ 
+ SRCS += $(PLATFORM_DRIVERS)/maxim_delay.c     \
+         $(PLATFORM_DRIVERS)/maxim_gpio.c      \
+@@ -18,4 +23,6 @@ SRCS += $(PLATFORM_DRIVERS)/maxim_delay.c     \
+         $(PLATFORM_DRIVERS)/maxim_gpio_irq.c  \
+         $(PLATFORM_DRIVERS)/maxim_irq.c       \
+         $(PLATFORM_DRIVERS)/maxim_uart.c      \
+-        $(PLATFORM_DRIVERS)/maxim_uart_stdio.c
++        $(PLATFORM_DRIVERS)/maxim_uart_stdio.c \
++        $(MAXIM_LIBRARIES)/PeriphDrivers/Source/SYS/mxc_delay.c \
++        $(MAXIM_LIBRARIES)/PeriphDrivers/Source/SYS/mxc_lock.c
+-- 
+2.43.0
+

@@ -1,0 +1,121 @@
+################################################################################
+# Mirror location for downloads, toolchains and gits.
+################################################################################
+mirror: $HOME/tmp/mirror
+
+################################################################################
+# Toolchain configurations
+################################################################################
+toolchains:
+# MacOS Host OS
+  - name: arm-gnu-toolchain-14.3.rel1-darwin-arm64-arm-none-eabi.tar.xz
+    url: https://developer.arm.com/-/media/Files/downloads/gnu/14.3.rel1/binrel/
+    destination: toolchains/aarch64-bm
+    strip_components: 1
+    os: darwin
+    arch: arm64
+
+# AArch64 Linux hosted cross toolchains
+  - name: arm-gnu-toolchain-14.3.rel1-aarch64-arm-none-eabi.tar.xz
+    url: https://developer.arm.com/-/media/Files/downloads/gnu/14.3.rel1/binrel
+    destination: toolchains/aarch32-bm
+    strip_components: 1
+    os: linux
+    arch: arm64
+
+  - name: arm-gnu-toolchain-14.3.rel1-aarch64-arm-none-linux-gnueabihf.tar.xz
+    url: https://developer.arm.com/-/media/Files/downloads/gnu/14.3.rel1/binrel
+    destination: toolchains/aarch32
+    strip_components: 1
+    os: linux
+    arch: arm64
+
+  - name: arm-gnu-toolchain-14.3.rel1-aarch64-arm-none-eabi.tar.xz
+    url: https://developer.arm.com/-/media/Files/downloads/gnu/14.3.rel1/binrel
+    destination: toolchains/aarch64-bm
+    strip_components: 1
+    os: linux
+    arch: arm64
+
+  - name: arm-gnu-toolchain-14.3.rel1-aarch64-aarch64-none-linux-gnu.tar.xz
+    url: https://developer.arm.com/-/media/Files/downloads/gnu/14.3.rel1/binrel
+    destination: toolchains/aarch64
+    strip_components: 1
+    os: linux
+    arch: arm64
+
+# Linux x86_64 Host OS
+  - name: arm-gnu-toolchain-13.3.rel1-x86_64-arm-none-eabi.tar.xz
+    url: https://armkeil.blob.core.windows.net/developer/Files/downloads/gnu/13.3.rel1/binrel
+    destination: toolchains/aarch64-bm
+    strip_components: 1
+    os: linux
+    arch: x86_64
+
+  - name: arm-gnu-toolchain-14.3.rel1-x86_64-arm-none-linux-gnueabihf.tar.xz
+    url: https://developer.arm.com/-/media/Files/downloads/gnu/14.3.rel1/binrel
+    destination: toolchains/aarch64
+    strip_components: 1
+    os: linux
+    arch: x86_64
+
+################################################################################
+# Files copied into the workspace
+################################################################################
+# FIXME: These patches is here for the time being - ideally they should be
+# in the git repos already.
+copy_files:
+  - source: patches/no-OS/000*.patch
+    dest: patches/no-OS
+  - source: patches/msdk/000*.patch
+    dest: patches/msdk
+
+################################################################################
+# High-level Makefile targets
+################################################################################
+envsetup: |
+  rm -rf msdk/Tools/GNUTools && ln -s ../../toolchains/aarch32-bm msdk/Tools/GNUTools
+  cd no-OS && git submodule update --init --recursive --depth=1
+  cd no-OS && git am ../patches/no-OS/000*.patch || true
+  cd msdk && git am ../patches/msdk/000*.patch || true
+
+test: |
+  @echo "Running tests NOT implemented yet"
+
+clean: |
+  @echo "Cleaning build environment NOT implemented yet"
+
+build: |
+  @make no-OS
+
+flash:
+  - "@echo Flash command not yet implemented - this is a placeholder"
+
+# Use an yaml-anchor for common build steps
+common_echo_build: &echo_build
+  - "@echo ✓ Built as part of SOC projects - no standalone build"
+
+################################################################################
+# Gits for the project
+################################################################################
+gits:
+  - name: "msdk"
+    url: "https://github.com/analogdevicesinc/msdk.git"
+    commit: "main"
+    build: *echo_build
+
+  - name: "no-OS"
+    url: "https://github.com/analogdevicesinc/no-OS.git"
+    commit: "main"
+    build: |
+      cd no-OS/projects/swiot1l && MAXIM_LIBRARIES=$$(cd ../../../msdk/Libraries && pwd) make reset
+      cd no-OS/projects/swiot1l && MAXIM_LIBRARIES=$$(cd ../../../msdk/Libraries && pwd) make RELEASE=y SWIOT1L_STATIC_IP=n SWIOT1L_MQTT_EXAMPLE=n SWIOT1L_DEFAULT_FW=y -j$$(nproc)
+
+  - name: "openocd"
+    url: "https://repo.or.cz/openocd.git"
+    commit: "master"
+    build:
+      - "bash -c 'cd openocd && git submodule update --init --recursive'"
+      - "bash -c 'cd openocd && ./bootstrap'"
+      - "bash -c 'mkdir -p openocd/build && cd openocd/build && ../configure --host=arm-none-linux-gnueabihf --prefix=../install --disable-docs --disable-ftdi --disable-presto --disable-openjtag --disable-usb-blaster --with-jim-shared=no --enable-internal-jimtcl CC=\"../../../toolchains/aarch32/bin/arm-none-linux-gnueabihf-gcc\" CXX=\"../../../toolchains/aarch32/bin/arm-none-linux-gnueabihf-g++\" LD=\"../../../toolchains/aarch32/bin/arm-none-linux-gnueabihf-ld\" AR=\"../../../toolchains/aarch32/bin/arm-none-linux-gnueabihf-ar\"'"
+      - "bash -c 'cd openocd/build && export PATH=../../../toolchains/aarch32/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin && make -j$(nproc) && make install'"
