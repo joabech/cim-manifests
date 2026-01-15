@@ -1,0 +1,30 @@
+From 7a2678365aac77979fb0efb36ea095eebeb4c2aa Mon Sep 17 00:00:00 2001
+From: Mehmet Soner Korucu <Mehmetsoner.Korucu@analog.com>
+Date: Tue, 13 Jan 2026 01:48:09 -0600
+Subject: [PATCH] cmake: update adi-sdk path in cmake according
+
+We want all dependencies in top workspace directory, hence
+we need to update hard-coded path definition of adi-sdk in
+cmake and point it to ../adi-sdk
+
+Signed-off-by: Mehmet Soner Korucu <Mehmetsoner.Korucu@analog.com>
+---
+ bl1/cmake/bl1.cmake | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/bl1/cmake/bl1.cmake b/bl1/cmake/bl1.cmake
+index a5530a8..700b6ce 100644
+--- a/bl1/cmake/bl1.cmake
++++ b/bl1/cmake/bl1.cmake
+@@ -11,7 +11,7 @@ execute_process(
+     OUTPUT_STRIP_TRAILING_WHITESPACE
+ )
+ # Set ADI_SDK environment variable to the top-level folder
+-set(ENV{ADI_SDK} ${GIT_TOP_LEVEL}/sdk/adi-sdk)
++set(ENV{ADI_SDK} ${GIT_TOP_LEVEL}/../adi-sdk)
+ set(ENV{GIT_TOP_LEVEL} ${GIT_TOP_LEVEL})
+ 
+ # Specify the linker script
+-- 
+2.34.1
+
