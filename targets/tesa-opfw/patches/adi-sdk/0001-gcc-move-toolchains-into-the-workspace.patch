@@ -1,0 +1,28 @@
+From 0a8da57faa937241a544be2c7d0e7962cbd4b140 Mon Sep 17 00:00:00 2001
+From: Mehmet Soner Korucu <Mehmetsoner.Korucu@analog.com>
+Date: Fri, 9 Jan 2026 06:22:44 -0600
+Subject: [PATCH] gcc: move toolchains into the workspace
+
+We want to keep things in the local workspace, hence we need to move the
+toolchain into the workspace as well. Hence instead of putting gcc under
+"/opt" we put it under "toolchains/aarch32"
+---
+ cmake/toolchains/gcc-arm-none-eabi.cmake | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/cmake/toolchains/gcc-arm-none-eabi.cmake b/cmake/toolchains/gcc-arm-none-eabi.cmake
+index 60a90d9..828bdf3 100644
+--- a/cmake/toolchains/gcc-arm-none-eabi.cmake
++++ b/cmake/toolchains/gcc-arm-none-eabi.cmake
+@@ -9,7 +9,7 @@ set(CMAKE_SYSTEM_NAME Generic)
+ set(CMAKE_SYSTEM_PROCESSOR arm)
+ set(CMAKE_CROSSCOMPILING true)
+ 
+-set(tools /opt/arm-gnu-toolchain-13.3.rel1-x86_64-arm-none-eabi/bin/)
++set(tools ${CMAKE_SOURCE_DIR}/../../toolchains/aarch32/bin/)
+ set(CMAKE_C_COMPILER ${tools}arm-none-eabi-gcc)
+ set(CMAKE_CXX_COMPILER ${tools}arm-none-eabi-g++)
+ 
+-- 
+2.34.1
+
