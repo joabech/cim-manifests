@@ -1,11 +1,63 @@
+################################################################################
+# Default mirror location (can be overridden by user: sdk-manager config -e)
+################################################################################
 mirror: $HOME/tmp/mirror
 
+################################################################################
+# Toolchains section - download and install toolchains
+################################################################################
+toolchains:
+  # Arm GNU toolchain for aarch32 (32-bit ARM)
+  - name: arm-gnu-toolchain-14.3.rel1-x86_64-arm-none-linux-gnueabihf.tar.xz
+    url: https://developer.arm.com/-/media/Files/downloads/gnu/14.3.rel1/binrel/
+    destination: toolchains/aarch32
+    strip_components: 1
+    os: linux
+    arch: x86_64
+    post_install_commands: |
+      cd bin && for f in *-none-linux*; do ln -sf "$f" "${f//-none}"; done
+
+  # Arm GNU toolchain for aarch64 (64-bit ARM)
+  - name: arm-gnu-toolchain-14.3.rel1-x86_64-aarch64-none-linux-gnu.tar.xz
+    url: https://developer.arm.com/-/media/Files/downloads/gnu/14.3.rel1/binrel/
+    destination: toolchains/aarch64
+    strip_components: 1
+    os: linux
+    arch: x86_64
+    post_install_commands: |
+      cd bin && for f in *-none-linux*; do ln -sf "$f" "${f//-none}"; done
+
+  # Rust toolchain - downloads rustup installer script and runs it
+  - url: https://sh.rustup.rs
+    destination: toolchains/rust
+    post_install_commands: |
+      mkdir -p .cargo .rustup
+      CARGO_HOME=$PWD/.cargo RUSTUP_HOME=$PWD/.rustup bash ./sh.rustup.rs -y --no-modify-path
+      echo 'Rust installation complete in $PWD'
+
+
+################################################################################
+# Makefile - build targets
+################################################################################
 envsetup:
   - ln -sf qemu_v8.mk build/Makefile
-  - make -C build -j3 toolchains $(MAKEFLAGS)
+
+build:
+  - $(MAKE) -C build all $(MAKEFLAGS)
 
 test:
-  - make -C build check $(MAKEFLAGS)
+  - $(MAKE) -C build check $(MAKEFLAGS)
+
+clean:
+  - $(MAKE) -C build clean $(MAKEFLAGS)
+
+flash: |
+  @echo "This is a QEMU setup, no flashing needed"
+
+
+################################################################################
+# Gits
+################################################################################
 
 gits:
   - name: build
@@ -116,7 +168,7 @@ gits:
     commit: refs/tags/v2.16.0
 
   - name: trusted-services
-    url: refs/tags/v1.1.0
+    url: https://git.trustedfirmware.org/TS/trusted-services.git
     commit: 8881aaa3a9cb21e8b869e28c1a079f02fa46fd6c
 
   - name: linux-arm-ffa-user
