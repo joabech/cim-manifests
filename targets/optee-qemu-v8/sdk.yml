@@ -1,5 +1,18 @@
+################################################################################
+# Default mirror location (can be overridden by user: sdk-manager config -e)
+################################################################################
 mirror: $HOME/tmp/mirror
 
+
+################################################################################
+# Toolchains section - download and install toolchains
+################################################################################
+# Not defined in this release for sdk-manager.
+
+
+################################################################################
+# Makefile - build targets
+################################################################################
 envsetup:
   - ln -sf qemu_v8.mk build/Makefile
   - make -C build -j3 toolchains $(MAKEFLAGS)
@@ -7,6 +20,19 @@ envsetup:
 test:
   - make -C build check $(MAKEFLAGS)
 
+build:
+  - $(MAKE) -C build all $(MAKEFLAGS)
+
+clean:
+  - $(MAKE) -C build clean $(MAKEFLAGS)
+
+flash: |
+  @echo "This is a QEMU setup, no flashing needed"
+
+
+################################################################################
+# Gits
+################################################################################
 gits:
   - name: build
     url: https://github.com/OP-TEE/build.git
@@ -116,7 +142,7 @@ gits:
     commit: refs/tags/v2.16.0
 
   - name: trusted-services
-    url: refs/tags/v1.1.0
+    url: https://git.trustedfirmware.org/TS/trusted-services.git
     commit: 8881aaa3a9cb21e8b869e28c1a079f02fa46fd6c
 
   - name: linux-arm-ffa-user
