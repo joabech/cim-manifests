@@ -1,0 +1,67 @@
+# ADI Kuiper Linux OS dependencies
+
+# YAML anchors for reusable package lists
+kuiper_packages: &kuiper_packages
+  - docker.io
+  - docker-compose
+  - git
+  - curl
+  - wget
+  - build-essential
+  - sudo
+  - binfmt-support
+  - qemu-user-binfmt
+
+# Linux x86_64 (Intel/AMD) dependencies
+linux-x86_64:
+  ubuntu-26.04:
+    command: "apt-get install"
+    packages: *kuiper_packages
+
+  ubuntu-24.04:
+    command: "apt-get install"
+    packages: *kuiper_packages
+
+  ubuntu-22.04:
+    command: "apt-get install"
+    packages: *kuiper_packages
+
+  debian-12:
+    command: "apt-get install"
+    packages: *kuiper_packages
+
+# Linux ARM64 (Raspberry Pi, ARM servers) dependencies
+linux-aarch64:
+  ubuntu-26.04:
+    command: "apt-get install"
+    packages: *kuiper_packages
+
+  ubuntu-24.04:
+    command: "apt-get install"
+    packages: *kuiper_packages
+
+  ubuntu-22.04:
+    command: "apt-get install"
+    packages: *kuiper_packages
+
+  debian-12:
+    command: "apt-get install"
+    packages: *kuiper_packages
+
+# Linux legacy (fallback)
+linux:
+  ubuntu-26.04:
+    command: "apt-get install"
+    packages: *kuiper_packages
+
+  ubuntu-24.04:
+    command: "apt-get install"
+    packages: *kuiper_packages
+
+  ubuntu-22.04:
+    command: "apt-get install"
+    packages: *kuiper_packages
+
+  debian-12:
+    command: "apt-get install"
+    packages: *kuiper_packages

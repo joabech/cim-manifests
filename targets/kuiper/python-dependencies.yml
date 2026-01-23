@@ -1,0 +1,20 @@
+# ADI Kuiper Linux Python dependencies
+# Kuiper build runs in Docker, so minimal Python dependencies needed on host
+
+profiles:
+  minimal:
+    packages:
+      - pyyaml
+
+  docs:
+    packages:
+      - sphinx
+      - sphinx-rtd-theme
+
+  dev:
+    packages:
+      - pyyaml
+      - black
+      - pytest
+
+default: dev
