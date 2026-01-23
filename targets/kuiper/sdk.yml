@@ -1,0 +1,141 @@
+################################################################################
+# ADI Kuiper Linux - Debian-based Linux distribution for Analog Devices hardware
+# Repository: https://github.com/analogdevicesinc/adi-kuiper-gen
+# Prerequisites: Ubuntu 22.04 and Docker
+################################################################################
+
+################################################################################
+# Mirror location for downloads, toolchains and gits.
+################################################################################
+mirror: $HOME/tmp/mirror
+
+
+################################################################################
+# High-level Makefile targets.
+################################################################################
+envsetup:
+  commands: |
+    @echo "=========================================="
+    @echo "ADI Kuiper Linux Build Environment"
+    @echo "=========================================="
+    @echo ""
+    @echo "Prerequisites:"
+    @echo "  - Run  "cim install os-deps""
+    @echo ""
+    @echo "Configuration options (choose one):"
+    @echo ""
+    @echo "  ARMHF (32-bit ARM):"
+    @echo "    make install-kuiper-basic-armhf    - Basic (RPI + Zynq + Arria10 + Cyclone5)"
+    @echo "    make install-kuiper-desktop-armhf  - Basic + Desktop Environment"
+    @echo "    make install-kuiper-full-armhf     - Desktop + All ADI Libraries & Tools"
+    @echo ""
+    @echo "  ARM64 (64-bit ARM):"
+    @echo "    make install-kuiper-basic-arm64    - Basic (RPI + ZynqMP + Versal)"
+    @echo "    make install-kuiper-desktop-arm64  - Basic + Desktop Environment"
+    @echo "    make install-kuiper-full-arm64     - Desktop + All ADI Libraries & Tools"
+    @echo ""
+    @echo "Build commands:"
+    @echo "  make sdk-build       - Build Kuiper image with current config"
+    @echo "  make sdk-clean       - Clean build artifacts"
+    @echo "  make sdk-test        - Check prerequisites"
+    @echo ""
+    @echo "Output location:"
+    @echo "  adi-kuiper-gen/kuiper-volume/"
+    @echo ""
+
+build:
+  commands: |
+    @echo "Building ADI Kuiper Linux with current configuration..."
+    @echo "This will take a while (30-60 minutes depending on your system)..."
+    @cd adi-kuiper-gen && sudo ./build-docker.sh
+
+clean:
+  commands: |
+    @echo "Cleaning Kuiper build artifacts..."
+    @cd adi-kuiper-gen && sudo rm -rf kuiper-volume
+    @docker system prune -f
+
+test:
+  commands: |
+    @echo "Checking build prerequisites..."
+    @which docker > /dev/null || (echo "ERROR: Docker not found. Please install Docker." && exit 1)
+    @docker --version
+    @echo "✓ Docker is installed"
+    @if [ ! -f adi-kuiper-gen/config ]; then echo "ERROR: config file not found"; exit 1; fi
+    @echo "✓ Kuiper config file exists"
+    @echo "✓ Prerequisites satisfied"
+
+flash:
+  commands: |
+    @echo "To flash the image to an SD card:"
+    @echo ""
+    @echo "1. Find your SD card device:"
+    @echo "   lsblk"
+    @echo ""
+    @echo "2. Flash the image (replace /dev/sdX with your SD card):"
+    @echo "   sudo dd if=${{ WORKSPACE }}/adi-kuiper-gen/kuiper-volume/ADI-Kuiper-Linux-*.img of=/dev/sdX bs=4M status=progress"
+    @echo ""
+    @echo "WARNING: Double-check the device path! Wrong device will destroy data!"
+
+
+################################################################################
+# Copy files section
+################################################################################
+copy_files:
+  - source: llm/CLAUDE.md
+    dest: CLAUDE.md
+  - source: configs/*
+    dest: configs/
+
+
+################################################################################
+# Installation targets for different Kuiper configurations
+# Available for both armhf (32-bit) and arm64 (64-bit) architectures
+################################################################################
+install:
+  # ============================================================================
+  # ARMHF (32-bit ARM) Configurations
+  # ============================================================================
+
+  - name: kuiper-basic-armhf
+    commands: |
+      @cp configs/kuiper-basic-armhf.config adi-kuiper-gen/config
+      @echo "✓ Basic armhf configuration set (RPI + Zynq + Arria10 + Cyclone5)"
+
+  - name: kuiper-desktop-armhf
+    commands: |
+      @cp configs/kuiper-desktop-armhf.config adi-kuiper-gen/config
+      @@echo "✓ Desktop armhf configuration set (Basic + Desktop Environment)"
+
+  - name: kuiper-full-armhf
+    commands: |
+      @cp configs/kuiper-full-armhf.config adi-kuiper-gen/config
+      @echo "✓ Full armhf configuration set (Desktop + All ADI Libraries & Tools)"
+
+  # ============================================================================
+  # ARM64 (64-bit ARM) Configurations
+  # ============================================================================
+
+  - name: kuiper-basic-arm64
+    commands: |
+      @cp configs/kuiper-basic-arm64.config adi-kuiper-gen/config
+      @echo "✓ Basic arm64 configuration set (RPI + ZynqMP + Versal)"
+
+  - name: kuiper-desktop-arm64
+    commands: |
+      @cp configs/kuiper-desktop-arm64.config adi-kuiper-gen/config
+      @echo "✓ Desktop arm64 configuration set (Basic + Desktop Environment)"
+
+  - name: kuiper-full-arm64
+    commands: |
+      @cp configs/kuiper-full-arm64.config adi-kuiper-gen/config
+      @echo "✓ Full arm64 configuration set (Desktop + All ADI Libraries & Tools)"
+
+
+################################################################################
+# Git repositories
+################################################################################
+gits:
+  - name: adi-kuiper-gen
+    url: https://github.com/analogdevicesinc/adi-kuiper-gen.git
+    commit: main
