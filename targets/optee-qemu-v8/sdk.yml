@@ -1,7 +1,8 @@
 ################################################################################
-# Default mirror location (can be overridden by user: sdk-manager config -e)
+# Default mirror location (can be overridden by user: cim config -e)
 ################################################################################
 mirror: $HOME/tmp/mirror
+
 
 ################################################################################
 # Toolchains section - download and install toolchains
@@ -27,13 +28,26 @@ toolchains:
     post_install_commands: |
       cd bin && for f in *-none-linux*; do ln -sf "$f" "${f//-none}"; done
 
-  # Rust toolchain - downloads rustup installer script and runs it
+  # Rust toolchain - downloads rustup installer script and runs it with isolated environment
+  # The environment variables ensure Rust installs only in the toolchain directory:
+  # - Direct mode: installs to workspace/toolchains/rust/.cargo and .rustup
+  # - Symlink mode (--symlink): installs to mirror/toolchains/{name}/.cargo and .rustup
   - url: https://sh.rustup.rs
     destination: toolchains/rust
+    environment:
+      # $PWD expands to the actual installation directory (workspace or mirror)
+      CARGO_HOME: "$PWD/.cargo"
+      RUSTUP_HOME: "$PWD/.rustup"
+      # Prepend cargo bin to PATH so rustup commands work during installation
+      PATH: "$PWD/.cargo/bin:$PATH"
     post_install_commands: |
+      set -e
       mkdir -p .cargo .rustup
-      CARGO_HOME=$PWD/.cargo RUSTUP_HOME=$PWD/.rustup bash ./sh.rustup.rs -y --no-modify-path
-      echo 'Rust installation complete in $PWD'
+      bash ./sh.rustup.rs -y --no-modify-path
+      echo "Installing stable Rust toolchain..."
+      .cargo/bin/rustup default stable
+      echo "Rust toolchain installed to $RUSTUP_HOME"
+      .cargo/bin/cargo --version
 
 
 ################################################################################
@@ -41,6 +55,7 @@ toolchains:
 ################################################################################
 envsetup:
   - ln -sf qemu_v8.mk build/Makefile
+  - cd optee_rust && git am ../patches/optee_rust/*.patch || true
 
 build:
   - $(MAKE) -C build all $(MAKEFLAGS)
@@ -56,6 +71,16 @@ flash: |
 
 
 ################################################################################
+# Copy files section - download files to be used during installation
+################################################################################
+copy_files:
+  - source: llm/CLAUDE.md
+    dest: CLAUDE.md
+  - source: patches/optee_rust/*.patch
+    dest: patches/optee_rust/
+
+
+###############################################################################
 # Gits
 ################################################################################
 gits:
