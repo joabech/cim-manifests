@@ -1,0 +1,27 @@
+From cc062e65d47cdd5b9c8a44043b0c794c4b29615f Mon Sep 17 00:00:00 2001
+From: Joakim Bech <joakim.bech@gmail.com>
+Date: Thu, 19 Feb 2026 22:42:57 +0100
+Subject: [PATCH] rust: change to nightly 2024-12-01
+
+We had issues finding the correct versions for the OP-TEE 4.6.0 build
+when running on new OS distros. Here update to a later version.
+
+Signed-off-by: Joakim Bech <joakim.bech@gmail.com>
+---
+ rust-toolchain.toml | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/rust-toolchain.toml b/rust-toolchain.toml
+index 4663e2f..40c6383 100644
+--- a/rust-toolchain.toml
++++ b/rust-toolchain.toml
+@@ -18,5 +18,5 @@
+ # Toolchain override for rustup
+ 
+ [toolchain]
+-channel = "nightly-2023-12-18"
++channel = "nightly-2024-12-01"
+ targets = ["aarch64-unknown-linux-gnu", "arm-unknown-linux-gnueabihf"]
+-- 
+2.53.0
+

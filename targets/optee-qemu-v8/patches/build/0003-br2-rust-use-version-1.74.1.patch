@@ -1,0 +1,28 @@
+From 5d98766142e6651d825ec82a99e78d2eee929cf0 Mon Sep 17 00:00:00 2001
+From: Joakim Bech <joakim.bech@gmail.com>
+Date: Thu, 19 Feb 2026 22:45:31 +0100
+Subject: [PATCH] br2/rust: use version 1.74.1
+
+This is a version that works with uuid. Need to set this since, now we
+get a version that is too new.
+
+Signed-off-by: Joakim Bech <joakim.bech@gmail.com>
+---
+ common.mk | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/common.mk b/common.mk
+index 7fdf5fe..7774205 100644
+--- a/common.mk
++++ b/common.mk
+@@ -282,6 +282,7 @@ ifeq ($(MEASURED_BOOT_FTPM),y)
+ DEFCONFIG_TSS ?= --br-defconfig build/br-ext/configs/tss
+ endif
+ 
++BR2_RUST_BIN_VERSION ?= "1.74.1"
+ BR2_PACKAGE_HOST_E2FSPROGS ?= n
+ BR2_PER_PACKAGE_DIRECTORIES ?= y
+ BR2_PACKAGE_LIBOPENSSL ?= y
+-- 
+2.53.0
+

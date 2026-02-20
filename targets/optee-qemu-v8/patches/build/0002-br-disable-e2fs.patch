@@ -1,0 +1,29 @@
+From 8f1c1205a0914de41bdac52dc8dd37793ac326a2 Mon Sep 17 00:00:00 2001
+From: Joakim Bech <joakim.bech@gmail.com>
+Date: Thu, 19 Feb 2026 21:43:42 +0100
+Subject: [PATCH] br: disable e2fs
+
+When running this on systems with more modern GCC v15.x, then we get
+compiler errors. You could change to -std=c17, but we can just disable
+this instead, we don't need it for OP-TEE.
+
+Signed-off-by: Joakim Bech <joakim.bech@gmail.com>
+---
+ common.mk | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/common.mk b/common.mk
+index f3eaf99..7fdf5fe 100644
+--- a/common.mk
++++ b/common.mk
+@@ -282,6 +282,7 @@ ifeq ($(MEASURED_BOOT_FTPM),y)
+ DEFCONFIG_TSS ?= --br-defconfig build/br-ext/configs/tss
+ endif
+ 
++BR2_PACKAGE_HOST_E2FSPROGS ?= n
+ BR2_PER_PACKAGE_DIRECTORIES ?= y
+ BR2_PACKAGE_LIBOPENSSL ?= y
+ BR2_PACKAGE_MMC_UTILS ?= y
+-- 
+2.53.0
+

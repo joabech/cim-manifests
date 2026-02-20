@@ -1,5 +1,5 @@
 ################################################################################
-# Default mirror location (can be overridden by user: sdk-manager config -e)
+# Default mirror location (can be overridden by user: cim config -e)
 ################################################################################
 mirror: $HOME/tmp/mirror
 
@@ -7,7 +7,36 @@ mirror: $HOME/tmp/mirror
 ################################################################################
 # Toolchains section - download and install toolchains
 ################################################################################
-# Not defined in this release for sdk-manager.
+toolchains:
+  # Arm GNU toolchain for aarch32 (32-bit ARM) - version 11.3 (from build/toolchain.mk)
+  - name: arm-gnu-toolchain-11.3.rel1-x86_64-arm-none-linux-gnueabihf.tar.xz
+    url: https://developer.arm.com/-/media/Files/downloads/gnu/11.3.rel1/binrel/
+    destination: toolchains/aarch32
+    strip_components: 1
+    os: linux
+    arch: x86_64
+    post_install_commands: |
+      cd bin && for f in *-none-linux*; do ln -sf "$f" "${f//-none}"; done
+
+  # Arm GNU toolchain for aarch64 (64-bit ARM) - version 11.3 (from build/toolchain.mk)
+  - name: arm-gnu-toolchain-11.3.rel1-x86_64-aarch64-none-linux-gnu.tar.xz
+    url: https://developer.arm.com/-/media/Files/downloads/gnu/11.3.rel1/binrel/
+    destination: toolchains/aarch64
+    strip_components: 1
+    os: linux
+    arch: x86_64
+    post_install_commands: |
+      cd bin && for f in *-none-linux*; do ln -sf "$f" "${f//-none}"; done
+
+  # Rust toolchain - downloads rustup installer script and runs it
+  - url: https://sh.rustup.rs
+    destination: toolchains/rust
+    post_install_commands: |
+      mkdir -p .cargo .rustup
+      CARGO_HOME=$PWD/.cargo RUSTUP_HOME=$PWD/.rustup bash ./sh.rustup.rs -y --no-modify-path
+      CARGO_HOME=$PWD/.cargo RUSTUP_HOME=$PWD/.rustup $PWD/.cargo/bin/rustup install 1.85.0
+      CARGO_HOME=$PWD/.cargo RUSTUP_HOME=$PWD/.rustup $PWD/.cargo/bin/rustup default 1.85.0
+      echo 'Rust installation complete in $PWD'
 
 
 ################################################################################
@@ -15,7 +44,10 @@ mirror: $HOME/tmp/mirror
 ################################################################################
 envsetup:
   - ln -sf qemu_v8.mk build/Makefile
-  - make -C build -j3 toolchains $(MAKEFLAGS)
+  - cd build && git am ../patches/build/*.patch || true
+  - cd optee_rust && git am ../patches/optee_rust/*.patch || true
+  - ./toolchains/rust/.cargo/bin/rustup install 1.85.0
+  - ./toolchains/rust/.cargo/bin/rustup default 1.85.0
 
 test:
   - make -C build check $(MAKEFLAGS)
@@ -31,6 +63,16 @@ flash: |
 
 
 ################################################################################
+# Copy files section - download files to be used during installation
+################################################################################
+copy_files:
+  - source: patches/build/*.patch
+    dest: patches/build/
+  - source: patches/optee_rust/*.patch
+    dest: patches/optee_rust/
+
+
+###############################################################################
 # Gits
 ################################################################################
 gits:
@@ -84,10 +126,13 @@ gits:
       - optee_os
       - optee_client
 
-  # buildroot git from common.xml
+  # buildroot git from common.xml, we have stepped this up a bit compared to
+  # what was used in the original 4.6.0 OP-TEE release. The reason being that
+  # now most distros use GCC 15.x and that give compiler errors with older
+  # build root version (m4, e2fs etc. to name a few.
   - name: buildroot
     url: https://github.com/buildroot/buildroot.git
-    commit: refs/tags/2024.05
+    commit: 7a07a9d155b8f601d68f07ee0ed1dc8d48907644
     build:
       - make -C build buildroot $(MAKEFLAGS)
 
