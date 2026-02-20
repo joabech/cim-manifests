@@ -3,8 +3,8 @@
 
 # YAML anchors for reusable package lists
 ubuntu_packages: &ubuntu_packages
-  - adb
   - acpica-tools
+  - adb
   - autoconf
   - automake
   - bc
@@ -39,7 +39,7 @@ ubuntu_packages: &ubuntu_packages
   - libusb-1.0-0-dev
   - make
   - mtools
-  - netcat
+  - netcat-openbsd
   - ninja-build
   - python-is-python3
   - python3-cryptography
@@ -118,47 +118,68 @@ fedora_packages: &fedora_packages
   - xz
   - zlib-devel
 
+
 # Linux x86_64 (Intel/AMD) dependencies
 linux-x86_64:
-  ubuntu:
-    version: "22.04"
-    command: "apt-get install"
+  ubuntu-24.04:
+    command: "apt install"
     packages: *ubuntu_packages
+
+  ubuntu-22.04:
+    command: "apt install"
+    packages: *ubuntu_packages
+
+  fedora-43:
+    command: "dnf install"
+    packages: *fedora_packages
   
-  fedora:
-    version: "42"
+  fedora-42:
     command: "dnf install"
     packages: *fedora_packages
 
+
 # Linux ARM64 (Apple Silicon, ARM servers) dependencies  
 linux-aarch64:
-  ubuntu:
-    version: "22.04"
-    command: "apt-get install"
+  ubuntu-24.04:
+    command: "apt install"
     packages: *ubuntu_packages
+
+  ubuntu-22.04:
+    command: "apt install"
+    packages: *ubuntu_packages
+
+  fedora-43:
+    command: "dnf install"
+    packages: *fedora_packages
   
-  fedora:
-    version: "42"
+  fedora-42:
     command: "dnf install"
     packages: *fedora_packages
  
+
 # Linux legacy
 linux:
-  ubuntu:
-    version: "22.04"
-    command: "apt-get install"
+  ubuntu-24.04:
+    command: "apt install"
     packages: *ubuntu_packages
-  
-  fedora:
-    version: "42"
+
+  ubuntu-22.04:
+    command: "apt install"
+    packages: *ubuntu_packages
+
+  fedora-43:
     command: "dnf install"
     packages: *fedora_packages
+  
+  fedora-42:
+    command: "dnf install"
+    packages: *fedora_packages
+
 
 # MacOS dependencies
 # Note that you cannot build OP-TEE QEMU v8 on MacOS natively,
 macos:
-  macos:
-    version: "any"
+  macos-any:
     command: "brew install"
     packages:
       # Base packages

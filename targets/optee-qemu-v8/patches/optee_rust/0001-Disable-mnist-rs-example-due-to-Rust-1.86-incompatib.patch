@@ -1,0 +1,2878 @@
+From fe47e3a9dc4a8fcce5bd860888d7d99d6b546683 Mon Sep 17 00:00:00 2001
+From: Joakim Bech <joakim.bech@gmail.com>
+Date: Fri, 20 Feb 2026 12:15:01 +0100
+Subject: [PATCH] Disable mnist-rs example due to Rust 1.86 incompatibility
+ with zune-jpeg
+
+The zune-jpeg crate 0.5.12 uses #[target_feature(enable = "neon")]
+on non-unsafe functions, which became a hard error in Rust 1.86.
+Remove mnist-rs example which depends on image crate that depends on zune-jpeg.
+---
+ examples/mnist-rs/Makefile                   |  46 ----
+ examples/mnist-rs/README.md                  | 234 -------------------
+ examples/mnist-rs/host/Cargo.toml            |  43 ----
+ examples/mnist-rs/host/Makefile              |  37 ---
+ examples/mnist-rs/host/samples/0.bin         | Bin 784 -> 0 bytes
+ examples/mnist-rs/host/samples/1.bin         | Bin 784 -> 0 bytes
+ examples/mnist-rs/host/samples/2.bin         | Bin 784 -> 0 bytes
+ examples/mnist-rs/host/samples/3.bin         | Bin 784 -> 0 bytes
+ examples/mnist-rs/host/samples/4.bin         | Bin 784 -> 0 bytes
+ examples/mnist-rs/host/samples/5.bin         | Bin 784 -> 0 bytes
+ examples/mnist-rs/host/samples/6.bin         | Bin 784 -> 0 bytes
+ examples/mnist-rs/host/samples/7.bin         | Bin 784 -> 0 bytes
+ examples/mnist-rs/host/samples/7.png         | Bin 721 -> 0 bytes
+ examples/mnist-rs/host/samples/8.bin         | Bin 784 -> 0 bytes
+ examples/mnist-rs/host/samples/9.bin         | Bin 784 -> 0 bytes
+ examples/mnist-rs/host/samples/model.bin     | Bin 31575 -> 0 bytes
+ examples/mnist-rs/host/src/commands/infer.rs |  85 -------
+ examples/mnist-rs/host/src/commands/mod.rs   |  20 --
+ examples/mnist-rs/host/src/commands/serve.rs | 116 ---------
+ examples/mnist-rs/host/src/commands/train.rs | 131 -----------
+ examples/mnist-rs/host/src/main.rs           |  45 ----
+ examples/mnist-rs/host/src/tee.rs            | 155 ------------
+ examples/mnist-rs/proto/Cargo.toml           |  29 ---
+ examples/mnist-rs/proto/src/inference.rs     |  18 --
+ examples/mnist-rs/proto/src/lib.rs           |  26 ---
+ examples/mnist-rs/proto/src/train.rs         |  33 ---
+ examples/mnist-rs/rust-toolchain.toml        |  26 ---
+ examples/mnist-rs/ta/Cargo.toml              |  51 ----
+ examples/mnist-rs/ta/common/Cargo.toml       |  32 ---
+ examples/mnist-rs/ta/common/src/lib.rs       |  25 --
+ examples/mnist-rs/ta/common/src/model.rs     |  86 -------
+ examples/mnist-rs/ta/common/src/utils.rs     |  35 ---
+ examples/mnist-rs/ta/inference/Cargo.toml    |  40 ----
+ examples/mnist-rs/ta/inference/Makefile      |  51 ----
+ examples/mnist-rs/ta/inference/build.rs      |  25 --
+ examples/mnist-rs/ta/inference/src/main.rs   |  91 --------
+ examples/mnist-rs/ta/inference/uuid.txt      |   1 -
+ examples/mnist-rs/ta/train/Cargo.toml        |  40 ----
+ examples/mnist-rs/ta/train/Makefile          |  50 ----
+ examples/mnist-rs/ta/train/build.rs          |  25 --
+ examples/mnist-rs/ta/train/src/main.rs       | 127 ----------
+ examples/mnist-rs/ta/train/src/trainer.rs    | 114 ---------
+ examples/mnist-rs/ta/train/uuid.txt          |   1 -
+ rust-toolchain.toml                          |   4 +-
+ 44 files changed, 2 insertions(+), 1840 deletions(-)
+ delete mode 100644 examples/mnist-rs/Makefile
+ delete mode 100644 examples/mnist-rs/README.md
+ delete mode 100644 examples/mnist-rs/host/Cargo.toml
+ delete mode 100644 examples/mnist-rs/host/Makefile
+ delete mode 100644 examples/mnist-rs/host/samples/0.bin
+ delete mode 100644 examples/mnist-rs/host/samples/1.bin
+ delete mode 100644 examples/mnist-rs/host/samples/2.bin
+ delete mode 100644 examples/mnist-rs/host/samples/3.bin
+ delete mode 100644 examples/mnist-rs/host/samples/4.bin
+ delete mode 100644 examples/mnist-rs/host/samples/5.bin
+ delete mode 100644 examples/mnist-rs/host/samples/6.bin
+ delete mode 100644 examples/mnist-rs/host/samples/7.bin
+ delete mode 100644 examples/mnist-rs/host/samples/7.png
+ delete mode 100644 examples/mnist-rs/host/samples/8.bin
+ delete mode 100644 examples/mnist-rs/host/samples/9.bin
+ delete mode 100644 examples/mnist-rs/host/samples/model.bin
+ delete mode 100644 examples/mnist-rs/host/src/commands/infer.rs
+ delete mode 100644 examples/mnist-rs/host/src/commands/mod.rs
+ delete mode 100644 examples/mnist-rs/host/src/commands/serve.rs
+ delete mode 100644 examples/mnist-rs/host/src/commands/train.rs
+ delete mode 100644 examples/mnist-rs/host/src/main.rs
+ delete mode 100644 examples/mnist-rs/host/src/tee.rs
+ delete mode 100644 examples/mnist-rs/proto/Cargo.toml
+ delete mode 100644 examples/mnist-rs/proto/src/inference.rs
+ delete mode 100644 examples/mnist-rs/proto/src/lib.rs
+ delete mode 100644 examples/mnist-rs/proto/src/train.rs
+ delete mode 100644 examples/mnist-rs/rust-toolchain.toml
+ delete mode 100644 examples/mnist-rs/ta/Cargo.toml
+ delete mode 100644 examples/mnist-rs/ta/common/Cargo.toml
+ delete mode 100644 examples/mnist-rs/ta/common/src/lib.rs
+ delete mode 100644 examples/mnist-rs/ta/common/src/model.rs
+ delete mode 100644 examples/mnist-rs/ta/common/src/utils.rs
+ delete mode 100644 examples/mnist-rs/ta/inference/Cargo.toml
+ delete mode 100644 examples/mnist-rs/ta/inference/Makefile
+ delete mode 100644 examples/mnist-rs/ta/inference/build.rs
+ delete mode 100644 examples/mnist-rs/ta/inference/src/main.rs
+ delete mode 100644 examples/mnist-rs/ta/inference/uuid.txt
+ delete mode 100644 examples/mnist-rs/ta/train/Cargo.toml
+ delete mode 100644 examples/mnist-rs/ta/train/Makefile
+ delete mode 100644 examples/mnist-rs/ta/train/build.rs
+ delete mode 100644 examples/mnist-rs/ta/train/src/main.rs
+ delete mode 100644 examples/mnist-rs/ta/train/src/trainer.rs
+ delete mode 100644 examples/mnist-rs/ta/train/uuid.txt
+
+diff --git a/examples/mnist-rs/Makefile b/examples/mnist-rs/Makefile
+deleted file mode 100644
+index 19bac24..0000000
+--- a/examples/mnist-rs/Makefile
++++ /dev/null
+@@ -1,46 +0,0 @@
+-# Licensed to the Apache Software Foundation (ASF) under one
+-# or more contributor license agreements.  See the NOTICE file
+-# distributed with this work for additional information
+-# regarding copyright ownership.  The ASF licenses this file
+-# to you under the Apache License, Version 2.0 (the
+-# "License"); you may not use this file except in compliance
+-# with the License.  You may obtain a copy of the License at
+-#
+-#   http://www.apache.org/licenses/LICENSE-2.0
+-#
+-# Unless required by applicable law or agreed to in writing,
+-# software distributed under the License is distributed on an
+-# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+-# KIND, either express or implied.  See the License for the
+-# specific language governing permissions and limitations
+-# under the License.
+-
+-# If _HOST or _TA specific compiler/target are not specified, then use common
+-# compiler/target for both
+-CROSS_COMPILE_HOST ?= aarch64-linux-gnu-
+-CROSS_COMPILE_TA ?= aarch64-linux-gnu-
+-TARGET_HOST ?= aarch64-unknown-linux-gnu
+-TARGET_TA ?= aarch64-unknown-linux-gnu
+-
+-.PHONY: host ta all clean
+-
+-all: toolchain host ta
+-
+-toolchain:
+-	rustup toolchain install
+-
+-host: toolchain
+-	$(q)make -C host TARGET=$(TARGET_HOST) \
+-		CROSS_COMPILE=$(CROSS_COMPILE_HOST)
+-
+-ta: toolchain
+-	$(q)make -C ta/train TARGET=$(TARGET_TA) \
+-		CROSS_COMPILE=$(CROSS_COMPILE_TA)
+-	$(q)make -C ta/inference TARGET=$(TARGET_TA) \
+-		CROSS_COMPILE=$(CROSS_COMPILE_TA)
+-
+-clean:
+-	$(q)make -C host clean
+-	cd proto && cargo clean
+-	$(q)make -C ta/train clean
+-	$(q)make -C ta/inference clean
+diff --git a/examples/mnist-rs/README.md b/examples/mnist-rs/README.md
+deleted file mode 100644
+index 97d7af2..0000000
+--- a/examples/mnist-rs/README.md
++++ /dev/null
+@@ -1,234 +0,0 @@
+-# mnist-rs
+-
+-This demo demonstrates how to train and perform inference in TEE.
+-
+-## Install the TA
+-
+-There are two TAs in the project:
+-
+-| TA | UUID | Usage |
+-| ---- | ---- | ---- |
+-| Train | 1b5f5b74-e9cf-4e62-8c3e-7e41da6d76f6 | for training new Model|
+-| Inference | ff09aa8a-fbb9-4734-ae8c-d7cd1a3f6744 | for performing reference|
+-
+-Separate them as normally training consumes much more resource than performing
+-inference, which results in different build settings(memory, concurrency, etc).
+-
+-Make sure to install them before attempting to use any functions, you can refer
+-to the [Makefile](../../Makefile) in the root directory for details.
+-
+-## Running the Host
+-
+-There are three subcommands in the host:
+-
+-1. Train
+-
+-    Trains a new model and exports it to the given path.
+-
+-    ``` shell
+-    mnist-rs train -o model.bin
+-    ```
+-
+-    This subcommand downloads the MNIST dataset, feeds the dataset into TEE and
+-    perform training inside TEE, outputs the model to the given path after the
+-    training finished.
+-
+-    ```mermaid
+-    sequenceDiagram
+-    actor D as Developer
+-    participant C as mnist-rs(REE)
+-    participant T as Train TA(TEE)
+-    
+-    D ->> C: train -o model.bin
+-    C ->> C: Fetch mnist dataset
+-
+-    C ->> T: open_session_with_operation
+-    T ->> T: Initialize Global Trainer<br/> with given learning rate
+-    T ->> C: Initialize finished
+-
+-    loop iterate over num_epoches
+-        rect rgb(191, 223, 255)
+-        note right of C: Train
+-            loop chunk by batch_size over train datasets
+-                C ->> T: invoke_command Train with chunk datasets
+-                T ->> T: Forward with given data
+-                T ->> T: Backward Optimization
+-                T ->> C: Train Output(loss, accuracy)
+-            end
+-        end
+-        rect rgb(200, 150, 255)
+-        note right of C: Valid
+-            loop chunk by batch_size over test datasets
+-                C ->> T: invoke_command Test with chunk datasets
+-                T ->> T: Forward with given data
+-                T ->> C: Test Output(loss, accuracy)
+-            end
+-        end
+-    end
+-
+-    C ->> T: Export Command
+-    T ->> C: Model Record
+-    C ->> D: model.bin
+-    ```
+-
+-    For detailed usage, run: `mnist-rs train --help`, a demo output is:
+-
+-    ``` shell
+-    Usage: mnist-rs train [OPTIONS]
+-
+-    Options:
+-      -n, --num-epochs <NUM_EPOCHS>        [default: 6]
+-      -b, --batch-size <BATCH_SIZE>        [default: 64]
+-      -l, --learning-rate <LEARNING_RATE>  [default: 0.0001]
+-      -o, --output <OUTPUT>
+-      -h, --help                           Print help
+-    ```
+-
+-2. Infer
+-
+-    Loads a model from the given path, tests it with a given image, and prints
+-    the inference result.
+-
+-    ```shell
+-    mnist-rs infer -m model.bin -b samples/7.bin -i samples/7.png
+-    ```
+-
+-    This subcommand loads the model the model from the given path and tests it
+-    with the given binaries and images, and prints the inference results. For
+-    convenience, you can use the sample binaries and images in the `samples`
+-    folder.
+-
+-    ```mermaid
+-    sequenceDiagram
+-    actor D as Developer
+-    participant C as mnist-rs(REE)
+-    participant T as Inference TA(TEE)
+-    
+-    D ->> C: infer -m model.bin<br/> -b samples/7.bin<br/> -i samples/7.png
+-
+-    C ->> C: load Model Record from disk
+-    C ->> T: open_session_with_operation
+-    T ->> T: Initialize Global Model<br/> with given Model Record
+-    T ->> C: Initialize finished
+-
+-    rect rgb(191, 223, 255)
+-    note right of C: Infer with samples/7.bin
+-        C ->> C: Load file from disk.
+-        C ->> T: invoke_command: Feed data
+-        T ->> T: Forward with given data
+-        T ->> C: Infer result
+-        C ->> D: Print result
+-    end
+-
+-    rect rgb(191, 223, 255)
+-    note right of C: Infer with samples/7.png
+-        C ->> C: Load image from disk.
+-        C ->> C: Convert image to luma8 binary
+-        C ->> T: invoke_command with data
+-        T ->> T: Forward with given data
+-        T ->> C: Infer result
+-        C ->> D: Print result
+-    end
+-
+-    ```
+-    For detailed usage, run: `mnist-rs infer --help`, a demo output is:
+-
+-    ```shell
+-    Usage: mnist-rs infer [OPTIONS] --model <MODEL>
+-
+-    Options:
+-        -m, --model <MODEL>    The path of the model
+-        -b, --binary <BINARY>  The path of the input binary, must be 768 byte binary, can be multiple
+-        -i, --image <IMAGE>    The path of the input image, must be dimension of 28x28, can be multiple
+-        -h, --help             Print help
+-    ```
+-
+-3. Serve
+-
+-    Loads a model from the given path, starts a web server and serves it as an
+-    API.
+-
+-    ```shell
+-    mnist-rs serve -m model.bin
+-    ```
+-
+-    This subcommand loads the model the model from the given path and starts a
+-    web server to provide inference APIs.
+-
+-    **Available APIs**:
+-
+-    | Method | Endpoint | Body |
+-    | ---- | ---- | ---- |
+-    | POST | `/inference/image` | an image with dimensions 28x28 |
+-    | POST | `/inference/binary` | a 784-byte binary |
+-
+-    You can test the server with the following commands:
+-
+-    ```shell
+-    # Perform inference using an image
+-    curl --data-binary "@./samples/7.png" http://localhost:3000/inference/image
+-    # Perform inference using a binary file
+-    curl --data-binary "@./samples/7.bin" http://localhost:3000/inference/binary
+-    ```
+-
+-    ```mermaid
+-    sequenceDiagram
+-    actor D as Developer
+-    actor H as HttpClient
+-    participant C as mnist-rs(REE)
+-    participant T as Inference TA(TEE)
+-    
+-    D ->> C: serve -m model.bin
+-
+-    C ->> C: Load Model Record from disk
+-    C ->> T: open_session_with_operation
+-    T ->> T: Initialize Global Model<br/> with given Model Record
+-    T ->> C: Initialize finished
+-
+-    C ->> C: Start http server
+-
+-    loop accept request
+-        par /inference/binary
+-            H ->> C: Request with binary data
+-            C ->> T: invoke_command: Feed data
+-            T ->> T: Forward with given data
+-            T ->> C: Infer result
+-            C ->> H: Infer result
+-        end
+-        par /inference/image
+-            H ->> C: Request with image data
+-            C ->> C: Convert image to luma8 binary
+-            C ->> T: invoke_command: Feed data
+-            T ->> T: Forward with given data
+-            T ->> C: Infer result
+-            C ->> H: Infer result
+-        end
+-    end
+-    
+-
+-    ```
+-
+-    For detailed usage, run: `mnist-rs serve --help`, a demo output is:
+-
+-    ```shell
+-    Usage: mnist-rs serve [OPTIONS] --model <MODEL>
+-
+-    Options:
+-        -m, --model <MODEL>  The path of the model
+-        -p, --port <PORT>    [default: 3000]
+-        -h, --help           Print help
+-    ```
+-
+-## Credits
+-
+-This demo project is inspired by the crates and examples from
+-[tracel-ai/burn](https://github.com/tracel-ai/burn), including:
+-
+-1. [crates/burn-no-std-tests](https://github.com/tracel-ai/burn/tree/v0.16.0/crates/burn-dataset)
+-2. [examples/custom-training-loop](https://github.com/tracel-ai/burn/tree/v0.16.0/examples/custom-training-loop)
+-3. [examples/mnist-inference-web](https://github.com/tracel-ai/burn/tree/v0.16.0/examples/mnist-inference-web)
+-
+-Special thanks to @[Guillaume Lagrange](https://github.com/laggui) for sharing
+-knowledge and providing early reviews.
+-
+-TODO: standard license files after 0.4.0 released.
+diff --git a/examples/mnist-rs/host/Cargo.toml b/examples/mnist-rs/host/Cargo.toml
+deleted file mode 100644
+index 90fab20..0000000
+--- a/examples/mnist-rs/host/Cargo.toml
++++ /dev/null
+@@ -1,43 +0,0 @@
+-# Licensed to the Apache Software Foundation (ASF) under one
+-# or more contributor license agreements.  See the NOTICE file
+-# distributed with this work for additional information
+-# regarding copyright ownership.  The ASF licenses this file
+-# to you under the Apache License, Version 2.0 (the
+-# "License"); you may not use this file except in compliance
+-# with the License.  You may obtain a copy of the License at
+-#
+-#   http://www.apache.org/licenses/LICENSE-2.0
+-#
+-# Unless required by applicable law or agreed to in writing,
+-# software distributed under the License is distributed on an
+-# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+-# KIND, either express or implied.  See the License for the
+-# specific language governing permissions and limitations
+-# under the License.
+-
+-[package]
+-name = "mnist-rs"
+-version = "0.4.0"
+-authors = ["Teaclave Contributors <dev@teaclave.apache.org>"]
+-license = "Apache-2.0"
+-repository = "https://github.com/apache/incubator-teaclave-trustzone-sdk.git"
+-description = "An example of Rust OP-TEE TrustZone SDK."
+-edition = "2021"
+-publish = false
+-
+-[dependencies]
+-proto = { path = "../proto" }
+-optee-teec = { path = "../../../optee-teec" }
+-clap = { version = "4.5.31", features = ["derive"] }
+-rand = "0.9.0"
+-rust-mnist = "0.2.0"
+-bytemuck = { version = "1.21.0", features = ["min_const_generics"] }
+-serde_json = "1.0.139"
+-image = "0.25.5"
+-tiny_http = "0.12.0"
+-anyhow = "1.0.97"
+-ureq = "3.0.8"
+-flate2 = "1.1.0"
+-
+-[profile.release]
+-lto = true
+diff --git a/examples/mnist-rs/host/Makefile b/examples/mnist-rs/host/Makefile
+deleted file mode 100644
+index 1804544..0000000
+--- a/examples/mnist-rs/host/Makefile
++++ /dev/null
+@@ -1,37 +0,0 @@
+-# Licensed to the Apache Software Foundation (ASF) under one
+-# or more contributor license agreements.  See the NOTICE file
+-# distributed with this work for additional information
+-# regarding copyright ownership.  The ASF licenses this file
+-# to you under the Apache License, Version 2.0 (the
+-# "License"); you may not use this file except in compliance
+-# with the License.  You may obtain a copy of the License at
+-#
+-#   http://www.apache.org/licenses/LICENSE-2.0
+-#
+-# Unless required by applicable law or agreed to in writing,
+-# software distributed under the License is distributed on an
+-# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+-# KIND, either express or implied.  See the License for the
+-# specific language governing permissions and limitations
+-# under the License.
+-
+-NAME := mnist-rs
+-
+-TARGET ?= aarch64-unknown-linux-gnu
+-CROSS_COMPILE ?= aarch64-linux-gnu-
+-OBJCOPY := $(CROSS_COMPILE)objcopy
+-LINKER_CFG := target.$(TARGET).linker=\"$(CROSS_COMPILE)gcc\"
+-
+-OUT_DIR := $(CURDIR)/target/$(TARGET)/release
+-
+-
+-all: host strip
+-
+-host:
+-	@cargo build --target $(TARGET_HOST) --release --config $(LINKER_CFG)
+-
+-strip: host
+-	@$(OBJCOPY) --strip-unneeded $(OUT_DIR)/$(NAME) $(OUT_DIR)/$(NAME)
+-
+-clean:
+-	@cargo clean
+diff --git a/examples/mnist-rs/host/samples/0.bin b/examples/mnist-rs/host/samples/0.bin
+deleted file mode 100644
+index 6d4d6d9787efc0567fe877b13b2b92be2875a95c..0000000000000000000000000000000000000000
+GIT binary patch
+literal 0
+HcmV?d00001
+
+literal 784
+zcmc)Hu@1pd6b9hCSXf!LN#hC3YNUe)5vinaV3mkSB%Z)xU=kBH34H_7nxqn|@z0-1
+zTSaec<qS8u=gT?w<Xj>C7ljFJ<;(LGfSqhB?Y>%f3xG3I&!{8<1Dt9KS3XJJ&Lm~4
+zyFuN!rT2h#64fgRr=J%>@o=|tpBjw6E`}KsgeKXc93_;!Z0`wF+voJNZUDsBRL^5<
+zrTP{0p6#P}*$9AJi+h9-+sXy7OprK{hH)Xo<s?a1;VPqJEScg3YX<0Tw7g_OA4Zn_
+Ox6K9Sjb>u{AIAeXt&o=h
+
+diff --git a/examples/mnist-rs/host/samples/1.bin b/examples/mnist-rs/host/samples/1.bin
+deleted file mode 100644
+index e4727fea3730b4a23cf88bac56dc6d0d1a877df9..0000000000000000000000000000000000000000
+GIT binary patch
+literal 0
+HcmV?d00001
+
+literal 784
+zcmZQz7+9e8FBhi+!v6%}lxzQpQ%d*CG@NoF|Lk$fox0DBOHSe64O~(T@&69vl<WED
+zi%ZV(?O6_7ay9>#;*w%m{Vx!goWzUkxTF{={>{fJH~n89PPr%loN&q6{>ClW`|m6>
+W4t-qL|5f6UVqiVCfeV)$eE<NTtR|2E
+
+diff --git a/examples/mnist-rs/host/samples/2.bin b/examples/mnist-rs/host/samples/2.bin
+deleted file mode 100644
+index e9820a4466bd8d943b96a5afa7a811cb84d91eb1..0000000000000000000000000000000000000000
+GIT binary patch
+literal 0
+HcmV?d00001
+
+literal 784
+zcmZQzpd~1&UH$+6v{-Cbto#cGx8yJ-K~h)yHvIitg&}A1>+dB69tO5^e|s?Ge1Bh(
+zWME*Z`tjEhLykdS2qbp#FE%+aDE<ET7#F5K5b*i__qjcGDTao>e<$FO+VJh~d>-s_
+zlCS>0RK_mFaP05jUK~<>KmP8;VWRK}+}hgy{#}bh8^e#ke?ftU75w=7S6f6xM1+-r
+zRYXK}+O%nt5driA5`BMH^e=<5s^Mm=gNlH_&+p$?mX=z=<rvDUtE)j;W>;5hB18ub
+F004ESaI*ja
+
+diff --git a/examples/mnist-rs/host/samples/3.bin b/examples/mnist-rs/host/samples/3.bin
+deleted file mode 100644
+index 3b30163f565376488d6451e4029afb38be926f4c..0000000000000000000000000000000000000000
+GIT binary patch
+literal 0
+HcmV?d00001
+
+literal 784
+zcmZQz7zn_lIcbssc8hr$|Ni~^Yq1bE+19^c@YD^9Wa{5P6VtNa{{7y-g(183?{WqP
+z2HV$v|1M@lm;C=%8zf|P@bBLxENGIu|0;k*%-{U|8-^w~>8}Dq%D(XM@X3GwR-?(q
+z{q@uM0dec!`yu=&vV1W-${(O|fB$}oM0c(C!p(5mi(scA17-mMbu|HjiJ$-e-H952
+zB33YURu}*N-45e`fbZS!{xCl8?Y|#9U>pVphN$m<|5(EKroaF0hp|DR<nLc=7(e;X
+z--$3b2=MLsdv~51h?Rf&+h0^U2A;d${{H^?^XE^HS562c>tkSGh~NGM;>E)?;%HI~
+S3=9&gU0!t&s_d9D^Z)>gCW>kR
+
+diff --git a/examples/mnist-rs/host/samples/4.bin b/examples/mnist-rs/host/samples/4.bin
+deleted file mode 100644
+index 5a7ec0479d894728c47e4ab94cfa5391013f9a39..0000000000000000000000000000000000000000
+GIT binary patch
+literal 0
+HcmV?d00001
+
+literal 784
+zcmZQz7>vN^0n}A)vKY>*d=3?wvI1R><uFVx;Sx8Rr0btHs7TQtQB*nIH#d2pA_vgr
+zR(v;wN(ue{i>fc=(`A@By?^(z!q{N2@=q3&ukhlR6N(i7!#^;7+aI_I5Fqwv2~2L~
+zpXD$n1aO|YC<I}N{r#JbD#x($&+*XE(9p&uhyTEBh5^l0U;q61^XJ9$-+%sa!UW;K
+zFeD@-gn?n<AGoV9K>eRTx)_2`(D3&!jEMp2@tE2E=L?2<7<lm}AI8K0n^6Ok>Hq-J
+C(Mu)(
+
+diff --git a/examples/mnist-rs/host/samples/5.bin b/examples/mnist-rs/host/samples/5.bin
+deleted file mode 100644
+index 86165766adbc4669b9b2b6893647b1a3b048886b..0000000000000000000000000000000000000000
+GIT binary patch
+literal 0
+HcmV?d00001
+
+literal 784
+zcmZQz7+@f%udgrA7^;uy4DXpY|Ni}Z{oCKaXmZMZU;g}s0W>*#sQA@Yt5&T-k`rn1
+zV6c4m_}z*cR}pR`aRvqk?sI?r7#I{7<d{&!85kJYHvVnl!Vm=mp4PuF`LRne#QeQ4
+zgF}j8+TV4!q!?cP{Z?;?L-zmQzkh#Ej;;*V(h5a4yc-r6fB*h{u>#cqX46~ue#7Md
+z)SyZ-FfcfKoPf%%$B<)SsQCMHhVhcWSmliV{{6e>&)>gOu;}Al4l?xDdbFU10P!u)
+T|K4rDq6-XSr;6c{q5}W`xnOt?
+
+diff --git a/examples/mnist-rs/host/samples/6.bin b/examples/mnist-rs/host/samples/6.bin
+deleted file mode 100644
+index 9b747bfc08c950f74b7fa81029e3d40e9d030e63..0000000000000000000000000000000000000000
+GIT binary patch
+literal 0
+HcmV?d00001
+
+literal 784
+zcmZQzpe0~G^LGOd^Vz5U`BRHSuJq3?3mj4my?@GZNiod&ZiGut>hBR;QVi4Ja+aZ?
+zYN*N{{!IW2On>zG&!2ZF4(59Lh=GBD#q8<d|F70R{QpEANoU@lX$%Zf4S)VTZj)hP
+z*z^b4JM;e(g6#aWOB<x27e#L8pF#$;w|}Rzfz9eY1)(9}*xw?C$$u9^d9#i}8DMbq
+zPa(saKYJh?slThy<%FMquM!3cp7?_76sdb4w@9A;bC8$8=fqDG?=kHByP1oDfx$;v
+zcGll7s8S3v7ylj!vb1bI`seSpKxE56K=Q_)KY#xI`SWKE*h*9&kly{Fr@LDNRdmn*
+E0Cl`<SO5S3
+
+diff --git a/examples/mnist-rs/host/samples/7.bin b/examples/mnist-rs/host/samples/7.bin
+deleted file mode 100644
+index 6e67157fcf0d51926673c7ea31a4b5050fd5d0e0..0000000000000000000000000000000000000000
+GIT binary patch
+literal 0
+HcmV?d00001
+
+literal 784
+zcmZQz7%m`W=ltn5D%gE<@87?F|2`grf>kESs+@~FiWWcq_we7pf4`po``3dk2L^&p
+ze9q3!)}n9zWnsucLGa&;LNGQO5PSJQ7)=Nc8vni1fpbuS_0NBHs3Hi^`foQYf`<Y)
+z&;GDN5kLZU|F$9VP=NRE50)qb2q1j--!cRb1u&ofcUu`n1Oe3k{qsfeP=Ne{f5nU_
+jA_&m>?;lF!AOYJ?xaBJU{kyG!q!t-e{yUE=Zm<9VT8Bs%
+
+diff --git a/examples/mnist-rs/host/samples/7.png b/examples/mnist-rs/host/samples/7.png
+deleted file mode 100644
+index 637d88f3bd314e7ae3a5886edc7bae1722b5df4b..0000000000000000000000000000000000000000
+GIT binary patch
+literal 0
+HcmV?d00001
+
+literal 721
+zcmV;?0xtcDP)<h;3K|Lk000e1NJLTq000~S000~a1^@s6at+^<00001b5ch_0Itp)
+z=>Px#1ZP1_K>z@;j|==^1poj532;bRa{vGi!vFvd!vV){sAK>D0%l1>K~zXf?Uv1p
+z@lh1VkGCO32}R9hCy^B!Stu*)NX^F5*4kn=PyPTqOMB&i5GxCbQb>`7WEK;e#CSW;
+zJ@;Yed1kJ+F<Cv|`s6yl^SkGs`#bkVqEe|4ZYT-krU9k9-<#=wz#rGaqLImDAeYMl
+z5jmU9=DmH5gaPmF?%?t95n{0z42MIQ&1R6x<>2}G8M@u>$)Lxc3j=DkTBz6SV6j-<
+zU*2xF@cQ}+&1Umxhl9ZY(&;qRYBfG9pCx1b`qTUnIkwwv{!%8B;lan_F_=syu-R-N
+zkx0PdaKOXE1IKJOgHovkyWP(1G_X>s1nc#B*W-r{enaY%pltSSolXZ%r;`uB<#KTw
+zX|Y&9uh)ZWwF(A<0TPJ>WV2aVE|>iIXHmeb35Ub@_V$KsFsRq-kqt)Z#}FDXf@OuB
+zP6yc(A}chMN~J<S;z!nDJRau-Hl0qP(P;1jJ0{^s&Vi=Q<MH6j%L}qX!(cFYG&|y|
+z3|Z$83WY$U(eSDyPGv_Dj^rHJdc{hmg7f(t{eJ(+>~;u^C!x-h$t1GU$3mfiYPDME
+zCqQUCNgxow$z+18P<Z>y><FRpD74O4HR5Wu!hAk|Np^(Lco2m`fyH8x2V>hGvhD2H
+zA{QYv9>i+3^6y3gBaz4@Q@KZI`~qche}9kVa+$BWR4R4pRPGTPzrfB&e0q99wo&td
+zUawc^cLqY^KhU)Kd_EkFM#vU659oHgg}$daYo}oWfn@|nqmlpb_xt=7@Ex7KwXy2t
+z=U=PUf@n0#uNvRc!2|ejQ6M^e2|85io<p~S%LVWo6_Q44tTpG{00000NkvXXu0mjf
+D$Sqef
+
+diff --git a/examples/mnist-rs/host/samples/8.bin b/examples/mnist-rs/host/samples/8.bin
+deleted file mode 100644
+index eb7ab3e55dc4cbdc1d49e186a06a0a5ec2ca54c5..0000000000000000000000000000000000000000
+GIT binary patch
+literal 0
+HcmV?d00001
+
+literal 784
+zcmZQz7^Fa3Umu6dICFmf{d?j3`SVj9dC`<`?)dlj?_UVMDv2U#e)`|P<Ms76u^}$g
+z@BLedBG>iz?{Q(M$n3wD(d7i80$v}{<TC&MO@qiOJ^lN40g66`ssEm8FfcHv&HVT8
+z-xgH2FbE&}cb-$p<MrRa54zF)z#w?}@AVJ={=RB}*^30yp8oy&_lYlt9tO8n|G=Oe
+zNii5mH9h<H_wUYPhs%F|h@wg^d-3=0_eFZV?9pHU{<A=pYxw*3@1@xK`DZ}(@uSKy
+fw0->dA7b4TB{V4p2I=CSbLY;TKUa;eYe)b9PlA0?
+
+diff --git a/examples/mnist-rs/host/samples/9.bin b/examples/mnist-rs/host/samples/9.bin
+deleted file mode 100644
+index bd51b5abf86bc4ee26d957b4770a969224c2437b..0000000000000000000000000000000000000000
+GIT binary patch
+literal 0
+HcmV?d00001
+
+literal 784
+zcmZQz7;=Db>Ooc<j*fot_pdN^Ihoi0{{CGigjI6F-+zDq{(V=>hAAum@$ZG5fB*h{
+zE`cfM|L-6JN7C(o|4(8X8}>JVfq`M$-+%jgFf^|JJDY)l;nm-N?HE!FVSg`Zgf9F2
+z_TL*V3`wDPAb0Lmx$$=fh8%;-hyVX3axk?0yRVEza$X+~0|V#!zY8(tpdjM!BTQdF
+z0n@U-bucytF!=gc4MPwHivO+Qgt5_q=&gTx=wfgn_irhjjRAIj!3-Q2;Jfb!W0C^^
+DEs|14
+
+diff --git a/examples/mnist-rs/host/samples/model.bin b/examples/mnist-rs/host/samples/model.bin
+deleted file mode 100644
+index 6cae1f934df3c9fed9f3bdfc61940bb38ff9e6a2..0000000000000000000000000000000000000000
+GIT binary patch
+literal 0
+HcmV?d00001
+
+literal 31575
+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%0A3ttL6(ahb1$ix~Yg?^0Sy9
+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
+UHITVmgMaQ6;lPa=5R?%7AFOe9zW@LL
+
+diff --git a/examples/mnist-rs/host/src/commands/infer.rs b/examples/mnist-rs/host/src/commands/infer.rs
+deleted file mode 100644
+index 8c3b339..0000000
+--- a/examples/mnist-rs/host/src/commands/infer.rs
++++ /dev/null
+@@ -1,85 +0,0 @@
+-// Licensed to the Apache Software Foundation (ASF) under one
+-// or more contributor license agreements.  See the NOTICE file
+-// distributed with this work for additional information
+-// regarding copyright ownership.  The ASF licenses this file
+-// to you under the Apache License, Version 2.0 (the
+-// "License"); you may not use this file except in compliance
+-// with the License.  You may obtain a copy of the License at
+-//
+-//   http://www.apache.org/licenses/LICENSE-2.0
+-//
+-// Unless required by applicable law or agreed to in writing,
+-// software distributed under the License is distributed on an
+-// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+-// KIND, either express or implied.  See the License for the
+-// specific language governing permissions and limitations
+-// under the License.
+-
+-use clap::Parser;
+-use image::EncodableLayout;
+-use optee_teec::Context;
+-use proto::{Image, IMAGE_SIZE};
+-
+-#[derive(Parser, Debug)]
+-pub struct Args {
+-    /// The path of the model.
+-    #[arg(short, long)]
+-    model: String,
+-    /// The path of the input binary, must be 768 byte binary, can be multiple
+-    #[arg(short, long)]
+-    binary: Vec<String>,
+-    /// The path of the input image, must be dimension of 28x28, can be multiple
+-    #[arg(short, long)]
+-    image: Vec<String>,
+-}
+-
+-pub fn execute(args: &Args) -> anyhow::Result<()> {
+-    let model_path = std::path::absolute(&args.model)?;
+-    println!("Load model from \"{}\"", model_path.display());
+-    let record = std::fs::read(&model_path)?;
+-    let mut ctx = Context::new()?;
+-    let mut caller = crate::tee::InferenceTaConnector::new(&mut ctx, &record)?;
+-
+-    let mut binaries: Vec<Image> = args
+-        .binary
+-        .iter()
+-        .map(|v| {
+-            let data = std::fs::read(v)?;
+-            anyhow::ensure!(data.len() == IMAGE_SIZE);
+-
+-            TryInto::<Image>::try_into(data)
+-                .map_err(|err| anyhow::Error::msg(format!("cannot convert {:?} into Image", err)))
+-        })
+-        .collect::<Result<Vec<_>, anyhow::Error>>()?;
+-    let images: Vec<Image> = args
+-        .image
+-        .iter()
+-        .map(|v| {
+-            let img = image::open(v).unwrap().to_luma8();
+-            let bytes = img.as_bytes();
+-            anyhow::ensure!(bytes.len() == IMAGE_SIZE);
+-            TryInto::<Image>::try_into(bytes)
+-                .map_err(|err| anyhow::Error::msg(format!("cannot convert {:?} into Image", err)))
+-        })
+-        .collect::<Result<Vec<_>, anyhow::Error>>()?;
+-    binaries.extend(images);
+-
+-    let result = caller.infer_batch(&binaries)?;
+-    anyhow::ensure!(binaries.len() == result.len());
+-
+-    for (i, binary) in args.binary.iter().enumerate() {
+-        println!("{}. {}: {}", i + 1, binary, result[i]);
+-    }
+-
+-    for (i, image) in args.image.iter().enumerate() {
+-        println!(
+-            "{}. {}: {}",
+-            i + args.binary.len() + 1,
+-            image,
+-            result[args.binary.len()]
+-        );
+-    }
+-    println!("Infer Success");
+-
+-    Ok(())
+-}
+diff --git a/examples/mnist-rs/host/src/commands/mod.rs b/examples/mnist-rs/host/src/commands/mod.rs
+deleted file mode 100644
+index 64e4e41..0000000
+--- a/examples/mnist-rs/host/src/commands/mod.rs
++++ /dev/null
+@@ -1,20 +0,0 @@
+-// Licensed to the Apache Software Foundation (ASF) under one
+-// or more contributor license agreements.  See the NOTICE file
+-// distributed with this work for additional information
+-// regarding copyright ownership.  The ASF licenses this file
+-// to you under the Apache License, Version 2.0 (the
+-// "License"); you may not use this file except in compliance
+-// with the License.  You may obtain a copy of the License at
+-//
+-//   http://www.apache.org/licenses/LICENSE-2.0
+-//
+-// Unless required by applicable law or agreed to in writing,
+-// software distributed under the License is distributed on an
+-// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+-// KIND, either express or implied.  See the License for the
+-// specific language governing permissions and limitations
+-// under the License.
+-
+-pub mod infer;
+-pub mod serve;
+-pub mod train;
+diff --git a/examples/mnist-rs/host/src/commands/serve.rs b/examples/mnist-rs/host/src/commands/serve.rs
+deleted file mode 100644
+index 99ef605..0000000
+--- a/examples/mnist-rs/host/src/commands/serve.rs
++++ /dev/null
+@@ -1,116 +0,0 @@
+-// Licensed to the Apache Software Foundation (ASF) under one
+-// or more contributor license agreements.  See the NOTICE file
+-// distributed with this work for additional information
+-// regarding copyright ownership.  The ASF licenses this file
+-// to you under the Apache License, Version 2.0 (the
+-// "License"); you may not use this file except in compliance
+-// with the License.  You may obtain a copy of the License at
+-//
+-//   http://www.apache.org/licenses/LICENSE-2.0
+-//
+-// Unless required by applicable law or agreed to in writing,
+-// software distributed under the License is distributed on an
+-// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+-// KIND, either express or implied.  See the License for the
+-// specific language governing permissions and limitations
+-// under the License.
+-
+-use clap::Parser;
+-use image::EncodableLayout;
+-use proto::{IMAGE_HEIGHT, IMAGE_SIZE, IMAGE_WIDTH};
+-use std::io::Cursor;
+-use tiny_http::{Request, Response, Server};
+-
+-#[derive(Parser, Debug)]
+-pub struct Args {
+-    /// The path of the model.
+-    #[arg(short, long)]
+-    model: String,
+-    #[arg(short, long, default_value_t = 3000)]
+-    port: u16,
+-}
+-
+-type HttpResponse = Response<Cursor<Vec<u8>>>;
+-
+-pub fn execute(args: &Args) -> anyhow::Result<()> {
+-    let model_path = std::path::absolute(&args.model)?;
+-    println!("Load model from \"{}\"", model_path.display());
+-    let record = std::fs::read(&model_path)?;
+-    let mut ctx = optee_teec::Context::new()?;
+-    let mut caller = crate::tee::InferenceTaConnector::new(&mut ctx, &record)?;
+-
+-    let addr = format!("0.0.0.0:{}", args.port);
+-    println!("Server runs on: {}", addr);
+-
+-    let server = Server::http(&addr)
+-        .map_err(|err| anyhow::Error::msg(format!("cannot start server: {:?}", err)))?;
+-
+-    loop {
+-        let mut request = server.recv()?;
+-        let response = match handle(&mut caller, &mut request) {
+-            Ok(v) => v,
+-            Err(err) => {
+-                eprintln!("unexpected error: {:#?}", err);
+-                Response::from_string("Internal Error").with_status_code(500)
+-            }
+-        };
+-        request.respond(response)?;
+-    }
+-}
+-
+-fn handle(
+-    caller: &mut crate::tee::InferenceTaConnector,
+-    request: &mut Request,
+-) -> anyhow::Result<HttpResponse> {
+-    if request.method().ne(&tiny_http::Method::Post) {
+-        return Ok(Response::from_string("Invalid Request Method").with_status_code(400));
+-    }
+-
+-    match request.url() {
+-        "/inference/image" => handle_image(caller, request),
+-        "/inference/binary" => handle_binary(caller, request),
+-        _ => Ok(Response::from_string("Not Found").with_status_code(404)),
+-    }
+-}
+-
+-fn handle_image(
+-    caller: &mut crate::tee::InferenceTaConnector,
+-    request: &mut Request,
+-) -> anyhow::Result<HttpResponse> {
+-    let mut data = Vec::with_capacity(IMAGE_SIZE);
+-    request.as_reader().read_to_end(&mut data)?;
+-    let img = image::ImageReader::new(Cursor::new(data))
+-        .with_guessed_format()?
+-        .decode()?
+-        .to_luma8();
+-    if img.width() as usize != IMAGE_WIDTH || img.height() as usize != IMAGE_HEIGHT {
+-        return Ok(Response::from_string("Invalid Image").with_status_code(400));
+-    }
+-    let result = handle_infer(caller, img.as_bytes())?;
+-
+-    println!("Performing Inference with Image, Result is {}", result);
+-    Ok(Response::from_data(result.to_string()))
+-}
+-
+-fn handle_binary(
+-    caller: &mut crate::tee::InferenceTaConnector,
+-    request: &mut Request,
+-) -> anyhow::Result<HttpResponse> {
+-    let mut data = Vec::with_capacity(IMAGE_SIZE);
+-    request.as_reader().read_to_end(&mut data)?;
+-    if data.len() != IMAGE_SIZE {
+-        return Ok(Response::from_string("Invalid Tensor").with_status_code(400));
+-    }
+-
+-    let result = handle_infer(caller, &data)?;
+-    println!("Performing Inference with Binary, Result is {}", result);
+-    Ok(Response::from_data(result.to_string()))
+-}
+-
+-fn handle_infer(
+-    caller: &mut crate::tee::InferenceTaConnector,
+-    image: &[u8],
+-) -> anyhow::Result<u8> {
+-    let result = caller.infer_batch(bytemuck::cast_slice(image))?;
+-    Ok(result[0])
+-}
+diff --git a/examples/mnist-rs/host/src/commands/train.rs b/examples/mnist-rs/host/src/commands/train.rs
+deleted file mode 100644
+index 4e8fac0..0000000
+--- a/examples/mnist-rs/host/src/commands/train.rs
++++ /dev/null
+@@ -1,131 +0,0 @@
+-// Licensed to the Apache Software Foundation (ASF) under one
+-// or more contributor license agreements.  See the NOTICE file
+-// distributed with this work for additional information
+-// regarding copyright ownership.  The ASF licenses this file
+-// to you under the Apache License, Version 2.0 (the
+-// "License"); you may not use this file except in compliance
+-// with the License.  You may obtain a copy of the License at
+-//
+-//   http://www.apache.org/licenses/LICENSE-2.0
+-//
+-// Unless required by applicable law or agreed to in writing,
+-// software distributed under the License is distributed on an
+-// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+-// KIND, either express or implied.  See the License for the
+-// specific language governing permissions and limitations
+-// under the License.
+-
+-use std::io::{Cursor, Read};
+-use std::path::PathBuf;
+-
+-use crate::tee::TrainerTaConnector;
+-use optee_teec::Context;
+-use proto::Image;
+-use rand::seq::SliceRandom;
+-
+-#[derive(clap::Parser, Debug)]
+-pub struct Args {
+-    #[arg(short, long, default_value_t = 6)]
+-    num_epochs: usize,
+-    #[arg(short, long, default_value_t = 64)]
+-    batch_size: usize,
+-    #[arg(short, long, default_value_t = 0.0001)]
+-    learning_rate: f64,
+-    #[arg(short, long)]
+-    output: Option<String>,
+-}
+-
+-fn convert_datasets(images: &Vec<Image>, labels: &[u8]) -> Vec<(Image, u8)> {
+-    let mut datasets: Vec<(Image, u8)> = images
+-        .iter()
+-        .map(|v| v.to_owned())
+-        .zip(labels.iter().copied())
+-        .collect();
+-    datasets.shuffle(&mut rand::rng());
+-    datasets
+-}
+-
+-pub fn execute(args: &Args) -> anyhow::Result<()> {
+-    // Initialize trainer
+-    let mut ctx = Context::new()?;
+-    let mut trainer = TrainerTaConnector::new(&mut ctx, args.learning_rate)?;
+-    // Download mnist data
+-    let data = check_download_mnist_data()?;
+-    // Prepare datasets
+-    let train_datasets = convert_datasets(&data.train_data, &data.train_labels);
+-    let valid_datasets = convert_datasets(&data.test_data, &data.test_labels);
+-    // Training loop, Originally inspired by burn/crates/custom-training-loop
+-    for epoch in 1..args.num_epochs + 1 {
+-        for (iteration, data) in train_datasets.chunks(args.batch_size).enumerate() {
+-            let images: Vec<Image> = data.iter().map(|v| v.0).collect();
+-            let labels: Vec<u8> = data.iter().map(|v| v.1).collect();
+-            let output = trainer.train(&images, &labels)?;
+-            println!(
+-                "[Train - Epoch {} - Iteration {}] Loss {:.3} | Accuracy {:.3} %",
+-                epoch, iteration, output.loss, output.accuracy,
+-            );
+-        }
+-
+-        for (iteration, data) in valid_datasets.chunks(args.batch_size).enumerate() {
+-            let images: Vec<Image> = data.iter().map(|v| v.0).collect();
+-            let labels: Vec<u8> = data.iter().map(|v| v.1).collect();
+-            let output = trainer.valid(&images, &labels)?;
+-            println!(
+-                "[Valid - Epoch {} - Iteration {}] Loss {:.3} | Accuracy {:.3} %",
+-                epoch, iteration, output.loss, output.accuracy,
+-            );
+-        }
+-    }
+-    // Export the model to the given path
+-    if let Some(output_path) = args.output.as_ref() {
+-        let record = trainer.export()?;
+-        println!("Export record to \"{}\"", output_path);
+-        std::fs::write(output_path, &record)?;
+-    }
+-    println!("Train Success");
+-    Ok(())
+-}
+-
+-fn check_download_mnist_data() -> anyhow::Result<rust_mnist::Mnist> {
+-    const DATA_PATH: &str = "./data/";
+-
+-    let folder = PathBuf::from(DATA_PATH);
+-    if !folder.exists() {
+-        std::fs::create_dir_all(&folder)?;
+-    }
+-
+-    // Expected file properties (name, compressed_size, uncompressed_size) for
+-    // verification after download
+-    const EXPECTED_MNIST_FILE_SIZES: [(&str, u64, u64); 4] = [
+-        ("train-images-idx3-ubyte", 9912422, 47040016),
+-        ("train-labels-idx1-ubyte", 28881, 60008),
+-        ("t10k-images-idx3-ubyte", 1648877, 7840016),
+-        ("t10k-labels-idx1-ubyte", 4542, 10008),
+-    ];
+-
+-    // Verify if all files are correctly downloaded
+-    for (filename, compressed_size, uncompressed_size) in EXPECTED_MNIST_FILE_SIZES.iter() {
+-        let file = folder.join(filename);
+-        if file.exists() && file.is_file() && std::fs::metadata(&file)?.len() == *compressed_size {
+-            println!("File {} exist, skip.", file.display());
+-            continue;
+-        }
+-
+-        let url = format!(
+-            "https://storage.googleapis.com/cvdf-datasets/mnist/{}.gz",
+-            filename
+-        );
+-        println!("Download {} from {}", filename, url);
+-        let body = ureq::get(&url).call()?.body_mut().read_to_vec()?;
+-
+-        anyhow::ensure!(body.len() == *compressed_size as usize);
+-
+-        let mut gz = flate2::bufread::GzDecoder::new(Cursor::new(body));
+-        let mut buffer = Vec::with_capacity(*uncompressed_size as usize);
+-        gz.read_to_end(&mut buffer)?;
+-
+-        std::fs::write(file, &buffer)?;
+-    }
+-
+-    Ok(rust_mnist::Mnist::new(DATA_PATH))
+-}
+diff --git a/examples/mnist-rs/host/src/main.rs b/examples/mnist-rs/host/src/main.rs
+deleted file mode 100644
+index da3a6a6..0000000
+--- a/examples/mnist-rs/host/src/main.rs
++++ /dev/null
+@@ -1,45 +0,0 @@
+-// Licensed to the Apache Software Foundation (ASF) under one
+-// or more contributor license agreements.  See the NOTICE file
+-// distributed with this work for additional information
+-// regarding copyright ownership.  The ASF licenses this file
+-// to you under the Apache License, Version 2.0 (the
+-// "License"); you may not use this file except in compliance
+-// with the License.  You may obtain a copy of the License at
+-//
+-//   http://www.apache.org/licenses/LICENSE-2.0
+-//
+-// Unless required by applicable law or agreed to in writing,
+-// software distributed under the License is distributed on an
+-// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+-// KIND, either express or implied.  See the License for the
+-// specific language governing permissions and limitations
+-// under the License.
+-
+-mod commands;
+-mod tee;
+-
+-use clap::{Parser, Subcommand};
+-
+-#[derive(Parser)]
+-#[command(version, about, long_about = None)]
+-struct Cli {
+-    #[command(subcommand)]
+-    command: Commands,
+-}
+-
+-#[derive(Subcommand)]
+-enum Commands {
+-    Train(commands::train::Args),
+-    Infer(commands::infer::Args),
+-    Serve(commands::serve::Args),
+-}
+-
+-fn main() -> anyhow::Result<()> {
+-    let cli = Cli::parse();
+-
+-    match cli.command {
+-        Commands::Train(args) => commands::train::execute(&args),
+-        Commands::Infer(args) => commands::infer::execute(&args),
+-        Commands::Serve(args) => commands::serve::execute(&args),
+-    }
+-}
+diff --git a/examples/mnist-rs/host/src/tee.rs b/examples/mnist-rs/host/src/tee.rs
+deleted file mode 100644
+index a3ff51c..0000000
+--- a/examples/mnist-rs/host/src/tee.rs
++++ /dev/null
+@@ -1,155 +0,0 @@
+-// Licensed to the Apache Software Foundation (ASF) under one
+-// or more contributor license agreements.  See the NOTICE file
+-// distributed with this work for additional information
+-// regarding copyright ownership.  The ASF licenses this file
+-// to you under the Apache License, Version 2.0 (the
+-// "License"); you may not use this file except in compliance
+-// with the License.  You may obtain a copy of the License at
+-//
+-//   http://www.apache.org/licenses/LICENSE-2.0
+-//
+-// Unless required by applicable law or agreed to in writing,
+-// software distributed under the License is distributed on an
+-// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+-// KIND, either express or implied.  See the License for the
+-// specific language governing permissions and limitations
+-// under the License.
+-
+-use optee_teec::{Context, ErrorKind, Operation, ParamNone, ParamTmpRef, Session, Uuid};
+-use proto::{inference, train, Image};
+-
+-const MAX_OUTPUT_SERIALIZE_SIZE: usize = 1 * 1024;
+-const MAX_MODEL_RECORD_SIZE: usize = 10 * 1024 * 1024;
+-
+-pub struct TrainerTaConnector {
+-    sess: Session,
+-}
+-
+-impl TrainerTaConnector {
+-    pub fn new(ctx: &mut Context, learning_rate: f64) -> optee_teec::Result<Self> {
+-        let bytes = learning_rate.to_le_bytes();
+-        let uuid = Uuid::parse_str(train::UUID).map_err(|err| {
+-            println!("parse uuid \"{}\" failed due to: {:?}", train::UUID, err);
+-            ErrorKind::BadParameters
+-        })?;
+-        let mut op = Operation::new(
+-            0,
+-            ParamTmpRef::new_input(bytes.as_slice()),
+-            ParamNone,
+-            ParamNone,
+-            ParamNone,
+-        );
+-
+-        Ok(Self {
+-            sess: ctx.open_session_with_operation(uuid, &mut op)?,
+-        })
+-    }
+-    pub fn train(&mut self, images: &[Image], labels: &[u8]) -> optee_teec::Result<train::Output> {
+-        let mut buffer = vec![0_u8; MAX_OUTPUT_SERIALIZE_SIZE];
+-        let images = bytemuck::cast_slice(images);
+-        let size = {
+-            let mut op = Operation::new(
+-                0,
+-                ParamTmpRef::new_input(images),
+-                ParamTmpRef::new_input(labels),
+-                ParamTmpRef::new_output(&mut buffer),
+-                ParamNone,
+-            );
+-            self.sess
+-                .invoke_command(train::Command::Train as u32, &mut op)?;
+-            op.parameters().2.updated_size()
+-        };
+-        let result = serde_json::from_slice(&buffer[0..size]).map_err(|err| {
+-            println!("proto error: {:?}", err);
+-            ErrorKind::BadFormat
+-        })?;
+-        Ok(result)
+-    }
+-    pub fn valid(&mut self, images: &[Image], labels: &[u8]) -> optee_teec::Result<train::Output> {
+-        let mut buffer = vec![0_u8; MAX_OUTPUT_SERIALIZE_SIZE];
+-        let images = bytemuck::cast_slice(images);
+-        let size = {
+-            let mut op = Operation::new(
+-                0,
+-                ParamTmpRef::new_input(images),
+-                ParamTmpRef::new_input(labels),
+-                ParamTmpRef::new_output(&mut buffer),
+-                ParamNone,
+-            );
+-            self.sess
+-                .invoke_command(train::Command::Valid as u32, &mut op)?;
+-            op.parameters().2.updated_size()
+-        };
+-        let result = serde_json::from_slice(&buffer[0..size]).map_err(|err| {
+-            println!("proto error: {:?}", err);
+-            ErrorKind::BadFormat
+-        })?;
+-        Ok(result)
+-    }
+-
+-    pub fn export(&mut self) -> optee_teec::Result<Vec<u8>> {
+-        let mut buffer = vec![0_u8; MAX_MODEL_RECORD_SIZE];
+-        let size = {
+-            let mut op = Operation::new(
+-                0,
+-                ParamTmpRef::new_output(&mut buffer),
+-                ParamNone,
+-                ParamNone,
+-                ParamNone,
+-            );
+-            self.sess
+-                .invoke_command(train::Command::Export as u32, &mut op)?;
+-            op.parameters().0.updated_size()
+-        };
+-        buffer.resize(size, 0);
+-        Ok(buffer)
+-    }
+-}
+-
+-pub struct InferenceTaConnector {
+-    sess: Session,
+-}
+-
+-impl InferenceTaConnector {
+-    pub fn new(ctx: &mut Context, record: &[u8]) -> optee_teec::Result<Self> {
+-        let uuid = Uuid::parse_str(inference::UUID).map_err(|err| {
+-            println!(
+-                "parse uuid \"{}\" failed due to: {:?}",
+-                inference::UUID,
+-                err
+-            );
+-            ErrorKind::BadParameters
+-        })?;
+-        let mut op = Operation::new(
+-            0,
+-            ParamTmpRef::new_input(record),
+-            ParamNone,
+-            ParamNone,
+-            ParamNone,
+-        );
+-
+-        Ok(Self {
+-            sess: ctx.open_session_with_operation(uuid, &mut op)?,
+-        })
+-    }
+-    pub fn infer_batch(&mut self, images: &[Image]) -> optee_teec::Result<Vec<u8>> {
+-        let mut output = vec![0_u8; images.len()];
+-        let size = {
+-            let mut op = Operation::new(
+-                0,
+-                ParamTmpRef::new_input(bytemuck::cast_slice(images)),
+-                ParamTmpRef::new_output(&mut output),
+-                ParamNone,
+-                ParamNone,
+-            );
+-            self.sess.invoke_command(0, &mut op)?;
+-            op.parameters().1.updated_size()
+-        };
+-
+-        if output.len() != size {
+-            println!("mismatch response, want {}, got {}", size, output.len());
+-            return Err(ErrorKind::Generic.into());
+-        }
+-        Ok(output)
+-    }
+-}
+diff --git a/examples/mnist-rs/proto/Cargo.toml b/examples/mnist-rs/proto/Cargo.toml
+deleted file mode 100644
+index 1bba120..0000000
+--- a/examples/mnist-rs/proto/Cargo.toml
++++ /dev/null
+@@ -1,29 +0,0 @@
+-# Licensed to the Apache Software Foundation (ASF) under one
+-# or more contributor license agreements.  See the NOTICE file
+-# distributed with this work for additional information
+-# regarding copyright ownership.  The ASF licenses this file
+-# to you under the Apache License, Version 2.0 (the
+-# "License"); you may not use this file except in compliance
+-# with the License.  You may obtain a copy of the License at
+-#
+-#   http://www.apache.org/licenses/LICENSE-2.0
+-#
+-# Unless required by applicable law or agreed to in writing,
+-# software distributed under the License is distributed on an
+-# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+-# KIND, either express or implied.  See the License for the
+-# specific language governing permissions and limitations
+-# under the License.
+-
+-[package]
+-name = "proto"
+-version = "0.4.0"
+-authors = ["Teaclave Contributors <dev@teaclave.apache.org>"]
+-license = "Apache-2.0"
+-repository = "https://github.com/apache/incubator-teaclave-trustzone-sdk.git"
+-description = "Data structures and functions shared by host and TA."
+-edition = "2021"
+-
+-[dependencies]
+-num_enum = { version = "0.7.3", default-features = false }
+-serde = { version = "1.0.218", default-features = false, features = ["derive"] }
+diff --git a/examples/mnist-rs/proto/src/inference.rs b/examples/mnist-rs/proto/src/inference.rs
+deleted file mode 100644
+index 18a58fb..0000000
+--- a/examples/mnist-rs/proto/src/inference.rs
++++ /dev/null
+@@ -1,18 +0,0 @@
+-// Licensed to the Apache Software Foundation (ASF) under one
+-// or more contributor license agreements.  See the NOTICE file
+-// distributed with this work for additional information
+-// regarding copyright ownership.  The ASF licenses this file
+-// to you under the Apache License, Version 2.0 (the
+-// "License"); you may not use this file except in compliance
+-// with the License.  You may obtain a copy of the License at
+-//
+-//   http://www.apache.org/licenses/LICENSE-2.0
+-//
+-// Unless required by applicable law or agreed to in writing,
+-// software distributed under the License is distributed on an
+-// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+-// KIND, either express or implied.  See the License for the
+-// specific language governing permissions and limitations
+-// under the License.
+-
+-pub const UUID: &str = &include_str!("../../ta/inference/uuid.txt");
+diff --git a/examples/mnist-rs/proto/src/lib.rs b/examples/mnist-rs/proto/src/lib.rs
+deleted file mode 100644
+index 69212ac..0000000
+--- a/examples/mnist-rs/proto/src/lib.rs
++++ /dev/null
+@@ -1,26 +0,0 @@
+-// Licensed to the Apache Software Foundation (ASF) under one
+-// or more contributor license agreements.  See the NOTICE file
+-// distributed with this work for additional information
+-// regarding copyright ownership.  The ASF licenses this file
+-// to you under the Apache License, Version 2.0 (the
+-// "License"); you may not use this file except in compliance
+-// with the License.  You may obtain a copy of the License at
+-//
+-//   http://www.apache.org/licenses/LICENSE-2.0
+-//
+-// Unless required by applicable law or agreed to in writing,
+-// software distributed under the License is distributed on an
+-// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+-// KIND, either express or implied.  See the License for the
+-// specific language governing permissions and limitations
+-// under the License.
+-
+-#![no_std]
+-pub mod inference;
+-pub mod train;
+-
+-pub const IMAGE_HEIGHT: usize = 28;
+-pub const IMAGE_WIDTH: usize = 28;
+-pub const IMAGE_SIZE: usize = IMAGE_HEIGHT * IMAGE_WIDTH;
+-pub const NUM_CLASSES: usize = 10;
+-pub type Image = [u8; IMAGE_SIZE];
+diff --git a/examples/mnist-rs/proto/src/train.rs b/examples/mnist-rs/proto/src/train.rs
+deleted file mode 100644
+index 9bc804f..0000000
+--- a/examples/mnist-rs/proto/src/train.rs
++++ /dev/null
+@@ -1,33 +0,0 @@
+-// Licensed to the Apache Software Foundation (ASF) under one
+-// or more contributor license agreements.  See the NOTICE file
+-// distributed with this work for additional information
+-// regarding copyright ownership.  The ASF licenses this file
+-// to you under the Apache License, Version 2.0 (the
+-// "License"); you may not use this file except in compliance
+-// with the License.  You may obtain a copy of the License at
+-//
+-//   http://www.apache.org/licenses/LICENSE-2.0
+-//
+-// Unless required by applicable law or agreed to in writing,
+-// software distributed under the License is distributed on an
+-// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+-// KIND, either express or implied.  See the License for the
+-// specific language governing permissions and limitations
+-// under the License.
+-use num_enum::{IntoPrimitive, TryFromPrimitive};
+-
+-#[derive(Debug, TryFromPrimitive, IntoPrimitive)]
+-#[repr(u32)]
+-pub enum Command {
+-    Train,
+-    Valid,
+-    Export,
+-}
+-
+-#[derive(serde::Serialize, serde::Deserialize)]
+-pub struct Output {
+-    pub loss: f32,
+-    pub accuracy: f32,
+-}
+-
+-pub const UUID: &str = &include_str!("../../ta/train/uuid.txt");
+diff --git a/examples/mnist-rs/rust-toolchain.toml b/examples/mnist-rs/rust-toolchain.toml
+deleted file mode 100644
+index 25dac2a..0000000
+--- a/examples/mnist-rs/rust-toolchain.toml
++++ /dev/null
+@@ -1,26 +0,0 @@
+-# Licensed to the Apache Software Foundation (ASF) under one
+-# or more contributor license agreements.  See the NOTICE file
+-# distributed with this work for additional information
+-# regarding copyright ownership.  The ASF licenses this file
+-# to you under the Apache License, Version 2.0 (the
+-# "License"); you may not use this file except in compliance
+-# with the License.  You may obtain a copy of the License at
+-#
+-#   http://www.apache.org/licenses/LICENSE-2.0
+-#
+-# Unless required by applicable law or agreed to in writing,
+-# software distributed under the License is distributed on an
+-# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+-# KIND, either express or implied.  See the License for the
+-# specific language governing permissions and limitations
+-# under the License.
+-
+-# Toolchain override, burn currently requires Rust 1.83 and will soon require
+-# Rust 1.85.
+-
+-[toolchain]
+-channel = "nightly-2025-01-16"
+-components = [ "rust-src" ]
+-targets = ["aarch64-unknown-linux-gnu", "arm-unknown-linux-gnueabihf"]
+-# minimal profile: install rustc, cargo, and rust-std
+-profile = "minimal"
+diff --git a/examples/mnist-rs/ta/Cargo.toml b/examples/mnist-rs/ta/Cargo.toml
+deleted file mode 100644
+index 8303332..0000000
+--- a/examples/mnist-rs/ta/Cargo.toml
++++ /dev/null
+@@ -1,51 +0,0 @@
+-# Licensed to the Apache Software Foundation (ASF) under one
+-# or more contributor license agreements.  See the NOTICE file
+-# distributed with this work for additional information
+-# regarding copyright ownership.  The ASF licenses this file
+-# to you under the Apache License, Version 2.0 (the
+-# "License"); you may not use this file except in compliance
+-# with the License.  You may obtain a copy of the License at
+-#
+-#   http://www.apache.org/licenses/LICENSE-2.0
+-#
+-# Unless required by applicable law or agreed to in writing,
+-# software distributed under the License is distributed on an
+-# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+-# KIND, either express or implied.  See the License for the
+-# specific language governing permissions and limitations
+-# under the License.
+-
+-[workspace]
+-resolver = "2"
+-
+-members = [
+-    "common",
+-    "train",
+-    "inference",
+-]
+-
+-[workspace.package]
+-edition = "2021"
+-license = "Apache-2.0"
+-version = "0.4.0"
+-repository = "https://github.com/apache/incubator-teaclave-trustzone-sdk.git"
+-authors = ["Teaclave Contributors <dev@teaclave.apache.org>"]
+-
+-[workspace.dependencies]
+-optee-utee-sys = { path = "../../../optee-utee/optee-utee-sys" }
+-optee-utee = { path = "../../../optee-utee" }
+-optee-utee-build = { path = "../../../optee-utee-build" }
+-
+-proto = { path = "../proto" }
+-
+-bytemuck = { version = "1.21.0", features = ["min_const_generics"] }
+-burn = { git = "https://github.com/tracel-ai/burn.git", rev = "a1ca4346424197f42ab1b5bff7f9d1210b029318", default-features = false, features = ["ndarray", "autodiff"] }
+-spin = "0.9.8"
+-serde = { version = "1.0.218", default-features = false, features = ["derive"] }
+-serde_json = { version = "1.0.139", default-features = false, features = ["alloc"] }
+-
+-
+-[profile.release]
+-panic = "abort"
+-lto = true
+-opt-level = 1
+diff --git a/examples/mnist-rs/ta/common/Cargo.toml b/examples/mnist-rs/ta/common/Cargo.toml
+deleted file mode 100644
+index 66bdb84..0000000
+--- a/examples/mnist-rs/ta/common/Cargo.toml
++++ /dev/null
+@@ -1,32 +0,0 @@
+-# Licensed to the Apache Software Foundation (ASF) under one
+-# or more contributor license agreements.  See the NOTICE file
+-# distributed with this work for additional information
+-# regarding copyright ownership.  The ASF licenses this file
+-# to you under the Apache License, Version 2.0 (the
+-# "License"); you may not use this file except in compliance
+-# with the License.  You may obtain a copy of the License at
+-#
+-#   http://www.apache.org/licenses/LICENSE-2.0
+-#
+-# Unless required by applicable law or agreed to in writing,
+-# software distributed under the License is distributed on an
+-# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+-# KIND, either express or implied.  See the License for the
+-# specific language governing permissions and limitations
+-# under the License.
+-
+-[package]
+-name = "common"
+-description = "Some common structs and functions."
+-publish = false
+-version.workspace = true
+-authors.workspace = true
+-license.workspace = true
+-repository.workspace = true
+-edition.workspace = true
+-
+-[dependencies]
+-proto = { workspace = true }
+-optee-utee-sys = { workspace = true }
+-optee-utee = { workspace = true }
+-burn = { workspace = true }
+diff --git a/examples/mnist-rs/ta/common/src/lib.rs b/examples/mnist-rs/ta/common/src/lib.rs
+deleted file mode 100644
+index 9332788..0000000
+--- a/examples/mnist-rs/ta/common/src/lib.rs
++++ /dev/null
+@@ -1,25 +0,0 @@
+-// Licensed to the Apache Software Foundation (ASF) under one
+-// or more contributor license agreements.  See the NOTICE file
+-// distributed with this work for additional information
+-// regarding copyright ownership.  The ASF licenses this file
+-// to you under the Apache License, Version 2.0 (the
+-// "License"); you may not use this file except in compliance
+-// with the License.  You may obtain a copy of the License at
+-//
+-//   http://www.apache.org/licenses/LICENSE-2.0
+-//
+-// Unless required by applicable law or agreed to in writing,
+-// software distributed under the License is distributed on an
+-// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+-// KIND, either express or implied.  See the License for the
+-// specific language governing permissions and limitations
+-// under the License.
+-
+-#![no_std]
+-extern crate alloc;
+-
+-mod model;
+-mod utils;
+-
+-pub use model::Model;
+-pub use utils::*;
+diff --git a/examples/mnist-rs/ta/common/src/model.rs b/examples/mnist-rs/ta/common/src/model.rs
+deleted file mode 100644
+index 39213f4..0000000
+--- a/examples/mnist-rs/ta/common/src/model.rs
++++ /dev/null
+@@ -1,86 +0,0 @@
+-// Licensed to the Apache Software Foundation (ASF) under one
+-// or more contributor license agreements.  See the NOTICE file
+-// distributed with this work for additional information
+-// regarding copyright ownership.  The ASF licenses this file
+-// to you under the Apache License, Version 2.0 (the
+-// "License"); you may not use this file except in compliance
+-// with the License.  You may obtain a copy of the License at
+-//
+-//   http://www.apache.org/licenses/LICENSE-2.0
+-//
+-// Unless required by applicable law or agreed to in writing,
+-// software distributed under the License is distributed on an
+-// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+-// KIND, either express or implied.  See the License for the
+-// specific language governing permissions and limitations
+-// under the License.
+-
+-use alloc::vec::Vec;
+-use burn::{
+-    prelude::*,
+-    record::{FullPrecisionSettings, Recorder, RecorderError},
+-};
+-use proto::{Image, IMAGE_SIZE, NUM_CLASSES};
+-
+-/// This is a simple model designed solely to demonstrate how to train and
+-/// perform inference, don't use it in production.
+-#[derive(Module, Debug)]
+-pub struct Model<B: Backend> {
+-    linear: nn::Linear<B>,
+-}
+-
+-impl<B: Backend> Model<B> {
+-    pub fn new(device: &B::Device) -> Self {
+-        Self {
+-            linear: nn::LinearConfig::new(IMAGE_SIZE, NUM_CLASSES).init(device),
+-        }
+-    }
+-
+-    pub fn forward(&self, input: Tensor<B, 2>) -> Tensor<B, 2> {
+-        self.linear.forward(input)
+-    }
+-
+-    pub fn export(&self) -> Result<Vec<u8>, RecorderError> {
+-        let recorder = burn::record::BinBytesRecorder::<FullPrecisionSettings>::new();
+-        recorder.record(self.clone().into_record(), ())
+-    }
+-
+-    pub fn import(device: &B::Device, record: Vec<u8>) -> Result<Self, RecorderError> {
+-        let recorder = burn::record::BinBytesRecorder::<FullPrecisionSettings>::new();
+-        let record = recorder.load(record, device)?;
+-
+-        let m = Self::new(device);
+-        Ok(m.load_record(record))
+-    }
+-}
+-
+-impl<B: Backend> Model<B> {
+-    pub fn image_to_tensor(device: &B::Device, image: &Image) -> Tensor<B, 2> {
+-        let tensor = TensorData::from(image.as_slice()).convert::<B::FloatElem>();
+-        let tensor = Tensor::<B, 1>::from_data(tensor, device);
+-        let tensor = tensor.reshape([1, IMAGE_SIZE]);
+-
+-        // Normalize input: make between [0,1] and make the mean=0 and std=1
+-        // values mean=0.1307,std=0.3081 were copied from Pytorch Mist Example
+-        // https://github.com/pytorch/examples/blob/54f4572509891883a947411fd7239237dd2a39c3/mnist/main.py#L122
+-        ((tensor / 255) - 0.1307) / 0.3081
+-    }
+-
+-    pub fn images_to_tensors(device: &B::Device, images: &[Image]) -> Tensor<B, 2> {
+-        let tensors = images
+-            .iter()
+-            .map(|v| Self::image_to_tensor(device, v))
+-            .collect();
+-        Tensor::cat(tensors, 0)
+-    }
+-
+-    pub fn labels_to_tensors(device: &B::Device, labels: &[u8]) -> Tensor<B, 1, Int> {
+-        let targets = labels
+-            .iter()
+-            .map(|item| {
+-                Tensor::<B, 1, Int>::from_data([(*item as i64).elem::<B::IntElem>()], device)
+-            })
+-            .collect();
+-        Tensor::cat(targets, 0)
+-    }
+-}
+diff --git a/examples/mnist-rs/ta/common/src/utils.rs b/examples/mnist-rs/ta/common/src/utils.rs
+deleted file mode 100644
+index e80e030..0000000
+--- a/examples/mnist-rs/ta/common/src/utils.rs
++++ /dev/null
+@@ -1,35 +0,0 @@
+-// Licensed to the Apache Software Foundation (ASF) under one
+-// or more contributor license agreements.  See the NOTICE file
+-// distributed with this work for additional information
+-// regarding copyright ownership.  The ASF licenses this file
+-// to you under the Apache License, Version 2.0 (the
+-// "License"); you may not use this file except in compliance
+-// with the License.  You may obtain a copy of the License at
+-//
+-//   http://www.apache.org/licenses/LICENSE-2.0
+-//
+-// Unless required by applicable law or agreed to in writing,
+-// software distributed under the License is distributed on an
+-// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+-// KIND, either express or implied.  See the License for the
+-// specific language governing permissions and limitations
+-// under the License.
+-
+-use optee_utee::{trace_println, ErrorKind, Parameter, Result};
+-
+-pub fn copy_to_output(param: &mut Parameter, data: &[u8]) -> Result<()> {
+-    let mut output = unsafe { param.as_memref()? };
+-
+-    let buffer = output.buffer();
+-    if buffer.len() < data.len() {
+-        trace_println!(
+-            "expect output buffer size {}, got size {} instead",
+-            data.len(),
+-            buffer.len()
+-        );
+-        return Err(ErrorKind::ShortBuffer.into());
+-    }
+-    buffer[..data.len()].copy_from_slice(data);
+-    output.set_updated_size(data.len());
+-    Ok(())
+-}
+diff --git a/examples/mnist-rs/ta/inference/Cargo.toml b/examples/mnist-rs/ta/inference/Cargo.toml
+deleted file mode 100644
+index b10e306..0000000
+--- a/examples/mnist-rs/ta/inference/Cargo.toml
++++ /dev/null
+@@ -1,40 +0,0 @@
+-# Licensed to the Apache Software Foundation (ASF) under one
+-# or more contributor license agreements.  See the NOTICE file
+-# distributed with this work for additional information
+-# regarding copyright ownership.  The ASF licenses this file
+-# to you under the Apache License, Version 2.0 (the
+-# "License"); you may not use this file except in compliance
+-# with the License.  You may obtain a copy of the License at
+-#
+-#   http://www.apache.org/licenses/LICENSE-2.0
+-#
+-# Unless required by applicable law or agreed to in writing,
+-# software distributed under the License is distributed on an
+-# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+-# KIND, either express or implied.  See the License for the
+-# specific language governing permissions and limitations
+-# under the License.
+-
+-[package]
+-name = "inference"
+-description = "An inference TA of MNIST model."
+-publish = false
+-version.workspace = true
+-authors.workspace = true
+-license.workspace = true
+-repository.workspace = true
+-edition.workspace = true
+-
+-[dependencies]
+-common = { path = "../common" }
+-proto = { workspace = true }
+-optee-utee-sys = { workspace = true }
+-optee-utee = { workspace = true }
+-burn = { workspace = true }
+-serde_json = { workspace = true }
+-bytemuck = { workspace = true }
+-spin = { workspace = true }
+-
+-[build-dependencies]
+-proto = { workspace = true }
+-optee-utee-build = { workspace = true }
+diff --git a/examples/mnist-rs/ta/inference/Makefile b/examples/mnist-rs/ta/inference/Makefile
+deleted file mode 100644
+index 1e6f1bb..0000000
+--- a/examples/mnist-rs/ta/inference/Makefile
++++ /dev/null
+@@ -1,51 +0,0 @@
+-# Licensed to the Apache Software Foundation (ASF) under one
+-# or more contributor license agreements.  See the NOTICE file
+-# distributed with this work for additional information
+-# regarding copyright ownership.  The ASF licenses this file
+-# to you under the Apache License, Version 2.0 (the
+-# "License"); you may not use this file except in compliance
+-# with the License.  You may obtain a copy of the License at
+-#
+-#   http://www.apache.org/licenses/LICENSE-2.0
+-#
+-# Unless required by applicable law or agreed to in writing,
+-# software distributed under the License is distributed on an
+-# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+-# KIND, either express or implied.  See the License for the
+-# specific language governing permissions and limitations
+-# under the License.
+-
+-UUID ?= $(shell cat "./uuid.txt")
+-NAME := inference
+-
+-TARGET ?= aarch64-unknown-linux-gnu
+-CROSS_COMPILE ?= aarch64-linux-gnu-
+-OBJCOPY := $(CROSS_COMPILE)objcopy
+-# Configure the linker to use GCC, which works on both cross-compilation and ARM machines
+-LINKER_CFG := target.$(TARGET).linker=\"$(CROSS_COMPILE)gcc\"
+-EXTRA_FLAGS = -Z build-std=core,alloc
+-
+-TA_SIGN_KEY ?= $(TA_DEV_KIT_DIR)/keys/default_ta.pem
+-SIGN := $(TA_DEV_KIT_DIR)/scripts/sign_encrypt.py
+-OUT_DIR := $(CURDIR)/../target/$(TARGET)/release
+-
+-
+-ifeq ($(STD),)
+-all: ta strip sign
+-else
+-all:
+-	@echo "Please \`unset STD\` then rerun \`source environment\` to build the No-STD version"
+-endif
+-
+-ta:
+-	@cargo build --target $(TARGET) --release --config $(LINKER_CFG) $(EXTRA_FLAGS)
+-
+-strip: ta
+-	@$(OBJCOPY) --strip-unneeded $(OUT_DIR)/$(NAME) $(OUT_DIR)/stripped_$(NAME)
+-
+-sign: strip
+-	@$(SIGN) --uuid $(UUID) --key $(TA_SIGN_KEY) --in $(OUT_DIR)/stripped_$(NAME) --out $(OUT_DIR)/$(UUID).ta
+-	@echo "SIGN =>  ${UUID}"
+-
+-clean:
+-	@cargo clean
+diff --git a/examples/mnist-rs/ta/inference/build.rs b/examples/mnist-rs/ta/inference/build.rs
+deleted file mode 100644
+index 314c05c..0000000
+--- a/examples/mnist-rs/ta/inference/build.rs
++++ /dev/null
+@@ -1,25 +0,0 @@
+-// Licensed to the Apache Software Foundation (ASF) under one
+-// or more contributor license agreements.  See the NOTICE file
+-// distributed with this work for additional information
+-// regarding copyright ownership.  The ASF licenses this file
+-// to you under the Apache License, Version 2.0 (the
+-// "License"); you may not use this file except in compliance
+-// with the License.  You may obtain a copy of the License at
+-//
+-//   http://www.apache.org/licenses/LICENSE-2.0
+-//
+-// Unless required by applicable law or agreed to in writing,
+-// software distributed under the License is distributed on an
+-// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+-// KIND, either express or implied.  See the License for the
+-// specific language governing permissions and limitations
+-// under the License.
+-
+-use optee_utee_build::{Error, RustEdition, TaConfig};
+-
+-fn main() -> Result<(), Error> {
+-    let config = TaConfig::new_default_with_cargo_env(proto::train::UUID)?
+-        .ta_data_size(1 * 1024 * 1024)
+-        .ta_stack_size(1 * 1024 * 1024);
+-    optee_utee_build::build(RustEdition::Before2024, config)
+-}
+diff --git a/examples/mnist-rs/ta/inference/src/main.rs b/examples/mnist-rs/ta/inference/src/main.rs
+deleted file mode 100644
+index 9c23396..0000000
+--- a/examples/mnist-rs/ta/inference/src/main.rs
++++ /dev/null
+@@ -1,91 +0,0 @@
+-// Licensed to the Apache Software Foundation (ASF) under one
+-// or more contributor license agreements.  See the NOTICE file
+-// distributed with this work for additional information
+-// regarding copyright ownership.  The ASF licenses this file
+-// to you under the Apache License, Version 2.0 (the
+-// "License"); you may not use this file except in compliance
+-// with the License.  You may obtain a copy of the License at
+-//
+-//   http://www.apache.org/licenses/LICENSE-2.0
+-//
+-// Unless required by applicable law or agreed to in writing,
+-// software distributed under the License is distributed on an
+-// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+-// KIND, either express or implied.  See the License for the
+-// specific language governing permissions and limitations
+-// under the License.
+-
+-#![no_std]
+-#![no_main]
+-extern crate alloc;
+-
+-use burn::{
+-    backend::{ndarray::NdArrayDevice, NdArray},
+-    tensor::cast::ToElement,
+-};
+-
+-use common::{copy_to_output, Model};
+-use optee_utee::{
+-    ta_close_session, ta_create, ta_destroy, ta_invoke_command, ta_open_session, trace_println,
+-};
+-use optee_utee::{ErrorKind, Parameters, Result};
+-use proto::Image;
+-use spin::Mutex;
+-
+-type NoStdModel = Model<NdArray>;
+-const DEVICE: NdArrayDevice = NdArrayDevice::Cpu;
+-static MODEL: Mutex<Option<NoStdModel>> = Mutex::new(Option::None);
+-
+-#[ta_create]
+-fn create() -> Result<()> {
+-    trace_println!("[+] TA create");
+-    Ok(())
+-}
+-
+-#[ta_open_session]
+-fn open_session(params: &mut Parameters) -> Result<()> {
+-    let mut p0 = unsafe { params.0.as_memref()? };
+-
+-    let mut model = MODEL.lock();
+-    model.replace(Model::import(&DEVICE, p0.buffer().to_vec()).map_err(|err| {
+-        trace_println!("import failed: {:?}", err);
+-        ErrorKind::BadParameters
+-    })?);
+-
+-    Ok(())
+-}
+-
+-#[ta_close_session]
+-fn close_session() {
+-    trace_println!("[+] TA close session");
+-}
+-
+-#[ta_destroy]
+-fn destroy() {
+-    trace_println!("[+] TA destroy");
+-}
+-
+-#[ta_invoke_command]
+-fn invoke_command(_cmd_id: u32, params: &mut Parameters) -> Result<()> {
+-    trace_println!("[+] TA invoke command");
+-    let mut p0 = unsafe { params.0.as_memref()? };
+-    let images: &[Image] = bytemuck::cast_slice(p0.buffer());
+-    let input = NoStdModel::images_to_tensors(&DEVICE, images);
+-
+-    let output = MODEL
+-        .lock()
+-        .as_ref()
+-        .ok_or(ErrorKind::CorruptObject)?
+-        .forward(input);
+-    let result: alloc::vec::Vec<u8> = output
+-        .iter_dim(0)
+-        .map(|v| {
+-            let data = burn::tensor::activation::softmax(v, 1);
+-            data.argmax(1).into_scalar().to_u8()
+-        })
+-        .collect();
+-
+-    copy_to_output(&mut params.1, &result)
+-}
+-
+-include!(concat!(env!("OUT_DIR"), "/user_ta_header.rs"));
+diff --git a/examples/mnist-rs/ta/inference/uuid.txt b/examples/mnist-rs/ta/inference/uuid.txt
+deleted file mode 100644
+index d00c0a4..0000000
+--- a/examples/mnist-rs/ta/inference/uuid.txt
++++ /dev/null
+@@ -1 +0,0 @@
+-ff09aa8a-fbb9-4734-ae8c-d7cd1a3f6744
+\ No newline at end of file
+diff --git a/examples/mnist-rs/ta/train/Cargo.toml b/examples/mnist-rs/ta/train/Cargo.toml
+deleted file mode 100644
+index a0c24f9..0000000
+--- a/examples/mnist-rs/ta/train/Cargo.toml
++++ /dev/null
+@@ -1,40 +0,0 @@
+-# Licensed to the Apache Software Foundation (ASF) under one
+-# or more contributor license agreements.  See the NOTICE file
+-# distributed with this work for additional information
+-# regarding copyright ownership.  The ASF licenses this file
+-# to you under the Apache License, Version 2.0 (the
+-# "License"); you may not use this file except in compliance
+-# with the License.  You may obtain a copy of the License at
+-#
+-#   http://www.apache.org/licenses/LICENSE-2.0
+-#
+-# Unless required by applicable law or agreed to in writing,
+-# software distributed under the License is distributed on an
+-# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+-# KIND, either express or implied.  See the License for the
+-# specific language governing permissions and limitations
+-# under the License.
+-
+-[package]
+-name = "train"
+-description = "An training TA of MNIST model."
+-publish = false
+-version.workspace = true
+-authors.workspace = true
+-license.workspace = true
+-repository.workspace = true
+-edition.workspace = true
+-
+-[dependencies]
+-common = { path = "../common" }
+-proto = { workspace = true }
+-optee-utee-sys = { workspace = true }
+-optee-utee = { workspace = true }
+-burn = { workspace = true }
+-spin = { workspace = true }
+-serde_json = { workspace = true }
+-bytemuck = { workspace = true, features = ["min_const_generics"] }
+-
+-[build-dependencies]
+-proto = { workspace = true }
+-optee-utee-build = { workspace = true }
+diff --git a/examples/mnist-rs/ta/train/Makefile b/examples/mnist-rs/ta/train/Makefile
+deleted file mode 100644
+index 4b8bbd4..0000000
+--- a/examples/mnist-rs/ta/train/Makefile
++++ /dev/null
+@@ -1,50 +0,0 @@
+-# Licensed to the Apache Software Foundation (ASF) under one
+-# or more contributor license agreements.  See the NOTICE file
+-# distributed with this work for additional information
+-# regarding copyright ownership.  The ASF licenses this file
+-# to you under the Apache License, Version 2.0 (the
+-# "License"); you may not use this file except in compliance
+-# with the License.  You may obtain a copy of the License at
+-#
+-#   http://www.apache.org/licenses/LICENSE-2.0
+-#
+-# Unless required by applicable law or agreed to in writing,
+-# software distributed under the License is distributed on an
+-# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+-# KIND, either express or implied.  See the License for the
+-# specific language governing permissions and limitations
+-# under the License.
+-
+-UUID ?= $(shell cat "./uuid.txt")
+-NAME := train
+-
+-TARGET ?= aarch64-unknown-linux-gnu
+-CROSS_COMPILE ?= aarch64-linux-gnu-
+-OBJCOPY := $(CROSS_COMPILE)objcopy
+-# Configure the linker to use GCC, which works on both cross-compilation and ARM machines
+-LINKER_CFG := target.$(TARGET).linker=\"$(CROSS_COMPILE)gcc\"
+-EXTRA_FLAGS = -Z build-std=core,alloc
+-
+-TA_SIGN_KEY ?= $(TA_DEV_KIT_DIR)/keys/default_ta.pem
+-SIGN := $(TA_DEV_KIT_DIR)/scripts/sign_encrypt.py
+-OUT_DIR := $(CURDIR)/../target/$(TARGET)/release
+-
+-ifeq ($(STD),)
+-all: ta strip sign
+-else
+-all:
+-	@echo "Please \`unset STD\` then rerun \`source environment\` to build the No-STD version"
+-endif
+-
+-ta:
+-	@cargo build --target $(TARGET) --release --config $(LINKER_CFG) $(EXTRA_FLAGS)
+-
+-strip: ta
+-	@$(OBJCOPY) --strip-unneeded $(OUT_DIR)/$(NAME) $(OUT_DIR)/stripped_$(NAME)
+-
+-sign: strip
+-	@$(SIGN) --uuid $(UUID) --key $(TA_SIGN_KEY) --in $(OUT_DIR)/stripped_$(NAME) --out $(OUT_DIR)/$(UUID).ta
+-	@echo "SIGN =>  ${UUID}"
+-
+-clean:
+-	@cargo clean
+diff --git a/examples/mnist-rs/ta/train/build.rs b/examples/mnist-rs/ta/train/build.rs
+deleted file mode 100644
+index e60b54b..0000000
+--- a/examples/mnist-rs/ta/train/build.rs
++++ /dev/null
+@@ -1,25 +0,0 @@
+-// Licensed to the Apache Software Foundation (ASF) under one
+-// or more contributor license agreements.  See the NOTICE file
+-// distributed with this work for additional information
+-// regarding copyright ownership.  The ASF licenses this file
+-// to you under the Apache License, Version 2.0 (the
+-// "License"); you may not use this file except in compliance
+-// with the License.  You may obtain a copy of the License at
+-//
+-//   http://www.apache.org/licenses/LICENSE-2.0
+-//
+-// Unless required by applicable law or agreed to in writing,
+-// software distributed under the License is distributed on an
+-// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+-// KIND, either express or implied.  See the License for the
+-// specific language governing permissions and limitations
+-// under the License.
+-
+-use optee_utee_build::{Error, RustEdition, TaConfig};
+-
+-fn main() -> Result<(), Error> {
+-    let config = TaConfig::new_default_with_cargo_env(proto::train::UUID)?
+-        .ta_data_size(5 * 1024 * 1024)
+-        .ta_stack_size(1 * 1024 * 1024);
+-    optee_utee_build::build(RustEdition::Before2024, config)
+-}
+diff --git a/examples/mnist-rs/ta/train/src/main.rs b/examples/mnist-rs/ta/train/src/main.rs
+deleted file mode 100644
+index f3ad57a..0000000
+--- a/examples/mnist-rs/ta/train/src/main.rs
++++ /dev/null
+@@ -1,127 +0,0 @@
+-// Licensed to the Apache Software Foundation (ASF) under one
+-// or more contributor license agreements.  See the NOTICE file
+-// distributed with this work for additional information
+-// regarding copyright ownership.  The ASF licenses this file
+-// to you under the Apache License, Version 2.0 (the
+-// "License"); you may not use this file except in compliance
+-// with the License.  You may obtain a copy of the License at
+-//
+-//   http://www.apache.org/licenses/LICENSE-2.0
+-//
+-// Unless required by applicable law or agreed to in writing,
+-// software distributed under the License is distributed on an
+-// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+-// KIND, either express or implied.  See the License for the
+-// specific language governing permissions and limitations
+-// under the License.
+-
+-#![no_std]
+-#![no_main]
+-extern crate alloc;
+-
+-use burn::backend::{ndarray::NdArrayDevice, Autodiff, NdArray};
+-use common::copy_to_output;
+-use optee_utee::{
+-    ta_close_session, ta_create, ta_destroy, ta_invoke_command, ta_open_session, trace_println,
+-};
+-use optee_utee::{ErrorKind, Parameters, Result};
+-use proto::train::Command;
+-use spin::Mutex;
+-
+-mod trainer;
+-
+-type NoStdTrainer = trainer::Trainer<Autodiff<NdArray>>;
+-
+-const DEVICE: NdArrayDevice = NdArrayDevice::Cpu;
+-static TRAINER: Mutex<Option<NoStdTrainer>> = Mutex::new(Option::None);
+-
+-#[ta_create]
+-fn create() -> Result<()> {
+-    trace_println!("[+] TA create");
+-    Ok(())
+-}
+-
+-#[ta_open_session]
+-fn open_session(params: &mut Parameters) -> Result<()> {
+-    let mut p0 = unsafe { params.0.as_memref()? };
+-
+-    let learning_rate = f64::from_le_bytes(p0.buffer().try_into().map_err(|err| {
+-        trace_println!("bad parameter {:?}", err);
+-        ErrorKind::BadParameters
+-    })?);
+-    trace_println!("Initialize with learning_rate: {}", learning_rate);
+-
+-    let mut trainer = TRAINER.lock();
+-    trainer.replace(NoStdTrainer::new(DEVICE, learning_rate));
+-
+-    Ok(())
+-}
+-
+-#[ta_close_session]
+-fn close_session() {
+-    trace_println!("[+] TA close session");
+-}
+-
+-#[ta_destroy]
+-fn destroy() {
+-    trace_println!("[+] TA destroy");
+-}
+-
+-#[ta_invoke_command]
+-fn invoke_command(cmd_id: u32, params: &mut Parameters) -> Result<()> {
+-    match Command::try_from(cmd_id) {
+-        Ok(Command::Train) => {
+-            let mut p0 = unsafe { params.0.as_memref()? };
+-            let mut p1 = unsafe { params.1.as_memref()? };
+-
+-            let images = p0.buffer();
+-            let labels = p1.buffer();
+-
+-            let mut trainer = TRAINER.lock();
+-            let result = trainer
+-                .as_mut()
+-                .ok_or(ErrorKind::CorruptObject)?
+-                .train(bytemuck::cast_slice(images), labels);
+-            let bytes = serde_json::to_vec(&result).map_err(|err| {
+-                trace_println!("unexpected error: {:?}", err);
+-                ErrorKind::BadState
+-            })?;
+-
+-            copy_to_output(&mut params.2, &bytes)
+-        }
+-        Ok(Command::Valid) => {
+-            let mut p0 = unsafe { params.0.as_memref()? };
+-            let mut p1 = unsafe { params.1.as_memref()? };
+-
+-            let images = p0.buffer();
+-            let labels = p1.buffer();
+-
+-            let trainer = TRAINER.lock();
+-            let result = trainer
+-                .as_ref()
+-                .ok_or(ErrorKind::CorruptObject)?
+-                .valid(bytemuck::cast_slice(images), labels);
+-
+-            let bytes = serde_json::to_vec(&result).map_err(|err| {
+-                trace_println!("unexpected error: {:?}", err);
+-                ErrorKind::BadState
+-            })?;
+-            copy_to_output(&mut params.2, &bytes)
+-        }
+-        Ok(Command::Export) => {
+-            let trainer = TRAINER.lock();
+-            let result = trainer
+-                .as_ref()
+-                .ok_or(ErrorKind::CorruptObject)?
+-                .export()
+-                .map_err(|err| {
+-                    trace_println!("unexpected error: {:?}", err);
+-                    ErrorKind::BadState
+-                })?;
+-            copy_to_output(&mut params.0, &result)
+-        }
+-        Err(_) => Err(ErrorKind::BadParameters.into()),
+-    }
+-}
+-
+-include!(concat!(env!("OUT_DIR"), "/user_ta_header.rs"));
+diff --git a/examples/mnist-rs/ta/train/src/trainer.rs b/examples/mnist-rs/ta/train/src/trainer.rs
+deleted file mode 100644
+index 5d4b9a8..0000000
+--- a/examples/mnist-rs/ta/train/src/trainer.rs
++++ /dev/null
+@@ -1,114 +0,0 @@
+-// Licensed to the Apache Software Foundation (ASF) under one
+-// or more contributor license agreements.  See the NOTICE file
+-// distributed with this work for additional information
+-// regarding copyright ownership.  The ASF licenses this file
+-// to you under the Apache License, Version 2.0 (the
+-// "License"); you may not use this file except in compliance
+-// with the License.  You may obtain a copy of the License at
+-//
+-//   http://www.apache.org/licenses/LICENSE-2.0
+-//
+-// Unless required by applicable law or agreed to in writing,
+-// software distributed under the License is distributed on an
+-// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+-// KIND, either express or implied.  See the License for the
+-// specific language governing permissions and limitations
+-// under the License.
+-
+-use alloc::vec::Vec;
+-use burn::{
+-    module::AutodiffModule,
+-    nn::loss::CrossEntropyLoss,
+-    optim::{adaptor::OptimizerAdaptor, Adam, AdamConfig, GradientsParams, Optimizer},
+-    prelude::*,
+-    record::RecorderError,
+-    tensor::{backend::AutodiffBackend, cast::ToElement},
+-};
+-use common::Model;
+-use proto::{train::Output, Image};
+-
+-pub struct Trainer<B: AutodiffBackend> {
+-    model: Model<B>,
+-    device: B::Device,
+-    optim: OptimizerAdaptor<Adam, Model<B>, B>,
+-    lr: f64,
+-}
+-
+-impl<B: AutodiffBackend> Trainer<B> {
+-    pub fn new(device: B::Device, lr: f64) -> Self {
+-        let mut seed = [0_u8; 8];
+-        optee_utee::Random::generate(seed.as_mut_slice());
+-        B::seed(u64::from_le_bytes(seed));
+-
+-        Self {
+-            optim: AdamConfig::new().init(),
+-            model: Model::new(&device),
+-            device,
+-            lr,
+-        }
+-    }
+-
+-    // Originally inspired by the burn/examples/custom-training-loop package.
+-    // You may refer to
+-    // https://github.com/tracel-ai/burn/blob/v0.16.0/examples/custom-training-loop
+-    // for details.
+-    pub fn train(&mut self, images: &[Image], labels: &[u8]) -> Output {
+-        let images = Model::images_to_tensors(&self.device, images);
+-        let targets = Model::labels_to_tensors(&self.device, labels);
+-        let model = self.model.clone();
+-
+-        let output = model.forward(images);
+-        let loss =
+-            CrossEntropyLoss::new(None, &output.device()).forward(output.clone(), targets.clone());
+-        let accuracy = accuracy(output, targets);
+-
+-        // Gradients for the current backward pass
+-        let grads = loss.backward();
+-        // Gradients linked to each parameter of the model.
+-        let grads = GradientsParams::from_grads(grads, &model);
+-        // Update the model using the optimizer.
+-        self.model = self.optim.step(self.lr, model, grads);
+-
+-        Output {
+-            loss: loss.into_scalar().to_f32(),
+-            accuracy,
+-        }
+-    }
+-
+-    // Originally inspired by the burn/examples/custom-training-loop package.
+-    // You may refer to
+-    // https://github.com/tracel-ai/burn/blob/v0.16.0/examples/custom-training-loop
+-    // for details.
+-    pub fn valid(&self, images: &[Image], labels: &[u8]) -> Output {
+-        // Get the model without autodiff.
+-        let model_valid = self.model.valid();
+-
+-        let images = Model::images_to_tensors(&self.device, images);
+-        let targets = Model::labels_to_tensors(&self.device, labels);
+-
+-        let output = model_valid.forward(images);
+-        let loss =
+-            CrossEntropyLoss::new(None, &output.device()).forward(output.clone(), targets.clone());
+-        let accuracy = accuracy(output, targets);
+-
+-        Output {
+-            loss: loss.into_scalar().to_f32(),
+-            accuracy,
+-        }
+-    }
+-
+-    pub fn export(&self) -> Result<Vec<u8>, RecorderError> {
+-        self.model.export()
+-    }
+-}
+-
+-// Originally copied from the burn/crates/no-std-tests package. You may refer
+-// to https://github.com/tracel-ai/burn/blob/v0.16.0/crates/burn-no-std-test for
+-// details.
+-fn accuracy<B: Backend>(output: Tensor<B, 2>, targets: Tensor<B, 1, Int>) -> f32 {
+-    let predictions = output.argmax(1).squeeze(1);
+-    let num_predictions: usize = targets.dims().iter().product();
+-    let num_corrects = predictions.equal(targets).int().sum().into_scalar();
+-
+-    num_corrects.elem::<f32>() / num_predictions as f32 * 100.0
+-}
+diff --git a/examples/mnist-rs/ta/train/uuid.txt b/examples/mnist-rs/ta/train/uuid.txt
+deleted file mode 100644
+index 1c014e8..0000000
+--- a/examples/mnist-rs/ta/train/uuid.txt
++++ /dev/null
+@@ -1 +0,0 @@
+-1b5f5b74-e9cf-4e62-8c3e-7e41da6d76f6
+\ No newline at end of file
+diff --git a/rust-toolchain.toml b/rust-toolchain.toml
+index f5affd4..cda563c 100644
+--- a/rust-toolchain.toml
++++ b/rust-toolchain.toml
+@@ -18,8 +18,8 @@
+ # Toolchain override for rustup
+ 
+ [toolchain]
+-channel = "nightly-2024-05-15"
++channel = "nightly-2025-02-01"
+ components = [ "rust-src" ]
+ targets = ["aarch64-unknown-linux-gnu", "arm-unknown-linux-gnueabihf"]
+ # minimal profile: install rustc, cargo, and rust-std
+-profile = "minimal"
+\ No newline at end of file
++profile = "minimal"
+-- 
+2.53.0
+

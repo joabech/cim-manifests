@@ -1,57 +1,29 @@
-# Python package dependencies for OP-TEE QEMU v8 target
-# Used by sdk-manager for installation and Docker generation
-
 profiles:
-  # Minimal profile - no additional packages
-  minimal:
-    packages: []
-    
   # Documentation profile - packages for building and serving docs
   docs:
     packages:
-      - sphinx
-      - sphinx-rtd-theme
-      - myst-parser
-      - sphinx-autobuild
-      # OP-TEE docs specific
-      - plantuml
       - graphviz
+      - myst-parser
+      - plantuml
+      - sphinx
+      - sphinx-autobuild
+      - sphinx-rtd-theme
       
-  # Development profile - docs + development tools
+  # Development profile
   dev:
     packages:
-      - sphinx
-      - sphinx-rtd-theme
-      - myst-parser
-      - sphinx-autobuild
-      - pytest
-      - black
-      - flake8
-      # OP-TEE development tools
-      - plantuml
-      - graphviz
       - pycryptodome
       - pyserial
       
   # Full profile - everything
   full:
     packages:
-      - sphinx
-      - sphinx-rtd-theme
-      - myst-parser
-      - sphinx-autobuild
-      - pytest
-      - black
-      - flake8
+      - cryptography
+      - ecdsa
       - mypy
       - pre-commit
-      # OP-TEE full environment
-      - plantuml
-      - graphviz
       - pycryptodome
       - pyserial
-      - ecdsa
-      - cryptography
 
 # Default profile to use when none specified
 default: docs
