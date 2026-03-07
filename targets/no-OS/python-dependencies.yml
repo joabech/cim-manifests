@@ -1,0 +1,10 @@
+profiles:
+  # Documentation profile
+  docs:
+    packages:
+      - myst-parser
+      - sphinx
+      - sphinx-autobuild
+      - sphinx-rtd-theme
+      
+default: docs

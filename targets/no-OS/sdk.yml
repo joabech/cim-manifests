@@ -1,0 +1,111 @@
+################################################################################
+# Mirror location for downloads, toolchains and gits.
+################################################################################
+mirror: $HOME/tmp/mirror
+
+
+################################################################################
+# Toolchain configurations
+################################################################################
+toolchains:
+# MacOS Host OS
+  - name: arm-gnu-toolchain-14.3.rel1-darwin-arm64-arm-none-eabi.tar.xz
+    url: https://developer.arm.com/-/media/Files/downloads/gnu/14.3.rel1/binrel/
+    destination: toolchains/aarch32-bm
+    strip_components: 1
+    os: darwin
+    arch: arm64
+
+# Linux AArch64 Host OS
+  - name: arm-gnu-toolchain-14.3.rel1-aarch64-arm-none-eabi.tar.xz
+    url: https://developer.arm.com/-/media/Files/downloads/gnu/14.3.rel1/binrel
+    destination: toolchains/aarch32-bm
+    strip_components: 1
+    os: linux
+    arch: arm64
+
+# Linux x86_64 Host OS
+  - name: arm-gnu-toolchain-14.3.rel1-x86_64-arm-none-eabi.tar.xz
+    url: https://developer.arm.com/-/media/Files/downloads/gnu/14.3.rel1/binrel
+    destination: toolchains/aarch32-bm
+    strip_components: 1
+    os: linux
+    arch: x86_64
+
+
+################################################################################
+# Files copied into the workspace
+################################################################################
+# FIXME: These patches is here for the time being - ideally they should be
+# in the git repos already.
+copy_files:
+  - source: patches/no-OS/00*.patch
+    dest: patches/no-OS
+  - source: patches/msdk/00*.patch
+    dest: patches/msdk
+  # Ideally this should be in a git in the future.
+  - source: build/Makefile
+    dest: build/Makefile
+  - source: scripts/build.sh
+    dest: build.sh
+
+
+################################################################################
+# High-level Makefile targets
+################################################################################
+# If we would like this to be really generic as done today in no-OS, then we
+# could add this:
+#   cd no-OS && git submodule update --init libraries/lvgl/lvgl libraries/lwip/lwip
+#
+# and if we did that, then we would need to remove the lwip and lvgl gits from
+# the gits section below. But, let's keep it like this for now, since it's much
+# fast to work work.
+envsetup: |
+  ln -sfn ../../toolchains/aarch32-bm msdk/Tools/GNUTools
+  rm -rf no-OS/libraries/lwip/lwip && ln -sf ../../../lwip no-OS/libraries/lwip/lwip
+  rm -rf no-OS/libraries/lvgl/lvgl && ln -sf ../../../lvgl no-OS/libraries/lvgl/lvgl
+  cd no-OS && git am ../patches/no-OS/00*.patch || true
+  cd msdk && git am ../patches/msdk/00*.patch || true
+
+test:
+  - $(MAKE) -C build check PROJ=$(PROJ) PLAT=$(PLAT) $(MAKEFLAGS)
+
+clean:
+  - $(MAKE) -C build clean PROJ=$(PROJ) PLAT=$(PLAT) $(MAKEFLAGS)
+
+build:
+  - $(MAKE) -C build all PROJ=$(PROJ) PLAT=$(PLAT) $(MAKEFLAGS)
+
+flash: |
+  @echo "No flash target defined for SOC projects."
+
+# Use an yaml-anchor for common build steps
+common_echo_build: &echo_build
+  - "@echo ✓ Built as part of SOC projects - no standalone build"
+
+
+################################################################################
+# Gits for the project
+################################################################################
+gits:
+  - name: msdk
+    url: https://github.com/analogdevicesinc/msdk.git
+    commit: main
+    build: *echo_build
+
+  - name: no-OS
+    url: https://github.com/analogdevicesinc/no-OS.git
+    commit: main
+    build:
+      - $(MAKE) -C build all $(MAKEFLAGS)
+
+  # no-OS submodules (previously managed via git submodule, now cloned to workspace root)
+  - name: lwip
+    url: https://github.com/lwip-tcpip/lwip
+    commit: e29870c15e8bf28eac9c811dd236c474f3f2008f
+    build: *echo_build
+
+  - name: lvgl
+    url: https://github.com/lvgl/lvgl.git
+    commit: c033a98afddd65aaafeebea625382a94020fe4a7
+    build: *echo_build

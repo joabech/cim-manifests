@@ -1,0 +1,112 @@
+################################################################################
+# Mirror location for downloads, toolchains and gits.
+################################################################################
+mirror: $HOME/tmp/mirror
+
+################################################################################
+# Toolchains section - download and install toolchains
+################################################################################
+toolchains:
+  # MacOS Host OS
+  - name: arm-gnu-toolchain-14.3.rel1-darwin-arm64-arm-none-eabi.tar.xz
+    url: https://developer.arm.com/-/media/Files/downloads/gnu/14.3.rel1/binrel/
+    destination: toolchains/aarch32-bm
+    strip_components: 1
+    os: darwin
+    arch: arm64
+
+  # Linux x86_64 Host OS
+  - name: arm-gnu-toolchain-13.3.rel1-x86_64-arm-none-eabi.tar.xz
+    url: https://armkeil.blob.core.windows.net/developer/Files/downloads/gnu/13.3.rel1/binrel
+    destination: toolchains/aarch32-bm
+    strip_components: 1
+    os: linux
+    arch: x86_64
+
+  # Linux AArch64 Host OS
+  - name: arm-gnu-toolchain-14.3.rel1-aarch64-arm-none-eabi.tar.xz
+    url: https://developer.arm.com/-/media/Files/downloads/gnu/14.3.rel1/binrel
+    destination: toolchains/aarch32-bm
+    strip_components: 1
+    os: linux
+    arch: arm64
+
+  # Example: Rust toolchain with post-install commands
+  # Downloads rustup installer script and runs it to install Rust
+  # Also shows how to use alternate mirror destination for download caching
+  # Note: name is omitted (or empty) since URL is a direct file URL
+  - url: https://sh.rustup.rs
+    destination: toolchains/rust
+    mirror_destination: toolchains/testing_mirror/rust
+    post_install_commands: |
+      mkdir -p cargo rustup
+      CARGO_HOME=$PWD/cargo RUSTUP_HOME=$PWD/rustup bash ./sh.rustup.rs -y --no-modify-path
+      echo 'Rust installation complete in $PWD'
+
+################################################################################
+# High-level Makefile targets.
+################################################################################
+# Show how to get an extra makefile to include in the SDK generated Makefile
+makefile_include:
+  - include extra.mk
+
+# This becomes sdk-envsetup target in the generated Makefile
+envsetup: |
+  @echo "Setting up CiM example"
+
+# Example showing how you can use depends_on to create dependencies between targets
+# This becomes sdk-build target in the generated Makefile
+build:
+  depends_on:
+    - sdk-envsetup
+  commands: |
+    @echo "Building CiM example" 
+
+################################################################################
+# Gits for the project
+################################################################################
+gits:
+  - name: git-sandbox
+    url: https://github.com/kevin-bates/git-sandbox.git
+    commit: master
+    depends_on:
+      - sdk-envsetup
+    build: |
+      @echo "Building git-sandbox"
+
+################################################################################
+# Copy files section - download files to be used during installation
+################################################################################
+copy_files:
+  # Show how to copy a local file into the SDK
+  - source: extra.mk
+    dest: extra.mk
+
+  # Show how to download from URL, with caching and symlink options and
+  # integrity checking
+  # - cache: true means the file will be stored in the mirror location for
+  #    future re-use
+  # - symlink: true means a symlink will be created from the mirror download
+  #    location to the dest location (relative to the workspace root)
+  # - sha256: The sha256 field is optional but recommended to ensure file
+  #    integrity.
+  - source: https://github.com/analogdevicesinc/scopy/archive/refs/tags/v2.1.0.zip
+    dest: downloads/scopy-v2.1.0.zip
+    cache: true
+    symlink: true
+    sha256: 99a706082b2ecd3b7ba95329b10987df3c687a940646d96c8aeb3000fce14fbd
+
+################################################################################
+# Installation section - binaries etc, with specific install commands
+################################################################################
+# Example: Install libarmlm.so to opt/libarmlm directory and create sentinel
+# file to mark installation complete.
+# Note. This goes hand in hand with the copy_files section above.
+install:
+  - name: scopy
+    sentinel: opt/.scopy-installed
+    commands: |
+      DOWNLOADS="downloads"
+      INSTALL_DIR="opt/scopy"
+      mkdir -p $$INSTALL_DIR
+      unzip -a $$DOWNLOADS/scopy-v2.1.0.zip -d $$INSTALL_DIR/

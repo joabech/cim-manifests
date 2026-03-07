@@ -1,0 +1,116 @@
+################################################################################
+# Mirror configuration, can be overriden in the users config.toml.
+################################################################################
+mirror: $HOME/tmp/mirror
+
+
+################################################################################
+# Copy files from manifest target to workspace
+################################################################################
+# Some pre-build binaries used when flashing the target.
+copy_files:
+  - source: archives/jupiter_mcs_sync_03_25.zip
+    dest: out/jupiter_mcs_sync_03_25.zip
+  - source: build/
+    dest: build
+
+
+################################################################################
+# Toolchains section - download and install toolchains
+################################################################################
+toolchains:
+  # Host: Linux x86_64
+  - name: arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-linux-gnu.tar.xz
+    url: https://developer.arm.com/-/media/Files/downloads/gnu/13.3.rel1/binrel/
+    destination: toolchains/aarch64
+    strip_components: 1
+    os: linux
+    arch: x86_64
+
+  # Host: Linux x86_64 - Bare-metal
+  - name: arm-gnu-toolchain-14.3.rel1-x86_64-aarch64-none-elf.tar.xz
+    url: https://developer.arm.com/-/media/Files/downloads/gnu/14.3.rel1/binrel/
+    destination: toolchains/aarch64-bm
+    strip_components: 1
+    os: linux
+    arch: x86_64
+
+  # Host: Linux arm64
+  - name: arm-gnu-toolchain-14.3.rel1-aarch64-aarch64-none-linux-gnu.tar.xz
+    url: https://developer.arm.com/-/media/Files/downloads/gnu/14.3.rel1/binrel/
+    destination: toolchains/aarch64
+    strip_components: 1
+    os: linux
+    arch: arm64
+
+  # Host: Linux arm64 - Bare-metal
+  - name: arm-gnu-toolchain-14.3.rel1-aarch64-aarch64-none-elf.tar.xz
+    url: https://developer.arm.com/-/media/Files/downloads/gnu/14.3.rel1/binrel/
+    destination: toolchains/aarch64-bm
+    strip_components: 1
+    os: linux
+    arch: arm64
+
+
+  # Host: MacOS x86_64
+  - name: arm-gnu-toolchain-13.3.rel1-darwin-x86_64-aarch64-none-linux-gnu.tar.xz
+    url: https://developer.arm.com/-/media/Files/downloads/gnu/13.3.rel1/binrel/
+    destination: toolchains/aarch64
+    strip_components: 1
+    os: darwin
+    arch: x86_64
+
+  # Host: MacOS arm64 - Bare-metal
+  - name: arm-gnu-toolchain-13.3.rel1-darwin-arm64-aarch64-none-elf.tar.xz
+    url: https://developer.arm.com/-/media/Files/downloads/gnu/13.3.rel1/binrel/
+    destination: toolchains/aarch64-bm
+    strip_components: 1
+    os: darwin
+    arch: arm64
+
+
+################################################################################
+# Build targets - will become a build target in the Makefile
+################################################################################
+envsetup: |
+  @echo "No environment setup needed for this target"
+
+build:
+  - $(MAKE) -C build all $(MAKEFLAGS)
+
+test: |
+  @echo "No test target defined for this platform"
+
+clean:
+  - $(MAKE) -C build clean $(MAKEFLAGS)
+
+flash: |
+  @echo "No flash target defined for this platform"
+
+
+################################################################################
+# Git repositories
+################################################################################
+gits:
+  # Trusted Firmware A for Jupiter SDR (ADI fork)
+  - name: trusted-firmware-a
+    url: https://github.com/analogdevicesinc/arm-trusted-firmware.git
+    commit: jupiter
+    build:
+      - $(MAKE) -C build build-tfa $(MAKEFLAGS)
+
+  # U-Boot for Jupiter SDR (ADI fork)
+  - name: u-boot
+    url: https://github.com/analogdevicesinc/u-boot-xlnx.git
+    commit: jupiter-sdr
+    build:
+      - $(MAKE) -C build build-uboot $(MAKEFLAGS)
+
+  # Linux kernel for ZynqMP (ADI fork)
+  # Alternative stable versions: 2023_R2, v6.18
+  # Note: Requires Linux host to build (macOS not supported due to build tooling)
+  - name: linux
+    url: https://github.com/analogdevicesinc/linux.git
+    commit: main
+    build:
+      - $(MAKE) -C build build-linux $(MAKEFLAGS)

@@ -1,0 +1,841 @@
+From f424a4db7ae23cdb14812cdc24ad3e875b8b5f49 Mon Sep 17 00:00:00 2001
+From: Joakim Bech <Joakim.Bech@analog.com>
+Date: Wed, 11 Feb 2026 12:48:00 +0100
+Subject: [PATCH 6/6] Fix compiler warnings and compilation errors across No-OS
+ projects
+
+This commit addresses a comprehensive set of compiler warnings and errors
+throughout the No-OS codebase, improving code quality and ensuring clean
+builds across all projects and drivers.
+
+All (32) maxim platforms builds without errors using GCC 14.3 now.
+
+Key fixes include:
+- Remove 100+ unused variable warnings across drivers and projects
+- Fix pointer-sign, enum-conversion, and discarded-qualifiers warnings
+- Remove always-false NULL checks and type-limit comparisons
+- Fix stringop-truncation and double-promotion warnings
+- Add missing return statements and fix uninitialized variable warnings
+- Replace deprecated API usage (MXC_RTC_GetSeconds)
+- Convert #warning directives to comments to eliminate cpp warnings
+- Fix unused function and label warnings in IIO and example code
+- Resolve lwip compilation error in socket implementation
+
+Affected components:
+- Drivers: ADXL313, LTC2672, MAX538x, MAX14919, SSD1306, LTC4306,
+  ADIN1110, LT7170, MAX17851, ADES1754
+- Platform: Maxim DMA, RTC, and SPI implementations
+- IIO subsystem: core, app, and daemon
+- Network: lwip and TCP socket implementations
+- Multiple project examples and common data files
+
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
+Signed-off-by: Joakim Bech <Joakim.Bech@analog.com>
+---
+ drivers/accel/adxl313/adxl313.c               |  2 +-
+ drivers/dac/ltc2672/ltc2672.c                 | 26 ++++++++-----------
+ drivers/dac/max538x/max538x.c                 |  2 +-
+ drivers/display/ssd_1306/ssd_1306.c           |  6 ++---
+ drivers/io-expander/ltc4306/ltc4306.c         | 10 +++----
+ drivers/net/adin1110/adin1110.c               |  3 ---
+ drivers/platform/maxim/common/maxim_dma.c     |  2 --
+ drivers/platform/maxim/max32650/maxim_rtc.c   |  6 ++++-
+ drivers/platform/maxim/max32650/maxim_spi.c   |  2 +-
+ drivers/power/ades1754/ades1754.c             |  1 -
+ drivers/power/lt7170/lt7170.c                 |  3 ---
+ drivers/power/max17851/max17851.c             |  3 +--
+ iio/iio.c                                     | 11 ++++----
+ iio/iio_app/iio_app.c                         |  6 ++---
+ iio/iiod.c                                    | 25 +++++++++++-------
+ network/lwip_raw_socket/lwip_socket.c         |  7 +++--
+ network/tcp_socket.c                          |  2 +-
+ .../ad7091r8-sdz/src/common/common_data.c     |  2 +-
+ .../spi_uart_bridge/spi_uart_bridge_example.c |  2 +-
+ projects/apard32690/src/common/common_data.c  |  2 +-
+ .../examples/basic_example/basic_example.c    |  4 +--
+ .../src/examples/basic/basic_example.c        |  2 +-
+ .../src/examples/basic/basic_example.c        |  2 +-
+ .../src/examples/basic/basic_example.c        | 10 +++----
+ .../src/examples/basic/basic_example.c        |  1 -
+ projects/max31855/src/platform/maxim/main.c   | 10 +++----
+ .../ssd1306/src/examples/example/example.c    |  5 +---
+ projects/swiot1l/src/swiot_fw.c               |  3 +--
+ util/no_os_display.c                          |  4 +--
+ 29 files changed, 76 insertions(+), 88 deletions(-)
+
+diff --git a/drivers/accel/adxl313/adxl313.c b/drivers/accel/adxl313/adxl313.c
+index 1ffd0814c..1c744392b 100644
+--- a/drivers/accel/adxl313/adxl313.c
++++ b/drivers/accel/adxl313/adxl313.c
+@@ -233,7 +233,7 @@ int adxl313_init(struct adxl313_dev **device,
+ 			/* Compute resolution for ADXL313 part depending on FULL_RES bit
+ 			 * and range. */
+ 			if (reg_value & ADXL313_REG_DATA_FORMAT_FULL_RES) {
+-				dev->resolution = dev->range;
++				dev->resolution = (enum adxl313_resolution)dev->range;
+ 			} else {
+ 				dev->resolution = ADXL313_10_BIT_RES;
+ 			}
+diff --git a/drivers/dac/ltc2672/ltc2672.c b/drivers/dac/ltc2672/ltc2672.c
+index d8f09f0e7..f9db11920 100644
+--- a/drivers/dac/ltc2672/ltc2672.c
++++ b/drivers/dac/ltc2672/ltc2672.c
+@@ -216,9 +216,7 @@ int ltc2672_set_code_channel(struct ltc2672_dev *device, uint16_t code,
+ 
+ 	if (((device->id == LTC2672_12 || device->id == LTC2662_12)
+ 	     && code > LTC2672_12BIT_RESO)
+-	    || ((device->id == LTC2672_16 || device->id == LTC2662_16)
+-		&& code > LTC2672_16BIT_RESO)
+-	    || out_ch < LTC2672_DAC0 || out_ch > LTC2672_DAC4)
++	    || out_ch > LTC2672_DAC4)
+ 		return -EINVAL;
+ 
+ 	/* Switching to V- results in constant -80mA output */
+@@ -253,7 +251,7 @@ int ltc2672_set_current_channel(struct ltc2672_dev *device,
+ {
+ 	uint32_t current_code;
+ 
+-	if (current > device->max_currents[out_ch] || out_ch < LTC2672_DAC0
++	if (current > device->max_currents[out_ch]
+ 	    || out_ch > LTC2672_DAC4)
+ 		return -EINVAL;
+ 
+@@ -272,10 +270,8 @@ int ltc2672_set_code_all_channels(struct ltc2672_dev *device, uint16_t code)
+ {
+ 	uint32_t command;
+ 
+-	if (((device->id == LTC2672_12 || device->id == LTC2662_12)
+-	     && code > LTC2672_12BIT_RESO)
+-	    || ((device->id == LTC2672_16 || device->id == LTC2662_16)
+-		&& code > LTC2672_16BIT_RESO))
++	if ((device->id == LTC2672_12 || device->id == LTC2662_12)
++	    && code > LTC2672_12BIT_RESO)
+ 		return -EINVAL;
+ 
+ 	if (device->out_spans[0] == LTC2672_VMINUS_VREF) {
+@@ -335,7 +331,7 @@ int ltc2672_set_span_channel(struct ltc2672_dev *device,
+ 	uint32_t command;
+ 
+ 	/* Check if span and channel are valid */
+-	if (ch_span < LTC2672_OFF || ch_span > LTC2672_4800VREF || out_ch < LTC2672_DAC0 || out_ch > LTC2672_DAC4)
++	if (ch_span > LTC2672_4800VREF || out_ch > LTC2672_DAC4)
+ 		return -EINVAL;
+ 
+ 	device->out_spans[out_ch] = ch_span;
+@@ -385,7 +381,7 @@ int ltc2672_set_span_all_channels(struct ltc2672_dev *device,
+ 	uint16_t span = 0;
+ 	uint32_t command;
+ 
+-	if (ch_span < LTC2672_OFF || ch_span > LTC2672_4800VREF)
++	if (ch_span > LTC2672_4800VREF)
+ 		return -EINVAL;
+ 
+ 	for (i = 0; i < LTC2672_TOTAL_CHANNELS; i++)
+@@ -450,7 +446,7 @@ int ltc2672_power_down_channel(struct ltc2672_dev *device,
+ {
+ 	uint32_t command;
+ 
+-	if (out_ch < LTC2672_DAC0 || out_ch > LTC2672_DAC4)
++	if (out_ch > LTC2672_DAC4)
+ 		return -EINVAL;
+ 
+ 	command = LTC2672_COMMAND32_GENERATE(LTC2672_PWRDWN_CHANNEL_X, out_ch,
+@@ -494,7 +490,7 @@ int ltc2672_monitor_mux(struct ltc2672_dev *device,
+ 	uint32_t mux = 0;
+ 	uint32_t command;
+ 
+-	if (mux_comm < LTC2672_MUX_DISABLED || mux_comm > LTC2672_MUX_VOUT4)
++	if (mux_comm > LTC2672_MUX_VOUT4)
+ 		return -EINVAL;
+ 
+ 	mux = LTC2672_MUX_SET(mux_comm);
+@@ -522,7 +518,7 @@ int ltc2672_setup_toggle_channel(struct ltc2672_dev *device,
+ 	if (device->out_spans[out_ch] == LTC2672_VMINUS_VREF || device->out_spans[out_ch] == LTC2672_OFF)
+ 		return -EINVAL;
+ 
+-	if (out_ch < LTC2672_DAC0 || out_ch > LTC2672_DAC4)
++	if (out_ch > LTC2672_DAC4)
+ 		return -EINVAL;
+ 
+ 	if ((current_reg_a > device->max_currents[out_ch])
+@@ -590,7 +586,7 @@ int ltc2672_write_input_register_channel(struct ltc2672_dev *device,
+ 	    || device->out_spans[out_ch] == LTC2672_OFF)
+ 		return -EINVAL;
+ 
+-	if (out_ch < LTC2672_DAC0 || out_ch > LTC2672_DAC4)
++	if (out_ch > LTC2672_DAC4)
+ 		return -EINVAL;
+ 
+ 	if (current_reg > device->max_currents[out_ch])
+@@ -782,7 +778,7 @@ int ltc2672_update_channel(struct ltc2672_dev *device,
+ {
+ 	uint32_t command;
+ 
+-	if (out_ch < LTC2672_DAC0 || out_ch > LTC2672_DAC4)
++	if (out_ch > LTC2672_DAC4)
+ 		return -EINVAL;
+ 
+ 	command = LTC2672_COMMAND32_GENERATE(LTC2672_PWRUP_UPD_CHANNEL_X, out_ch,
+diff --git a/drivers/dac/max538x/max538x.c b/drivers/dac/max538x/max538x.c
+index 50b06c060..0d2ff82c8 100644
+--- a/drivers/dac/max538x/max538x.c
++++ b/drivers/dac/max538x/max538x.c
+@@ -111,7 +111,7 @@ int max538x_init(struct max538x_dev **device,
+ 	int ret;
+ 	struct max538x_dev *dev;
+ 
+-	if ((init_param.max538x_vdd == NULL || init_param.max538x_vdd == 0)
++	if (init_param.max538x_vdd == 0
+ 	    && init_param.active_device > MAX5381K)
+ 		return -EINVAL;
+ 
+diff --git a/drivers/display/ssd_1306/ssd_1306.c b/drivers/display/ssd_1306/ssd_1306.c
+index fc6707730..82d3e555c 100644
+--- a/drivers/display/ssd_1306/ssd_1306.c
++++ b/drivers/display/ssd_1306/ssd_1306.c
+@@ -253,7 +253,6 @@ int32_t ssd_1306_init(struct display_dev *device)
+ *******************************************************************************/
+ int32_t ssd_1306_display_on_off(struct display_dev *device, uint8_t on_off)
+ {
+-	int32_t	ret;
+ 	uint8_t command;
+ 	ssd_1306_extra *extra;
+ 
+@@ -292,6 +291,7 @@ int32_t ssd_1306_move_cursor(struct display_dev *device, uint8_t row,
+ 	ret = ssd1306_buffer_transmit(extra, command, 3U, SSD1306_CMD);
+ 	if (ret != 0)
+ 		return -EFAULT;
++	return 0;
+ }
+ 
+ /***************************************************************************//**
+@@ -377,12 +377,12 @@ int32_t ssd_1306_print_buffer(struct display_dev *device, char *buffer)
+ 	uint8_t last_frame_bytes = nr_of_frame_bytes % 254;
+ 
+ 	for (int i = 0; i < nr_of_sendable_frames; i++) {
+-		ret = ssd1306_buffer_transmit(extra, &buffer[i * 254], 254, SSD1306_DATA);
++		ret = ssd1306_buffer_transmit(extra, (uint8_t *)&buffer[i * 254], 254, SSD1306_DATA);
+ 		if (ret != 0)
+ 			return ret;
+ 	}
+ 	if (last_frame_bytes > 0) {
+-		ret = ssd1306_buffer_transmit(extra, &buffer[nr_of_sendable_frames * 254],
++		ret = ssd1306_buffer_transmit(extra, (uint8_t *)&buffer[nr_of_sendable_frames * 254],
+ 					      last_frame_bytes, SSD1306_DATA);
+ 		if (ret != 0)
+ 			return ret;
+diff --git a/drivers/io-expander/ltc4306/ltc4306.c b/drivers/io-expander/ltc4306/ltc4306.c
+index 533bb5c53..359549e78 100644
+--- a/drivers/io-expander/ltc4306/ltc4306.c
++++ b/drivers/io-expander/ltc4306/ltc4306.c
+@@ -174,7 +174,7 @@ int ltc4306_read(struct ltc4306_dev *dev, uint8_t addr, uint8_t *read_data,
+ 	int ret;
+ 
+ 	/* Check if valid readable register */
+-	if (addr < LTC4306_CTRL_REG0 || addr > LTC4306_CTRL_REG3)
++	if (addr > LTC4306_CTRL_REG3)
+ 		return -EINVAL;
+ 
+ 	/* Check if read will go out of bounds*/
+@@ -231,13 +231,13 @@ int ltc4306_addr_gen(struct ltc4306_init_param *init_param,
+ {
+ 	int loc;
+ 
+-	if (addr0 < LTC4306_LOW || addr0 > LTC4306_NO_CONN)
++	if (addr0 > LTC4306_NO_CONN)
+ 		return -EINVAL;
+ 
+-	if (addr1 < LTC4306_LOW || addr1 > LTC4306_NO_CONN)
++	if (addr1 > LTC4306_NO_CONN)
+ 		return -EINVAL;
+ 
+-	if (addr2 < LTC4306_LOW || addr2 > LTC4306_NO_CONN)
++	if (addr2 > LTC4306_NO_CONN)
+ 		return -EINVAL;
+ 
+ 	loc = (int)addr0 * 1 + (int)addr1 * 3 + (int)addr2 * 9;
+@@ -672,7 +672,7 @@ int ltc4306_get_mass_write(struct ltc4306_dev *dev, bool *mass_write_en)
+ int ltc4306_set_timeout_mode(struct ltc4306_dev *dev,
+ 			     enum ltc4306_timeout_mode tout)
+ {
+-	if (tout < LTC4306_DISABLED || tout > LTC4306_7P5MS)
++	if (tout > LTC4306_7P5MS)
+ 		return -EINVAL;
+ 
+ 	return ltc4306_reg_update(dev, LTC4306_CTRL_REG2, LTC4306_TOUT, tout);
+diff --git a/drivers/net/adin1110/adin1110.c b/drivers/net/adin1110/adin1110.c
+index fd101fe82..4a8b427b9 100644
+--- a/drivers/net/adin1110/adin1110.c
++++ b/drivers/net/adin1110/adin1110.c
+@@ -947,9 +947,6 @@ int adin1110_init(struct adin1110_desc **desc,
+ 	struct adin1110_desc *descriptor;
+ 	int ret;
+ 
+-	if (!param->mac_address)
+-		return -EINVAL;
+-
+ 	descriptor = no_os_calloc(1, sizeof(*descriptor));
+ 	if (!descriptor)
+ 		return -ENOMEM;
+diff --git a/drivers/platform/maxim/common/maxim_dma.c b/drivers/platform/maxim/common/maxim_dma.c
+index 80776301f..d05b2d0d8 100644
+--- a/drivers/platform/maxim/common/maxim_dma.c
++++ b/drivers/platform/maxim/common/maxim_dma.c
+@@ -123,8 +123,6 @@ free_descriptor:
+  */
+ static int maxim_dma_remove(struct no_os_dma_desc *desc)
+ {
+-	uint32_t i;
+-
+ 	MXC_SYS_ClockDisable(MXC_SYS_PERIPH_CLOCK_DMA);
+ 	MAX_DMA->cn &= MAX_DMA_IRQ_EN_ALL_CH;
+ 	no_os_irq_ctrl_remove(desc->irq_ctrl);
+diff --git a/drivers/platform/maxim/max32650/maxim_rtc.c b/drivers/platform/maxim/max32650/maxim_rtc.c
+index 8f91541a8..07325d6f3 100644
+--- a/drivers/platform/maxim/max32650/maxim_rtc.c
++++ b/drivers/platform/maxim/max32650/maxim_rtc.c
+@@ -132,7 +132,11 @@ int32_t no_os_rtc_stop(struct no_os_rtc_desc *dev)
+  */
+ int32_t no_os_rtc_get_cnt(struct no_os_rtc_desc *dev, uint32_t *tmr_cnt)
+ {
+-	*tmr_cnt = MXC_RTC_GetSecond();
++	int ret;
++
++	ret = MXC_RTC_GetSeconds(tmr_cnt);
++	if (ret != E_NO_ERROR)
++		return -EINVAL;
+ 
+ 	return 0;
+ }
+diff --git a/drivers/platform/maxim/max32650/maxim_spi.c b/drivers/platform/maxim/max32650/maxim_spi.c
+index af91a2a8f..0a304ebdc 100644
+--- a/drivers/platform/maxim/max32650/maxim_spi.c
++++ b/drivers/platform/maxim/max32650/maxim_spi.c
+@@ -337,7 +337,7 @@ static int _max_spi_config(struct no_os_spi_desc *desc)
+ 	if (ret)
+ 		goto err_init;
+ 
+-	ret = MXC_SPI_SetMode(MXC_SPI_GET_SPI(desc->device_id), desc->mode);
++	ret = MXC_SPI_SetMode(MXC_SPI_GET_SPI(desc->device_id), (mxc_spi_mode_t)desc->mode);
+ 	if (ret) {
+ 		ret = -EINVAL;
+ 		goto err_init;
+diff --git a/drivers/power/ades1754/ades1754.c b/drivers/power/ades1754/ades1754.c
+index 42cb398c1..20da95cc6 100644
+--- a/drivers/power/ades1754/ades1754.c
++++ b/drivers/power/ades1754/ades1754.c
+@@ -891,7 +891,6 @@ int ades1754_set_cell_pol(struct ades1754_desc *desc,
+ 			  enum ades1754_cell_polarity cell_polarity)
+ {
+ 	uint16_t reg_val = 0;
+-	unsigned int i;
+ 	int ret;
+ 
+ 	reg_val = cell_polarity | no_os_field_prep(ADES1754_CELL_POLARITY_MASK,
+diff --git a/drivers/power/lt7170/lt7170.c b/drivers/power/lt7170/lt7170.c
+index ac81595d5..a32a1b692 100644
+--- a/drivers/power/lt7170/lt7170.c
++++ b/drivers/power/lt7170/lt7170.c
+@@ -468,7 +468,6 @@ int lt7170_remove(struct lt7170_dev *dev)
+  */
+ int lt7170_send_byte(struct lt7170_dev *dev, uint8_t cmd)
+ {
+-	int ret;
+ 	uint8_t tx_buf[2] = {0};
+ 
+ 	tx_buf[0] = cmd;
+@@ -518,7 +517,6 @@ int lt7170_read_byte(struct lt7170_dev *dev, uint8_t cmd, uint8_t *data)
+  */
+ int lt7170_write_byte(struct lt7170_dev *dev, uint8_t cmd, uint8_t value)
+ {
+-	int ret;
+ 	uint8_t tx_buf[3] = {0};
+ 
+ 	tx_buf[0] = cmd;
+@@ -572,7 +570,6 @@ int lt7170_read_word(struct lt7170_dev *dev, uint8_t cmd, uint16_t *word)
+  */
+ int lt7170_write_word(struct lt7170_dev *dev, uint8_t cmd, uint16_t word)
+ {
+-	int ret;
+ 	uint8_t tx_buf[4] = {0};
+ 
+ 	tx_buf[0] = cmd;
+diff --git a/drivers/power/max17851/max17851.c b/drivers/power/max17851/max17851.c
+index 002721aec..c7bdafd84 100644
+--- a/drivers/power/max17851/max17851.c
++++ b/drivers/power/max17851/max17851.c
+@@ -286,7 +286,7 @@ int max17851_write_msg(struct max17851_desc *desc, const uint8_t *data,
+ 		.bytes_number = len + 2,
+ 		.cs_change = 1,
+ 	};
+-	int ret, i;
++	int ret;
+ 
+ 	ret = max17851_config_gen2(desc, MAX17851_TX_QUEUE_SEL, true);
+ 	if (ret)
+@@ -488,7 +488,6 @@ int max17851_set_comm(struct max17851_desc *desc,
+ 		      enum max17851_comm_timeout_delay delay)
+ {
+ 	uint8_t reg_val;
+-	int ret;
+ 
+ 	reg_val = no_os_field_prep(MAX17851_COMM_RETRY_COUNT_MASK, count) |
+ 		  no_os_field_prep(MAX17851_COMM_TIMEOUT_DELAY_MASK, delay);
+diff --git a/iio/iio.c b/iio/iio.c
+index 921e57da8..cc5d5720f 100644
+--- a/iio/iio.c
++++ b/iio/iio.c
+@@ -1336,7 +1336,7 @@ static int iio_read_buffer(struct iiod_ctx *ctx, const char *device, char *buf,
+ 
+ 	ret = no_os_cb_size(&dev->buffer.cb, &size);
+ #ifdef IIO_IGNORE_BUFF_OVERRUN_ERR
+-#warning Buffer overrun error checking is disabled.
++	/* NOTE: Buffer overrun error checking is disabled. */
+ 	if (ret != -NO_OS_EOVERRUN)
+ #endif
+ 		if (NO_OS_IS_ERR_VALUE(ret))
+@@ -1494,7 +1494,6 @@ close_socket:
+  */
+ int iio_step(struct iio_desc *desc)
+ {
+-	struct iiod_conn_data data;
+ 	uint32_t conn_id;
+ 	int32_t ret;
+ 
+@@ -1518,6 +1517,7 @@ int iio_step(struct iio_desc *desc)
+ 	ret = iiod_conn_step(desc->iiod, conn_id);
+ 	if (ret == -ENOTCONN) {
+ #if defined(NO_OS_NETWORKING) || defined(NO_OS_LWIP_NETWORKING) || defined(NO_OS_W5500_NETWORKING)
++		struct iiod_conn_data data;
+ 		iiod_conn_remove(desc->iiod, conn_id, &data);
+ 		socket_remove(data.conn);
+ 		no_os_free(data.buf);
+@@ -1986,8 +1986,8 @@ int iio_init(struct iio_desc **desc, struct iio_init_param *init_param)
+ 
+ 	return 0;
+ 
+-free_pylink:
+ #if defined(NO_OS_NETWORKING) || defined(NO_OS_LWIP_NETWORKING) || defined(NO_OS_W5500_NETWORKING)
++free_pylink:
+ 	socket_remove(ldesc->server);
+ #endif
+ free_conns:
+@@ -2013,13 +2013,12 @@ free_desc:
+  */
+ int iio_remove(struct iio_desc *desc)
+ {
+-	struct iiod_conn_data data;
+-	int ret;
+-
+ 	if (!desc)
+ 		return -EINVAL;
+ 
+ #if defined(NO_OS_NETWORKING) || defined(NO_OS_LWIP_NETWORKING) || defined(NO_OS_W5500_NETWORKING)
++	struct iiod_conn_data data;
++	int ret;
+ 	for (int i = 0; i < IIOD_MAX_CONNECTIONS; i++) {
+ 		ret = iiod_conn_remove(desc->iiod, i, &data);
+ 		if (!ret) {
+diff --git a/iio/iio_app/iio_app.c b/iio/iio_app/iio_app.c
+index 48a6cd1aa..1ffa17b79 100644
+--- a/iio/iio_app/iio_app.c
++++ b/iio/iio_app/iio_app.c
+@@ -86,7 +86,7 @@ static inline uint32_t _calc_uart_xfer_time(uint32_t len, uint32_t baudrate)
+ 	return ms;
+ }
+ 
+-#if !defined(LINUX_PLATFORM) && !defined(NO_OS_NETWORKING) && !defined(NO_OS_USB_UART)
++#if !defined(LINUX_PLATFORM) && !defined(NO_OS_NETWORKING) && !defined(NO_OS_LWIP_NETWORKING) && !defined(NO_OS_USB_UART)
+ static int32_t iio_print_uart_info_message(struct no_os_uart_desc **uart_desc,
+ 		struct no_os_uart_init_param *user_uart_params,
+ 		char *message, int32_t msglen)
+@@ -303,7 +303,6 @@ int iio_app_init(struct iio_app_desc **app,
+ 	struct iio_data_buffer *buff;
+ 	unsigned int i;
+ 	int status;
+-	void *irq_desc = app_init_param.irq_desc;
+ 
+ 	application = (struct iio_app_desc *)no_os_calloc(1, sizeof(*application));
+ 	if (!application)
+@@ -312,7 +311,8 @@ int iio_app_init(struct iio_app_desc **app,
+ 	application->post_step_callback = app_init_param.post_step_callback;
+ 	application->arg = app_init_param.arg;
+ 
+-#if defined(ADUCM_PLATFORM) || defined(STM32_PLATFORM)
++#if defined(ADUCM_PLATFORM) || defined(STM32_PLATFORM) || defined(MAXIM_PLATFORM)
++	void *irq_desc = app_init_param.irq_desc;
+ 	/* Only one irq controller can exist and be initialized in
+ 	 * any of the iio_devices. */
+ 	for (i = 0; i < app_init_param.nb_devices; i++) {
+diff --git a/iio/iiod.c b/iio/iiod.c
+index 892bd9035..3dbc644a3 100644
+--- a/iio/iiod.c
++++ b/iio/iiod.c
+@@ -193,7 +193,8 @@ static int32_t iiod_parse_rw_attr(const char *token, struct comand_desc *res,
+ 	    res->type == IIO_ATTR_TYPE_CH_OUT) {
+ 		if (!token)
+ 			return -EINVAL;
+-		strncpy(res->channel, token, sizeof(res->channel));
++		strncpy(res->channel, token, sizeof(res->channel) - 1);
++		res->channel[sizeof(res->channel) - 1] = '\0';
+ 		token = strtok_r(NULL, delim, ctx);
+ 	}
+ 
+@@ -207,7 +208,8 @@ static int32_t iiod_parse_rw_attr(const char *token, struct comand_desc *res,
+ 			return parse_num(token, &res->bytes_count, 10);
+ 		}
+ 
+-		strncpy(res->attr, token, sizeof(res->attr));
++		strncpy(res->attr, token, sizeof(res->attr) - 1);
++		res->attr[sizeof(res->attr) - 1] = '\0';
+ 		token = strtok_r(NULL, delim, ctx);
+ 		if (!token)
+ 			return -EINVAL;
+@@ -215,10 +217,12 @@ static int32_t iiod_parse_rw_attr(const char *token, struct comand_desc *res,
+ 		return parse_num(token, &res->bytes_count, 10);
+ 	}
+ 
+-	if (token)
+-		strncpy(res->attr, token, sizeof(res->attr));
+-	else
++	if (token) {
++		strncpy(res->attr, token, sizeof(res->attr) - 1);
++		res->attr[sizeof(res->attr) - 1] = '\0';
++	} else {
+ 		memset(res->attr, 0, sizeof(res->attr));
++	}
+ 
+ 	return 0;
+ }
+@@ -247,7 +251,8 @@ int32_t iiod_parse_line(char *buf, struct comand_desc *res, char **ctx)
+ 		break;
+ 	}
+ 
+-	strncpy(res->device, token, sizeof(res->device));
++	strncpy(res->device, token, sizeof(res->device) - 1);
++	res->device[sizeof(res->device) - 1] = '\0';
+ 	token = strtok_r(NULL, delim, ctx);
+ 	switch (res->cmd) {
+ 	case IIOD_CMD_CLOSE:
+@@ -262,10 +267,12 @@ int32_t iiod_parse_line(char *buf, struct comand_desc *res, char **ctx)
+ 	case IIOD_CMD_WRITEBUF:
+ 		return parse_num(token, &res->bytes_count, 10);
+ 	case IIOD_CMD_SETTRIG:
+-		if (token)
+-			strncpy(res->trigger, token, sizeof(res->trigger));
+-		else
++		if (token) {
++			strncpy(res->trigger, token, sizeof(res->trigger) - 1);
++			res->trigger[sizeof(res->trigger) - 1] = '\0';
++		} else {
+ 			memset(res->trigger, 0, sizeof(res->trigger));
++		}
+ 
+ 		return 0;
+ 	case IIOD_CMD_SET:
+diff --git a/network/lwip_raw_socket/lwip_socket.c b/network/lwip_raw_socket/lwip_socket.c
+index 805cfb8d0..bf6113a88 100644
+--- a/network/lwip_raw_socket/lwip_socket.c
++++ b/network/lwip_raw_socket/lwip_socket.c
+@@ -280,11 +280,12 @@ int32_t no_os_lwip_init(struct lwip_network_desc **desc,
+ 	struct lwip_network_desc *descriptor;
+ 	struct netif *netif_descriptor;
+ 	ip4_addr_t ipaddr, netmask, gw;
++#ifdef NO_OS_IP
+ 	uint32_t raw_netmask[4] = {0};
+ 	uint32_t raw_gateway[4] = {0};
+ 	uint32_t raw_ip[4] = {0};
++#endif
+ 	int ret;
+-	int i;
+ 
+ 	network_descriptor = calloc(1, sizeof(*network_descriptor));
+ 	if (!network_descriptor)
+@@ -377,7 +378,7 @@ int32_t no_os_lwip_init(struct lwip_network_desc **desc,
+ 	printf("IP address: %s\n", ip4addr_ntoa(&netif_descriptor->ip_addr));
+ 	printf("Network mask: %s\n", ip4addr_ntoa(&netif_descriptor->netmask));
+ 	printf("Gateway's IP address: %s\n", ip4addr_ntoa(&netif_descriptor->gw));
+-	for (i = 0; i < NO_OS_MAX_SOCKETS; i++) {
++	for (int i = 0; i < NO_OS_MAX_SOCKETS; i++) {
+ 		descriptor->sockets[i].state = SOCKET_CLOSED;
+ 		descriptor->sockets[i].desc = descriptor;
+ 		descriptor->sockets[i].id = i;
+@@ -391,7 +392,6 @@ platform_remove:
+ 	param->platform_ops->remove(descriptor->mac_desc);
+ free_netif:
+ 	netif_remove(netif_descriptor);
+-free_descriptor:
+ 	free(descriptor);
+ free_netif_descriptor:
+ 	free(netif_descriptor);
+@@ -859,7 +859,6 @@ static int32_t lwip_socket_connect(void *net, uint32_t sock_id,
+ 	struct lwip_socket_desc *socket;
+ 	struct tcp_pcb *pcb;
+ 	uint8_t ip_addr[4];
+-	err_t ret;
+ 
+ 	sscanf(addr->addr, "%d.%d.%d.%d", &ip_addr[0], &ip_addr[1],
+ 	       &ip_addr[2], &ip_addr[3]);
+diff --git a/network/tcp_socket.c b/network/tcp_socket.c
+index fff90235b..61e1d49c4 100644
+--- a/network/tcp_socket.c
++++ b/network/tcp_socket.c
+@@ -45,7 +45,7 @@
+ 
+ #ifdef DISABLE_SECURE_SOCKET
+ 
+-#warning "TCP socket communication is not secured"
++/* NOTE: TCP socket communication is not secured */
+ 
+ #define DEFAULT_CONNECTION_BUFFER_SIZE 256
+ 
+diff --git a/projects/ad7091r8-sdz/src/common/common_data.c b/projects/ad7091r8-sdz/src/common/common_data.c
+index b2000831e..5c01217b4 100644
+--- a/projects/ad7091r8-sdz/src/common/common_data.c
++++ b/projects/ad7091r8-sdz/src/common/common_data.c
+@@ -86,7 +86,7 @@ struct no_os_irq_init_param ad7091r8_timer_irq_ip = {
+ };
+ 
+ /* AD7091R-8 timer trigger callback info */
+-const struct iio_hw_trig_cb_info ad7091r8_timer_cb_info = {
++struct iio_hw_trig_cb_info ad7091r8_timer_cb_info = {
+ 	.event = NO_OS_EVT_TIM_ELAPSED,
+ 	.peripheral = NO_OS_TIM_IRQ,
+ 	.handle = AD7091R8_TIMER_CB_HANDLE,
+diff --git a/projects/ades1754/src/examples/spi_uart_bridge/spi_uart_bridge_example.c b/projects/ades1754/src/examples/spi_uart_bridge/spi_uart_bridge_example.c
+index d7ddd2897..07d9a2803 100644
+--- a/projects/ades1754/src/examples/spi_uart_bridge/spi_uart_bridge_example.c
++++ b/projects/ades1754/src/examples/spi_uart_bridge/spi_uart_bridge_example.c
+@@ -108,7 +108,7 @@ int example_main()
+ 
+ 			real_voltage = cell_voltage;
+ 			real_voltage = real_voltage * 5.0f / ADES1754_CELL_RESOLUTION;
+-			pr_info("Cell %d Voltage : %0.5fV\n", i, real_voltage);
++			pr_info("Cell %d Voltage : %0.5fV\n", i, (double)real_voltage);
+ 		}
+ 
+ 		for (i = 0; i < 9; i++) {
+diff --git a/projects/apard32690/src/common/common_data.c b/projects/apard32690/src/common/common_data.c
+index 87a3eaf2c..96362ec86 100644
+--- a/projects/apard32690/src/common/common_data.c
++++ b/projects/apard32690/src/common/common_data.c
+@@ -62,7 +62,7 @@ struct no_os_uart_init_param uart_ip = {
+ 
+ #if defined(APARD32690_ECHO_SERVER_EXAMPLE) || defined(APARD32690_ADIN1110_STANDALONE_EXAMPLE)
+ 
+-const struct max_spi_init_param adin1110_spi_extra = {
++struct max_spi_init_param adin1110_spi_extra = {
+ 	.num_slaves = 1,
+ 	.polarity = SPI_SS_POL_LOW,
+ 	.vssel = MXC_GPIO_VSSEL_VDDIOH,
+diff --git a/projects/dc2903a/src/examples/basic_example/basic_example.c b/projects/dc2903a/src/examples/basic_example/basic_example.c
+index 391b36a53..ea72106ec 100644
+--- a/projects/dc2903a/src/examples/basic_example/basic_example.c
++++ b/projects/dc2903a/src/examples/basic_example/basic_example.c
+@@ -77,7 +77,7 @@ int basic_example_main()
+ 			}
+ 
+ 			/* Print Current set to all channels */
+-			pr_info("All DAC channels have current of: %0.2f mA\n", currents_to_set[i]);
++			pr_info("All DAC channels have current of: %0.2f mA\n", (double)currents_to_set[i]);
+ 
+ 			/*Lengthy delay to better visualize the change in values*/
+ 			no_os_mdelay(1500);
+@@ -107,7 +107,7 @@ int basic_example_main()
+ 
+ 		/* Setup and Demo toggle function on OUT3 */
+ 		pr_info("Toggle function on OUT3. Current toggles between %0.2f and %0.2f mA.\n",
+-			currents_to_toggle[0], currents_to_toggle[1]);
++			(double)currents_to_toggle[0], (double)currents_to_toggle[1]);
+ 
+ 		ret = ltc2672_setup_toggle_channel(ltc2672_desc, LTC2672_DAC3,
+ 						   currents_to_toggle[0], currents_to_toggle[1]);
+diff --git a/projects/eval-adis1646x/src/examples/basic/basic_example.c b/projects/eval-adis1646x/src/examples/basic/basic_example.c
+index 473ee608e..e8a30e90b 100644
+--- a/projects/eval-adis1646x/src/examples/basic/basic_example.c
++++ b/projects/eval-adis1646x/src/examples/basic/basic_example.c
+@@ -125,7 +125,7 @@ int basic_example_main()
+ 			goto exit;
+ 
+ 		for (uint8_t i = 0; i < 7; i++)
+-			pr_info("%s %.5f %s \n", output_data[i], val[i] * output_scale[i],
++			pr_info("%s %.5f %s \n", output_data[i], (double)(val[i] * output_scale[i]),
+ 				output_unit[i]);
+ 	}
+ 
+diff --git a/projects/eval-adis1654x/src/examples/basic/basic_example.c b/projects/eval-adis1654x/src/examples/basic/basic_example.c
+index 77254bfba..460f5133c 100644
+--- a/projects/eval-adis1654x/src/examples/basic/basic_example.c
++++ b/projects/eval-adis1654x/src/examples/basic/basic_example.c
+@@ -125,7 +125,7 @@ int basic_example_main()
+ 			goto exit;
+ 
+ 		for (uint8_t i = 0; i < 7; i++)
+-			pr_info("%s %.5f %s \n", output_data[i], val[i] * output_scale[i],
++			pr_info("%s %.5f %s \n", output_data[i], (double)(val[i] * output_scale[i]),
+ 				output_unit[i]);
+ 	}
+ exit:
+diff --git a/projects/eval-ltc4306/src/examples/basic/basic_example.c b/projects/eval-ltc4306/src/examples/basic/basic_example.c
+index 2e2d85483..430bdc480 100644
+--- a/projects/eval-ltc4306/src/examples/basic/basic_example.c
++++ b/projects/eval-ltc4306/src/examples/basic/basic_example.c
+@@ -54,9 +54,10 @@ int basic_example_main()
+ 	struct max538x_dev *max538x;
+ 	float v0[] = {0.16, 0.26, 0.36, 0.46, 0.56, 0.66, 0.76, 0.86, 0.96};
+ 	float inc = 0.5;
+-	int ret, i, j;
++	int ret, j;
++	unsigned int i;
+ 	int voltage_inc = NO_OS_ARRAY_SIZE(v0);
+-	int flash_instances = 16;
++	unsigned int flash_instances = 16;
+ 
+ 	ret = ltc4306_addr_gen(&ltc4306_user_init, LTC4306_HIGH, LTC4306_HIGH,
+ 			       LTC4306_HIGH);
+@@ -120,7 +121,7 @@ int basic_example_main()
+ 	for (i = 0; i < LTC4306_NUM_DOWNSTREAM; i++) {
+ 		pr_info("DAC %d: \t", i + 1);
+ 		for (j = 0; j < voltage_inc; j++) {
+-			pr_info("%0.4f \t", (v0[j] + (inc * (float)i)));
++			pr_info("%0.4f \t", (double)(v0[j] + (inc * (float)i)));
+ 		}
+ 		pr_info("\n");
+ 	}
+@@ -136,7 +137,7 @@ int basic_example_main()
+ 				if (ret)
+ 					goto error_ltc4306;
+ 
+-				ret = max538x_set_voutput(max538x, (v0[j] + (inc * (float)i)));
++				ret = max538x_set_voutput(max538x, (double)(v0[j] + (inc * (float)i)));
+ 				if (ret)
+ 					goto error_max538x;
+ 
+@@ -152,7 +153,6 @@ error_ltc4306:
+ 	ltc4306_remove(ltc4306);
+ error_max538x:
+ 	max538x_remove(max538x);
+-error:
+ 	pr_info("Error!\r\n");
+ 	return 0;
+ }
+diff --git a/projects/max31827-evkit/src/examples/basic/basic_example.c b/projects/max31827-evkit/src/examples/basic/basic_example.c
+index d000f7652..403650e22 100644
+--- a/projects/max31827-evkit/src/examples/basic/basic_example.c
++++ b/projects/max31827-evkit/src/examples/basic/basic_example.c
+@@ -46,7 +46,6 @@ int example_main()
+ 	struct max31827_device *dev;
+ 	int ret;
+ 	int32_t val;
+-	int idx;
+ 
+ 	struct no_os_uart_desc *uart;
+ 
+diff --git a/projects/max31855/src/platform/maxim/main.c b/projects/max31855/src/platform/maxim/main.c
+index e73768434..626cbd46c 100644
+--- a/projects/max31855/src/platform/maxim/main.c
++++ b/projects/max31855/src/platform/maxim/main.c
+@@ -49,14 +49,13 @@
+  *******************************************************************************/
+ int main()
+ {
+-	int ret;
+-
+ #ifdef IIO_EXAMPLE
+ 	return iio_example_main();
+ #endif
+ 
+ #ifdef BASIC_EXAMPLE
+ 	struct no_os_uart_desc *uart;
++	int ret;
+ 
+ 	ret = no_os_uart_init(&uart, &uip);
+ 	if (ret)
+@@ -66,6 +65,9 @@ int main()
+ 	ret = basic_example_main();
+ 	if (ret)
+ 		goto error;
++
++error:
++	no_os_uart_remove(uart);
+ #endif
+ 
+ #if (IIO_EXAMPLE + BASIC_EXAMPLE != 1)
+@@ -73,9 +75,5 @@ int main()
+ Please enable only one example and rebuild the project.
+ #endif
+ 
+-error:
+-#ifdef BASIC_EXAMPLE
+-	no_os_uart_remove(uart);
+-#endif
+ 	return 0;
+ }
+diff --git a/projects/ssd1306/src/examples/example/example.c b/projects/ssd1306/src/examples/example/example.c
+index 54e2dc2de..9060b2fc5 100644
+--- a/projects/ssd1306/src/examples/example/example.c
++++ b/projects/ssd1306/src/examples/example/example.c
+@@ -130,15 +130,13 @@ const LV_ATTRIBUTE_MEM_ALIGN uint8_t star_wars_logo[] = {
+ void my_flush_cb(lv_display_t * disp, const lv_area_t * area,
+ 		 uint8_t * color_p)
+ {
+-	int ret;
+-
+ 	uint8_t * lvgl_buff = &display_buffer[8];
+ 	uint8_t buff_to_ssd1306[8 * 128] = {0};
+ 
+ 	no_os_row_major_to_column_major_8bits(lvgl_buff, buff_to_ssd1306,
+ 					      SSD1306_HOR_REZ, SSD1306_VER_REZ);
+ 
+-	ret = ssd_1306_print_buffer(oled_display, buff_to_ssd1306);
++	(void)ssd_1306_print_buffer(oled_display, (char *)buff_to_ssd1306);
+ 	lv_display_flush_ready(disp);
+ }
+ 
+@@ -149,7 +147,6 @@ void my_flush_cb(lv_display_t * disp, const lv_area_t * area,
+  */
+ int display_task()
+ {
+-	int ret;
+ 	lv_init();
+ 	memset(&display_buffer[8], 0x00, sizeof(display_buffer) - 8);
+ 	lv_display_t * disp = lv_display_create(SSD1306_HOR_REZ, SSD1306_VER_REZ);
+diff --git a/projects/swiot1l/src/swiot_fw.c b/projects/swiot1l/src/swiot_fw.c
+index 072acfa8d..9d7942dd4 100644
+--- a/projects/swiot1l/src/swiot_fw.c
++++ b/projects/swiot1l/src/swiot_fw.c
+@@ -49,7 +49,6 @@
+ #include "lwip_adin1110.h"
+ 
+ #define DATA_BUFFER_SIZE 1000
+-#define IIO_IGNORE_BUFF_OVERRUN_ERR
+ 
+ uint8_t iio_data_buffer[DATA_BUFFER_SIZE * sizeof(uint32_t) * 8];
+ 
+@@ -83,7 +82,7 @@ int swiot_firmware()
+ 	struct max14906_iio_desc *max14906_iio_desc;
+ 	struct adt75_iio_desc *adt75_iio_desc;
+ 	struct swiot_iio_desc *swiot_iio_desc;
+-	struct iio_sw_trig *sw_trig;
++	struct iio_sw_trig *sw_trig = NULL;
+ 	int ret;
+ 
+ 	struct no_os_gpio_desc *ad74413r_ldac_gpio;
+diff --git a/util/no_os_display.c b/util/no_os_display.c
+index eff78ffe3..63b94f2e0 100644
+--- a/util/no_os_display.c
++++ b/util/no_os_display.c
+@@ -51,8 +51,8 @@ int32_t no_os_row_major_to_column_major_8bits(uint8_t *src, uint8_t *dst,
+ 	if (width % 8 != 0 || height % 8 != 0)
+ 		return -1;
+ 
+-	for (int i = 0; i < dst_stride; i++) {
+-		for (int j = 0; j < width; j++) {
++	for (uint32_t i = 0; i < dst_stride; i++) {
++		for (uint32_t j = 0; j < (uint32_t)width; j++) {
+ 			tmp_var = 0;
+ 			int byte_index = j / 8;
+ 			int bit_index = 7 - (j % 8);
+-- 
+2.43.0
+

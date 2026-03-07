@@ -1,0 +1,11 @@
+profiles:
+  docs:
+    packages:
+      - graphviz
+      - myst-parser
+      - plantuml
+      - sphinx
+      - sphinx-autobuild
+      - sphinx-rtd-theme
+      
+default: docs

@@ -1,0 +1,57 @@
+From 3803b81bd83ba1def642018119470711f29cb337 Mon Sep 17 00:00:00 2001
+From: Joakim Bech <Joakim.Bech@analog.com>
+Date: Tue, 10 Feb 2026 20:10:58 +0100
+Subject: [PATCH 4/6] Fix enum-conversion warnings in SPI drivers
+
+Added explicit casts when converting between enum types in SPI and SPIXR
+peripheral drivers.
+
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
+---
+ Libraries/PeriphDrivers/Source/SPI/spi_me10.c     | 4 ++--
+ Libraries/PeriphDrivers/Source/SPIXR/spixr_me10.c | 4 ++--
+ 2 files changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/Libraries/PeriphDrivers/Source/SPI/spi_me10.c b/Libraries/PeriphDrivers/Source/SPI/spi_me10.c
+index a0a79641df..00216ab63a 100644
+--- a/Libraries/PeriphDrivers/Source/SPI/spi_me10.c
++++ b/Libraries/PeriphDrivers/Source/SPI/spi_me10.c
+@@ -183,13 +183,13 @@ int MXC_SPI_GetSlave(mxc_spi_regs_t *spi)
+ /* ************************************************************************ */
+ int MXC_SPI_SetWidth(mxc_spi_regs_t *spi, mxc_spi_width_t spiWidth)
+ {
+-    return MXC_SPI_RevA1_SetWidth((mxc_spi_reva_regs_t *)spi, spiWidth);
++    return MXC_SPI_RevA1_SetWidth((mxc_spi_reva_regs_t *)spi, (mxc_spi_reva_width_t)spiWidth);
+ }
+ 
+ /* ************************************************************************ */
+ mxc_spi_width_t MXC_SPI_GetWidth(mxc_spi_regs_t *spi)
+ {
+-    return MXC_SPI_RevA1_GetWidth((mxc_spi_reva_regs_t *)spi);
++    return (mxc_spi_width_t)MXC_SPI_RevA1_GetWidth((mxc_spi_reva_regs_t *)spi);
+ }
+ 
+ /* ************************************************************************ */
+diff --git a/Libraries/PeriphDrivers/Source/SPIXR/spixr_me10.c b/Libraries/PeriphDrivers/Source/SPIXR/spixr_me10.c
+index 92de8af56d..117197b316 100644
+--- a/Libraries/PeriphDrivers/Source/SPIXR/spixr_me10.c
++++ b/Libraries/PeriphDrivers/Source/SPIXR/spixr_me10.c
+@@ -210,13 +210,13 @@ void MXC_SPIXR_RXFIFOClear(void)
+ /* ************************************************************************* */
+ int MXC_SPIXR_SetWidth(mxc_spixr_width_t width)
+ {
+-    return MXC_SPIXR_RevA_SetWidth((mxc_spixr_reva_regs_t *)MXC_SPIXR, width);
++    return MXC_SPIXR_RevA_SetWidth((mxc_spixr_reva_regs_t *)MXC_SPIXR, (mxc_spixr_reva_width_t)width);
+ }
+ 
+ /* ************************************************************************* */
+ int MXC_SPIXR_SetSPIMode(mxc_spixr_mode_t mode)
+ {
+-    return MXC_SPIXR_RevA_SetSPIMode((mxc_spixr_reva_regs_t *)MXC_SPIXR, mode);
++    return MXC_SPIXR_RevA_SetSPIMode((mxc_spixr_reva_regs_t *)MXC_SPIXR, (mxc_spixr_reva_mode_t)mode);
+ }
+ 
+ /* ************************************************************************* */
+-- 
+2.43.0
+
