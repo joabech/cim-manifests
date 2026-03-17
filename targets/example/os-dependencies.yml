@@ -4,6 +4,7 @@ ubuntu_packages: &ubuntu_pkgs
   - cmake
   - curl
   - git
+  - libc6-dev
   - libboost-all-dev
   - libssl-dev
   - pkg-config
@@ -18,6 +19,7 @@ fedora_packages: &fedora_pkgs
   - curl
   - gcc
   - gcc-c++
+  - glibc-devel
   - git
   - openssl-devel
   - pkgconfig

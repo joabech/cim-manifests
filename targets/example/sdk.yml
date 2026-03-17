@@ -31,6 +31,31 @@ toolchains:
     os: linux
     arch: arm64
 
+  # LLVM/Clang for macOS ARM64 Host OS
+  # Standard LLVM release - use with GCC sysroot for bare-metal ARM
+  - name: LLVM-22.1.1-macOS-ARM64.tar.xz
+    url: https://github.com/llvm/llvm-project/releases/download/llvmorg-22.1.1/
+    destination: toolchains/clang
+    strip_components: 1
+    os: darwin
+    arch: arm64
+
+  # LLVM/Clang for Linux x86_64 Host OS
+  - name: LLVM-22.1.1-Linux-X64.tar.xz
+    url: https://github.com/llvm/llvm-project/releases/download/llvmorg-22.1.1/
+    destination: toolchains/clang
+    strip_components: 1
+    os: linux
+    arch: x86_64
+
+  # LLVM/Clang for Linux AArch64 Host OS
+  - name: LLVM-22.1.1-Linux-ARM64.tar.xz
+    url: https://github.com/llvm/llvm-project/releases/download/llvmorg-22.1.1/
+    destination: toolchains/clang
+    strip_components: 1
+    os: linux
+    arch: arm64
+
   # Example: Rust toolchain with post-install commands
   # Downloads rustup installer script and runs it to install Rust
   # Also shows how to use alternate mirror destination for download caching
@@ -81,6 +106,9 @@ copy_files:
   # Show how to copy a local file into the SDK
   - source: extra.mk
     dest: extra.mk
+
+  - source: src/
+    dest: src/
 
   # Show how to download from URL, with caching and symlink options and
   # integrity checking
