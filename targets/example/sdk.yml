@@ -107,8 +107,13 @@ copy_files:
   - source: extra.mk
     dest: extra.mk
 
+  # Copy example hello world source file into the workspace src directory
   - source: src/
     dest: src/
+
+  # Copy the project aware CLAUDE.md file into the workspace root directory
+  - source: llm/CLAUDE.md
+    dest: CLAUDE.md
 
   # Show how to download from URL, with caching and symlink options and
   # integrity checking
