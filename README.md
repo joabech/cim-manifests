@@ -63,10 +63,11 @@ cim init -t optee-qemu-v8 --source <path-to-repo>
 
 ## Examples
 
+- **Example:** Shared dependencies via symlinks; good starting point for new targets.
 - **Jupiter-SDK**: Build for the examples show at Embedded World 2026.
 - **no-OS**: Build for the examples show at Embedded World 2026.
 - **OP-TEE QEMU v8:** Custom dependencies for OP-TEE-specific packages and tools.
-- **Example:** Shared dependencies via symlinks; good starting point for new targets.
+- **U-boot for Arm64:** Custom dependencies for U-boot development on Arm64.
 
 ## License
 

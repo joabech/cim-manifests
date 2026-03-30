@@ -1,0 +1,102 @@
+################################################################################
+# U-Boot ARM64 Cross-Compiler Manifest
+#
+# This manifest provides a complete environment for building U-Boot for Arm64
+# (AArch64) targets using the Arm GNU bare-metal toolchain.
+################################################################################
+
+################################################################################
+# Manifest variables - reusable across the manifest
+################################################################################
+variables:
+  # Toolchain path variables for use in makefiles and build scripts
+  TOOLCHAIN_AARCH64_BM: toolchains/aarch64-bm/bin
+  # Cross-compiler prefix for ARM64 bare-metal targets
+  CROSS_COMPILE: aarch64-none-elf-
+  # Default U-Boot defconfig for QEMU ARM64 (generic ARM64 target)
+  UBOOT_DEFCONFIG: qemu_arm64_defconfig
+
+
+################################################################################
+# Mirror location for downloads, toolchains and gits.
+################################################################################
+mirror: $HOME/tmp/mirror
+
+
+################################################################################
+# Makefile includes — build/uboot.mk defines all uboot-* and QEMU targets
+################################################################################
+makefile_include:
+  - include build/uboot.mk
+
+
+################################################################################
+# Copy files section - include build scripts and makefiles
+#
+# Normally we recommend to create a dedidcated build.git and clone that in the
+# gits section below, but this make it easier when showcase what cim can do.
+################################################################################
+copy_files:
+  - source: build/
+    dest: build/
+
+
+################################################################################
+# Toolchains section - download and install toolchains
+################################################################################
+toolchains:
+  # MacOS Host OS (arm64)
+  - name: arm-gnu-toolchain-15.2.rel1-darwin-arm64-aarch64-none-elf.tar.xz
+    url: https://developer.arm.com/-/media/Files/downloads/gnu/15.2.rel1/binrel
+    destination: toolchains/aarch64-bm
+    strip_components: 1
+    os: darwin
+    arch: arm64
+
+  # Linux AArch64 Host OS
+  - name: arm-gnu-toolchain-15.2.rel1-aarch64-aarch64-none-elf.tar.xz
+    url: https://developer.arm.com/-/media/Files/downloads/gnu/15.2.rel1/binrel
+    destination: toolchains/aarch64-bm
+    strip_components: 1
+    os: linux
+    arch: arm64
+
+  # Linux x86_64 Host OS
+  - name: arm-gnu-toolchain-15.2.rel1-x86_64-aarch64-none-elf.tar.xz
+    url: https://developer.arm.com/-/media/Files/downloads/gnu/15.2.rel1/binrel
+    destination: toolchains/aarch64-bm
+    strip_components: 1
+    os: linux
+    arch: x86_64
+
+
+################################################################################
+# Makefile targets - redirect to uboot-* targets defined in build/uboot.mk
+################################################################################
+
+envsetup:
+  - "@echo 'U-Boot ARM64 build environment ready'"
+  - "@echo 'Cross compiler: $(CROSS_COMPILE)'"
+  - "@echo 'Toolchain:      $(CURDIR)/${{ TOOLCHAIN_AARCH64_BM }}'"
+  - "@command -v ccache >/dev/null 2>&1 && echo 'ccache:         enabled' || echo 'ccache:         not found (install ccache for faster rebuilds)'"
+
+build:
+  - $(MAKE) uboot-build
+
+test:
+  - $(MAKE) qemu
+
+clean:
+  - $(MAKE) uboot-clean
+
+flash:
+  - $(MAKE) uboot-flash
+
+
+################################################################################
+# Git repositories
+################################################################################
+gits:
+  - name: u-boot
+    url: https://github.com/u-boot/u-boot.git
+    commit: master
