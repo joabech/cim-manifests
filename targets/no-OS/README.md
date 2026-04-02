@@ -18,15 +18,15 @@ $ make sdk-envsetup
 $ make sdk-build -j12
 ```
 
-We can build many (not all) of the platform in no-OS with this setup. To build for another platforms than the default one (`swiot1l`), we specify the platform as an argument `PLAT=<platform>`. For example, to build `adin1110` platform, we would do:
+We can build many (not all) of the projects in no-OS with this setup. To build another project than the default one (`swiot1l`), we specify the project as an argument `PROJ=<project>`. For example, to build `adin1110` project, we would do:
 ``` bash
-$ make sdk-build -j12 PLAT=adin1110
+$ make sdk-build -j12 PROJ=adin1110
 ```
 
 ### Cleaning the builds
-Since this builds for different platforms, it's advisable to clean when switching between platforms. To clean the build, we can do for example:
+Since this builds for different projects, it's advisable to clean when switching between projects. To clean the build, we can do for example:
 ``` bash
-$ make sdk-clean PLAT=adin1110
+$ make sdk-clean PROJ=adin1110
 ```
 
 ## Manifest structure
