@@ -9,11 +9,8 @@
 # Manifest variables - reusable across the manifest
 ################################################################################
 variables:
-  # Toolchain path variables for use in makefiles and build scripts
-  TOOLCHAIN_AARCH64_BM: toolchains/aarch64-bm/bin
-  # Cross-compiler prefix for ARM64 bare-metal targets
+  TOOLCHAIN_AARCH64_BM: ${{ WORKSPACE }}/toolchains/aarch64-bm/bin
   CROSS_COMPILE: aarch64-none-elf-
-  # Default U-Boot defconfig for QEMU ARM64 (generic ARM64 target)
   UBOOT_DEFCONFIG: qemu_arm64_defconfig
 
 
@@ -27,18 +24,7 @@ mirror: $HOME/tmp/mirror
 # Makefile includes — build/uboot.mk defines all uboot-* and QEMU targets
 ################################################################################
 makefile_include:
-  - include build/uboot.mk
-
-
-################################################################################
-# Copy files section - include build scripts and makefiles
-#
-# Normally we recommend to create a dedidcated build.git and clone that in the
-# gits section below, but this make it easier when showcase what cim can do.
-################################################################################
-copy_files:
-  - source: build/
-    dest: build/
+  - include build/Makefile
 
 
 ################################################################################
@@ -75,16 +61,19 @@ toolchains:
 ################################################################################
 
 envsetup:
-  - "@echo 'U-Boot ARM64 build environment ready'"
-  - "@echo 'Cross compiler: $(CROSS_COMPILE)'"
-  - "@echo 'Toolchain:      $(CURDIR)/${{ TOOLCHAIN_AARCH64_BM }}'"
-  - "@command -v ccache >/dev/null 2>&1 && echo 'ccache:         enabled' || echo 'ccache:         not found (install ccache for faster rebuilds)'"
+  - "@echo 'Environment ready: CROSS_COMPILE=$(CROSS_COMPILE)'"
+  - "@command -v ccache >/dev/null 2>&1 && echo 'ccache: enabled' || true"
 
 build:
-  - $(MAKE) uboot-build
+  depends_on:
+    - u-boot
+    - hello-world
+  commands: |
+     @echo "Building main project"
+     $(MAKE) -C build qemu-hello WORKSPACE=$(WORKSPACE)
 
 test:
-  - $(MAKE) qemu
+  - $(MAKE) -f build/Makefile qemu WORKSPACE=$(WORKSPACE)
 
 clean:
   - $(MAKE) uboot-clean
@@ -97,6 +86,20 @@ flash:
 # Git repositories
 ################################################################################
 gits:
+  - name: build
+    url: https://github.com/joabech/build.git
+    commit: u-boot
+
   - name: u-boot
     url: https://github.com/u-boot/u-boot.git
     commit: master
+    build:
+      - $(MAKE) u-boot-build
+
+  - name: hello-world
+    url: https://github.com/joabech/hello-world.git
+    commit: main
+    build_depends_on:
+      - u-boot
+    build:
+      - $(MAKE) hello-world-build
