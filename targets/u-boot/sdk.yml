@@ -1,7 +1,8 @@
 ################################################################################
-# U-Boot ARM64 Cross-Compiler Manifest
+# U-Boot and Linux Arm64 Cross-Compiler Manifest
 #
-# This manifest provides a complete environment for building U-Boot for Arm64
+# This manifest provides a complete environment for building U-Boot, Linux and
+# busybox for an Arm64 system
 # (AArch64) targets using the Arm GNU bare-metal toolchain.
 ################################################################################
 
@@ -9,9 +10,13 @@
 # Manifest variables - reusable across the manifest
 ################################################################################
 variables:
-  TOOLCHAIN_AARCH64_BM: ${{ WORKSPACE }}/toolchains/aarch64-bm/bin
+  ARCH: arm64
   CROSS_COMPILE: aarch64-none-elf-
+  CROSS_COMPILE_LINUX: aarch64-none-linux-gnu-
+  TOOLCHAIN_AARCH64_BM: ${{ WORKSPACE }}/toolchains/aarch64-bm/bin
+  TOOLCHAIN_AARCH64_LINUX: ${{ WORKSPACE }}/toolchains/aarch64-linux/bin
   UBOOT_DEFCONFIG: qemu_arm64_defconfig
+  OUT_DIR: ${{ WORKSPACE }}/out
 
 
 ################################################################################
@@ -55,31 +60,61 @@ toolchains:
     os: linux
     arch: x86_64
 
+  # Linux AArch64 Host OS (linux toolchain)
+  - name: arm-gnu-toolchain-15.2.rel1-aarch64-aarch64-none-linux-gnu.tar.xz
+    url: https://developer.arm.com/-/media/Files/downloads/gnu/15.2.rel1/binrel
+    destination: toolchains/aarch64-linux
+    strip_components: 1
+    os: linux
+    arch: arm64
+
+  # Linux x86_64 Host OS (linux toolchain)
+  - name: arm-gnu-toolchain-15.2.rel1-x86_64-aarch64-none-linux-gnu.tar.xz
+    url: https://developer.arm.com/-/media/Files/downloads/gnu/15.2.rel1/binrel
+    destination: toolchains/aarch64-linux
+    strip_components: 1
+    os: linux
+    arch: x86_64
+
+  # macOS Host OS (linux toolchain)
+  - name: arm-gnu-toolchain-15.2.rel1-darwin-arm64-aarch64-none-linux-gnu.tar.xz
+    url: https://developer.arm.com/-/media/Files/downloads/gnu/15.2.rel1/binrel
+    destination: toolchains/aarch64-linux
+    strip_components: 1
+    os: darwin
+    arch: arm64
+
 
 ################################################################################
 # Makefile targets - redirect to uboot-* targets defined in build/uboot.mk
 ################################################################################
-
-envsetup:
-  - "@echo 'Environment ready: CROSS_COMPILE=$(CROSS_COMPILE)'"
-  - "@command -v ccache >/dev/null 2>&1 && echo 'ccache: enabled' || true"
+envsetup: |
+  @echo "No environment setup needed in this build!"
 
 build:
   depends_on:
     - u-boot
     - hello-world
+    - linux
+    - busybox
   commands: |
-     @echo "Building main project"
-     $(MAKE) -C build qemu-hello WORKSPACE=$(WORKSPACE)
+    @echo "Building main project"
+    $(MAKE) linux-boot-script
 
 test:
-  - $(MAKE) -f build/Makefile qemu WORKSPACE=$(WORKSPACE)
+  commands: |
+    $(MAKE) qemu
 
 clean:
-  - $(MAKE) uboot-clean
+  commands: |
+    $(MAKE) busybox-clean
+    $(MAKE) hello-world-clean
+    $(MAKE) linux-clean
+    $(MAKE) u-boot-clean
+    rm -rf ${{ OUT_DIR }}
 
-flash:
-  - $(MAKE) uboot-flash
+flash: |
+  @echo "Nothing to flash in this build!"
 
 
 ################################################################################
@@ -88,18 +123,30 @@ flash:
 gits:
   - name: build
     url: https://github.com/joabech/build.git
-    commit: u-boot
+    commit: u-boot-with-linux
 
   - name: u-boot
     url: https://github.com/u-boot/u-boot.git
     commit: master
-    build:
-      - $(MAKE) u-boot-build
+    build: |
+      $(MAKE) u-boot-build
 
   - name: hello-world
     url: https://github.com/joabech/hello-world.git
     commit: main
     build_depends_on:
       - u-boot
-    build:
-      - $(MAKE) hello-world-build
+    build: |
+      $(MAKE) hello-world-build
+
+  - name: linux
+    url: https://github.com/torvalds/linux.git
+    commit: v6.12
+    build: |
+      $(MAKE) linux-build
+
+  - name: busybox
+    url: https://github.com/mirror/busybox.git
+    commit: 1_36_1
+    build: |
+      $(MAKE) busybox-initramfs
