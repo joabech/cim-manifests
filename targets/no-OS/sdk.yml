@@ -60,24 +60,29 @@ copy_files:
 # and if we did that, then we would need to remove the lwip and lvgl gits from
 # the gits section below. But, let's keep it like this for now, since it's much
 # fast to work work.
-envsetup: |
-  ln -sfn ../../toolchains/aarch32-bm msdk/Tools/GNUTools
-  rm -rf no-OS/libraries/lwip/lwip && ln -sf ../../../lwip no-OS/libraries/lwip/lwip
-  rm -rf no-OS/libraries/lvgl/lvgl && ln -sf ../../../lvgl no-OS/libraries/lvgl/lvgl
-  cd no-OS && git am ../patches/no-OS/00*.patch || true
-  cd msdk && git am ../patches/msdk/00*.patch || true
+envsetup:
+  commands: |
+    ln -sfn ../../toolchains/aarch32-bm msdk/Tools/GNUTools
+    rm -rf no-OS/libraries/lwip/lwip && ln -sf ../../../lwip no-OS/libraries/lwip/lwip
+    rm -rf no-OS/libraries/lvgl/lvgl && ln -sf ../../../lvgl no-OS/libraries/lvgl/lvgl
+    cd no-OS && git am ../patches/no-OS/00*.patch || true
+    cd msdk && git am ../patches/msdk/00*.patch || true
 
 test:
-  - $(MAKE) -C build check PROJ=$(PROJ) PLAT=$(PLAT) $(MAKEFLAGS)
+  commands: |
+    $(MAKE) -C build check PROJ=$(PROJ) PLAT=$(PLAT)
 
 clean:
-  - $(MAKE) -C build clean PROJ=$(PROJ) PLAT=$(PLAT) $(MAKEFLAGS)
+  commands: |
+    $(MAKE) -C build clean PROJ=$(PROJ) PLAT=$(PLAT)
 
 build:
-  - $(MAKE) -C build all PROJ=$(PROJ) PLAT=$(PLAT) $(MAKEFLAGS)
+  commands: |
+    $(MAKE) -C build all PROJ=$(PROJ) PLAT=$(PLAT)
 
-flash: |
-  @echo "No flash target defined for SOC projects."
+flash:
+  commands: |
+    echo "No flash target defined for SOC projects."
 
 # Use an yaml-anchor for common build steps
 common_echo_build: &echo_build
@@ -97,9 +102,10 @@ gits:
     url: https://github.com/analogdevicesinc/no-OS.git
     commit: main
     build:
-      - $(MAKE) -C build all $(MAKEFLAGS)
+      - $(MAKE) -C build all
 
-  # no-OS submodules (previously managed via git submodule, now cloned to workspace root)
+  # no-OS submodules (previously managed via git submodule, now cloned to
+  # workspace root)
   - name: lwip
     url: https://github.com/lwip-tcpip/lwip
     commit: e29870c15e8bf28eac9c811dd236c474f3f2008f
