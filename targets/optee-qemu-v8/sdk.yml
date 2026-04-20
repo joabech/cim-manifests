@@ -81,7 +81,7 @@ copy_files:
 gits:
   - name: build
     url: https://github.com/OP-TEE/build.git
-    commit: master
+    commit: refs/tags/4.10.0
     build:
       - make -C build -j`nproc` $(MAKEFLAGS)
 
@@ -91,7 +91,7 @@ gits:
 
   - name: optee_client
     url: https://github.com/OP-TEE/optee_client.git
-    commit: master
+    commit: refs/tags/4.10.0
     depends_on:
       - optee_os
     build:
@@ -99,32 +99,32 @@ gits:
 
   - name: optee_os
     url: https://github.com/OP-TEE/optee_os.git
-    commit: master
+    commit: refs/tags/4.10.0
     build:
       - make -C build optee-os $(MAKEFLAGS)
 
   - name: optee_ftpm
     url: https://github.com/OP-TEE/optee_ftpm.git
-    commit: master
+    commit: refs/tags/4.10.0
     depends_on:
       - optee_os
 
   - name: optee_test
     url: https://github.com/OP-TEE/optee_test.git
-    commit: master
+    commit: refs/tags/4.10.0
     depends_on:
       - optee_os
 
   # linaro-swg gits from common.xml
   - name: linux
     url: https://github.com/linaro-swg/linux.git
-    commit: optee
+    commit: refs/tags/optee-4.10.0
     build:
       - make -C build linux $(MAKEFLAGS)
 
   - name: optee_examples
     url: https://github.com/linaro-swg/optee_examples.git
-    commit: master
+    commit: refs/tags/4.10.0
     depends_on:
       - optee_os
       - optee_client
@@ -146,7 +146,7 @@ gits:
   # Misc gits from qemu_v8.xml
   - name: optee_rust
     url: https://github.com/apache/incubator-teaclave-trustzone-sdk.git
-    commit: main
+    commit: 746ee39f286788c049ddb55f57417ba97ed575a7
 
   - name: qemu
     url: https://github.com/qemu/qemu.git
@@ -156,19 +156,19 @@ gits:
 
   - name: hafnium
     url: https://github.com/TF-Hafnium/hafnium.git
-    commit: v2.12
+    commit: refs/tags/v2.14.0
     build:
       - make -C build hafnium $(MAKEFLAGS)
 
   - name: trusted-firmware-a
     url: https://github.com/TrustedFirmware-A/trusted-firmware-a.git
-    commit: v2.13-rc0
+    commit: refs/tags/v2.14.0
     build:
       - make -C build arm-tf $(MAKEFLAGS)
 
   - name: mbedtls
     url: https://github.com/Mbed-TLS/mbedtls.git
-    commit: mbedtls-3.6.0
+    commit: refs/tags/mbedtls-3.6.5
 
   - name: u-boot
     url: https://github.com/u-boot/u-boot.git
