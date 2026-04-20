@@ -72,20 +72,25 @@ toolchains:
 ################################################################################
 # Build targets - will become a build target in the Makefile
 ################################################################################
-envsetup: |
-  @echo "No environment setup needed for this target"
+envsetup:
+  commands: |
+    echo "No environment setup needed for this target"
 
 build:
-  - $(MAKE) -C build all $(MAKEFLAGS)
+  commands: |
+    $(MAKE) -C build all $(MAKEFLAGS)
 
-test: |
-  @echo "No test target defined for this platform"
+test:
+  commands: |
+    echo "No test target defined for this platform"
 
 clean:
-  - $(MAKE) -C build clean $(MAKEFLAGS)
+  commands: |
+    $(MAKE) -C build clean $(MAKEFLAGS)
 
-flash: |
-  @echo "No flash target defined for this platform"
+flash:
+  commands: |
+    echo "No flash target defined for this platform"
 
 
 ################################################################################
