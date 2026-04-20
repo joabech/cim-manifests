@@ -47,19 +47,24 @@ toolchains:
 # High-level Makefile targets.
 ################################################################################
 envsetup:
-  - ln -sf qemu_v8.mk build/Makefile
+  commands: |
+    ln -sf qemu_v8.mk build/Makefile
 
 build:
-  - $(MAKE) -C build all $(MAKEFLAGS)
+  commands: |
+    $(MAKE) -C build all
 
 test:
-  - $(MAKE) -C build check $(MAKEFLAGS)
+  commands: |
+    $(MAKE) -C build check
 
 clean:
-  - $(MAKE) -C build clean $(MAKEFLAGS)
+  commands: |
+    $(MAKE) -C build clean
 
-flash: |
-  @echo "This is a QEMU setup, no flashing needed"
+flash:
+  commands: |
+    echo "This is a QEMU setup, no flashing needed"
 
 
 ################################################################################
