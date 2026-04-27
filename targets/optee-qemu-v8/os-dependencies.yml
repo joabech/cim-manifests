@@ -121,6 +121,10 @@ fedora_packages: &fedora_packages
 
 # Linux x86_64 (Intel/AMD) dependencies
 linux-x86_64:
+  ubuntu-26.04:
+    command: "apt install"
+    packages: *ubuntu_pkgs
+
   ubuntu-24.04:
     command: "apt install"
     packages: *ubuntu_packages
@@ -140,6 +144,10 @@ linux-x86_64:
 
 # Linux ARM64 (Apple Silicon, ARM servers) dependencies  
 linux-aarch64:
+  ubuntu-26.04:
+    command: "apt install"
+    packages: *ubuntu_pkgs
+
   ubuntu-24.04:
     command: "apt install"
     packages: *ubuntu_packages
@@ -159,6 +167,10 @@ linux-aarch64:
 
 # Linux legacy
 linux:
+  ubuntu-26.04:
+    command: "apt install"
+    packages: *ubuntu_pkgs
+
   ubuntu-24.04:
     command: "apt install"
     packages: *ubuntu_packages
