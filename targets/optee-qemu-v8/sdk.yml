@@ -46,6 +46,14 @@ toolchains:
 ################################################################################
 # High-level Makefile targets.
 ################################################################################
+# OP-TEE do NOT want to use qemu.mk from the QEMU git and do not want to use
+# trusted-services.mk from the trusted-services git. Hence add them to the
+# exclude list so they are not copied into the build/ folder automatically.
+makefile_include:
+  exclude:
+    - qemu
+    - trusted-services
+
 envsetup:
   commands: |
     ln -sf qemu_v8.mk build/Makefile
