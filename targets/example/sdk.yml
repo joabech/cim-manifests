@@ -71,9 +71,16 @@ toolchains:
 ################################################################################
 # High-level Makefile targets.
 ################################################################################
-# Show how to get an extra makefile to include in the SDK generated Makefile
+# Show how to get an extra makefile to include in the SDK generated Makefile.
+# The structured form supports an optional 'exclude' list that suppresses
+# auto-discovered build/<name>.mk fragments for the named repositories.
+# The legacy bare-list form (just a sequence of strings) is still supported
+# and implies no exclusions.
 makefile_include:
-  - include extra.mk
+  files:
+    - include extra.mk
+  exclude:
+    - git-sandbox
 
 # This becomes sdk-envsetup target in the generated Makefile
 envsetup: |
