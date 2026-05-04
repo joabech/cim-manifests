@@ -76,10 +76,10 @@ toolchains:
 
 envsetup:
   commands: |
-    echo 'U-Boot ARM64 build environment ready'"
-    echo 'Cross compiler: $(CROSS_COMPILE)'"
-    echo 'Toolchain:      $(CURDIR)/${{ TOOLCHAIN_AARCH64_BM }}'"
-    command -v ccache >/dev/null 2>&1 && echo 'ccache:         enabled' || echo 'ccache:         not found (install ccache for faster rebuilds)'"
+    @echo "U-Boot ARM64 build environment ready"
+    @echo "Cross compiler: $(CROSS_COMPILE)"
+    @echo "Toolchain:      $(CURDIR)/${{ TOOLCHAIN_AARCH64_BM }}"
+    @command -v ccache >/dev/null 2>&1 && echo "ccache:         enabled" || echo "ccache:         not found (install ccache for faster rebuilds)"
 
 build:
   commands: |
