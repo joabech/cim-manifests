@@ -15,6 +15,7 @@ mirror: $HOME/tmp/mirror
 ################################################################################
 envsetup:
   commands: |
+    @cd adi-kuiper-gen && git am *.patch || true
     @echo "=========================================="
     @echo "ADI Kuiper Linux Build Environment"
     @echo "=========================================="
@@ -86,6 +87,8 @@ copy_files:
     dest: CLAUDE.md
   - source: configs/*
     dest: configs/
+  - source: patches/adi-kuiper-gen/*
+    dest: adi-kuiper-gen/
 
 
 ################################################################################
