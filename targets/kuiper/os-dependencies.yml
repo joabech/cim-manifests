@@ -9,6 +9,8 @@ kuiper_packages: &kuiper_packages
   - wget
   - build-essential
   - sudo
+  - binfmt-support
+  - qemu-user-binfmt
 
 # Linux x86_64 (Intel/AMD) dependencies
 linux-x86_64:
