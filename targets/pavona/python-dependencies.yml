@@ -1,0 +1,107 @@
+# Python dependencies for the Pavona open-source silicon project.
+# Package names are the same across Ubuntu 22.04/24.04/26.04; pip resolves
+# compatible versions for each Python runtime automatically.
+# Install with: cim install pip
+profiles:
+  default:
+    packages:
+      - antlr4-python3-runtime
+      - anytree
+      - argcomplete
+      - attrs
+      - beautifulsoup4
+      - blessed
+      - cachetools
+      - certifi
+      - charset-normalizer
+      - click
+      - colorama
+      - commonmark
+      - crcmod
+      - cssselect
+      - cssutils
+      - dilithium-py
+      - edalize
+      - enlighten
+      - exceptiongroup
+      - fastjsonschema
+      - flake8
+      - fusesoc
+      - gitdb
+      - gitpython
+      - hjson
+      - idna
+      - iniconfig
+      - isort
+      - jinja2
+      - jsonschema
+      - jsonschema-specifications
+      - jsonschema2md
+      - kyber-py
+      - libclang
+      - libcst
+      - lizard
+      - lxml
+      - mako
+      - markdown
+      - markupsafe
+      - mccabe
+      - mistletoe
+      - more-itertools
+      - msgpack-python
+      - mypy
+      - mypy-extensions
+      - ninja
+      - okonomiyaki
+      - packaging
+      - pathspec
+      - peakrdl-systemrdl
+      - pip-licenses
+      - pluggy
+      - pluralizer
+      - prefixed
+      - premailer
+      - prettytable
+      - prompt-toolkit
+      - pycodestyle
+      - pycryptodome
+      - pydriller
+      - pyelftools
+      - pyfinite
+      - pyflakes
+      - pygments
+      - pyparsing
+      - pyserial
+      - pytest
+      - pytest-timeout
+      - pytz
+      - pyyaml
+      - questionary
+      - referencing
+      - requests
+      - rich
+      - rpds-py
+      - ruff
+      - semantic-version
+      - simplesat
+      - siphash
+      - six
+      - smmap
+      - soupsieve
+      - systemrdl-compiler
+      - tabulate
+      - termcolor
+      - tockloader
+      - toml
+      - tomli
+      - tqdm
+      - typer
+      - types-pytz
+      - types-pyyaml
+      - types-tabulate
+      - typing-extensions
+      - urllib3
+      - wcwidth
+      - yapf
+
+default: default

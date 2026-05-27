@@ -1,0 +1,30 @@
+################################################################################
+# Mirror location for downloads, toolchains and gits.
+################################################################################
+mirror: $HOME/tmp/mirror
+
+
+################################################################################
+# High-level Makefile targets
+################################################################################
+
+build:
+  commands: |
+    cd pavona && PATH=$(CURDIR)/.venv/bin:$$PATH ./bazelisk.sh build sw/device/examples/hello_world:hello_world
+
+test:
+  commands: |
+    cd pavona && PATH=$(CURDIR)/.venv/bin:$$PATH ./bazelisk.sh test sw/device/examples/hello_world:hello_world_sim_verilator --test_output=streamed
+
+clean:
+  commands: |
+    cd pavona && ./bazelisk.sh clean
+
+
+################################################################################
+# Gits for the project
+################################################################################
+gits:
+  - name: pavona
+    url: https://github.com/pavona/pavona.git
+    commit: main

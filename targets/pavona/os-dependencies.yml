@@ -1,0 +1,90 @@
+# OS dependencies for the Pavona open-source silicon project.
+# Package list derived from pavona/apt-requirements.txt plus python3-venv
+# (required by the getting-started guide but absent from apt-requirements.txt).
+# Pavona targets Ubuntu only; no macOS or Fedora entries.
+
+ubuntu_packages: &ubuntu_pkgs
+  - autoconf
+  - bison
+  - brotli
+  - build-essential
+  - cmake
+  - curl
+  - dfu-util
+  - file
+  - flex
+  - g++
+  - git
+  - help2man
+  - lcov
+  - libelf1
+  - libelf-dev
+  - libftdi1-2
+  - libftdi1-dev
+  - libpcsclite-dev
+  - libssl-dev
+  - libtool
+  - libudev-dev
+  - libusb-1.0-0
+  - lrzsz
+  - lsb-release
+  - make
+  - openssl
+  - perl
+  - pkgconf
+  - python3
+  - python3-pip
+  - python3-setuptools
+  - python3-venv
+  - python3-wheel
+  - python-is-python3
+  - srecord
+  - tree
+  - xmlstarlet
+  - xsltproc
+  - xxd
+  - xz-utils
+  - zip
+  - zlib1g-dev
+
+
+linux-x86_64:
+  ubuntu-26.04:
+    command: "apt install"
+    packages: *ubuntu_pkgs
+
+  ubuntu-24.04:
+    command: "apt install"
+    packages: *ubuntu_pkgs
+
+  ubuntu-22.04:
+    command: "apt install"
+    packages: *ubuntu_pkgs
+
+
+linux-aarch64:
+  ubuntu-26.04:
+    command: "apt install"
+    packages: *ubuntu_pkgs
+
+  ubuntu-24.04:
+    command: "apt install"
+    packages: *ubuntu_pkgs
+
+  ubuntu-22.04:
+    command: "apt install"
+    packages: *ubuntu_pkgs
+
+
+linux:
+  ubuntu-26.04:
+    command: "apt install"
+    packages: *ubuntu_pkgs
+
+  ubuntu-24.04:
+    command: "apt install"
+    packages: *ubuntu_pkgs
+
+  ubuntu-22.04:
+    command: "apt install"
+    packages: *ubuntu_pkgs
