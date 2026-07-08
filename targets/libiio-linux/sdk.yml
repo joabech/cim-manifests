@@ -1,0 +1,95 @@
+################################################################################
+# Manifest variables — optional key-value pairs that can be reused across
+# the manifest with ${{ VAR }} syntax.
+################################################################################
+variables:
+  # Build options
+  LIBIIO_BUILD_TYPE: RelWithDebInfo
+  LIBIIO_UTILS: ON
+  LIBIIO_EXAMPLES: OFF
+  LIBIIO_IIOD: ON
+  LIBIIO_COMPAT: ON
+
+  # Backends
+  LIBIIO_USB: ON
+  LIBIIO_NETWORK: ON
+  LIBIIO_LOCAL: ON
+  LIBIIO_SERIAL: OFF
+  LIBIIO_EMU: OFF
+
+  # Bindings
+  LIBIIO_PYTHON: OFF
+  LIBIIO_CPP: OFF
+  LIBIIO_CSHARP: OFF
+
+
+################################################################################
+# High-level Makefile targets
+################################################################################
+envsetup:
+  commands: |
+    @echo "libiio build options (override with make VAR=value):"
+    @echo ""
+    @echo "  Build options:"
+    @echo "    LIBIIO_BUILD_TYPE=$(LIBIIO_BUILD_TYPE)"
+    @echo "    LIBIIO_UTILS=$(LIBIIO_UTILS)"
+    @echo "    LIBIIO_EXAMPLES=$(LIBIIO_EXAMPLES)"
+    @echo "    LIBIIO_IIOD=$(LIBIIO_IIOD)"
+    @echo "    LIBIIO_COMPAT=$(LIBIIO_COMPAT)"
+    @echo ""
+    @echo "  Backends:"
+    @echo "    LIBIIO_USB=$(LIBIIO_USB)"
+    @echo "    LIBIIO_NETWORK=$(LIBIIO_NETWORK)"
+    @echo "    LIBIIO_LOCAL=$(LIBIIO_LOCAL)"
+    @echo "    LIBIIO_SERIAL=$(LIBIIO_SERIAL)"
+    @echo "    LIBIIO_EMU=$(LIBIIO_EMU)"
+    @echo ""
+    @echo "  Bindings:"
+    @echo "    LIBIIO_PYTHON=$(LIBIIO_PYTHON)"
+    @echo "    LIBIIO_CPP=$(LIBIIO_CPP)"
+    @echo "    LIBIIO_CSHARP=$(LIBIIO_CSHARP)"
+
+build:
+  commands: |
+    cmake -B build/libiio -S libiio \
+      -DCMAKE_BUILD_TYPE=$(LIBIIO_BUILD_TYPE) \
+      -DCMAKE_INSTALL_PREFIX=$(WORKSPACE)/install \
+      -DINSTALL_UDEV_RULE=OFF \
+      -DWITH_UTILS=$(LIBIIO_UTILS) \
+      -DWITH_EXAMPLES=$(LIBIIO_EXAMPLES) \
+      -DWITH_IIOD=$(LIBIIO_IIOD) \
+      -DLIBIIO_COMPAT=$(LIBIIO_COMPAT) \
+      -DWITH_USB_BACKEND=$(LIBIIO_USB) \
+      -DWITH_NETWORK_BACKEND=$(LIBIIO_NETWORK) \
+      -DWITH_LOCAL_BACKEND=$(LIBIIO_LOCAL) \
+      -DWITH_SERIAL_BACKEND=$(LIBIIO_SERIAL) \
+      -DWITH_EMU_BACKEND=$(LIBIIO_EMU) \
+      -DCPP_BINDINGS=$(LIBIIO_CPP) \
+      -DCSHARP_BINDINGS=$(LIBIIO_CSHARP)
+    cmake --build build/libiio --parallel $$(nproc)
+    cmake --install build/libiio
+    if [ "$(LIBIIO_PYTHON)" = "ON" ]; then \
+      $(CURDIR)/.venv/bin/pip install ./libiio/bindings/python; \
+    fi
+  depends_on:
+    - sdk-envsetup
+
+test:
+  commands: |
+    cmake -B build/libiio -S libiio \
+      -DWITH_TESTS=ON \
+      -DWITH_EMU_BACKEND=ON
+    cmake --build build/libiio --parallel $$(nproc)
+    ctest --test-dir build/libiio --output-on-failure
+
+clean:
+  commands: |
+    rm -rf build/libiio install
+
+################################################################################
+# Git repositories
+################################################################################
+gits:
+  - name: libiio
+    url: https://github.com/analogdevicesinc/libiio.git
+    commit: main
