@@ -64,6 +64,8 @@ cim init -t optee-qemu-v8 --source <path-to-repo>
 ## Examples
 
 - **Example:** Shared dependencies via symlinks; good starting point for new targets.
+- **overlay-example:** Extends `example` via `extends:`/`overlay:` -- shows how to add, remove, and modify gits, toolchains, copy_files, install steps, and variables without duplicating a base target's manifest.
+- **overlay-example-chain:** Extends `overlay-example`, forming a 3-level `extends:` chain (`example -> overlay-example -> overlay-example-chain`) -- shows that `extends:` only accepts a single base target per level (no comma-separated/list form); combine multiple ancestors by chaining single-parent levels instead.
 - **Jupiter-SDK**: Build for the examples show at Embedded World 2026.
 - **no-OS**: Build for the examples show at Embedded World 2026.
 - **OP-TEE QEMU v8:** Custom dependencies for OP-TEE-specific packages and tools.

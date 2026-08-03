@@ -1,0 +1,15 @@
+# overlay-example's own Python dependencies.
+#
+# Just like os-dependencies.yml, each level of an extends: chain can have
+# its own python-dependencies.yml; cim copies and processes every level's
+# file independently ("cim install pip" installs from all of them).
+#
+# This file only adds a "demo" profile with a package specific to
+# overlay-example; "example"'s own python-dependencies.yml already
+# defines the "docs"/"dev"/"full" profiles.
+profiles:
+  demo:
+    packages:
+      - requests
+
+default: demo

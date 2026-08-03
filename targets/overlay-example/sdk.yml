@@ -1,0 +1,130 @@
+################################################################################
+# overlay-example: demonstrates cim's extends:/overlay: feature.
+#
+# This target is based on ("extends:") the "example" target. This one file
+# carries two distinct kinds of content:
+#
+#   - The normal gits:/install:/copy_files:/variables: lists (below): new
+#     entries that are unique to overlay-example -- a git, an install step,
+#     a local copy_files entry, a variable -- added exactly as they would
+#     be in a target with no extends: at all.
+#   - overlay: (further down): only remove/modify operations against
+#     content inherited from "example" (removing the Rust toolchain and the
+#     Scopy download, and tweaking git-sandbox's build: message).
+#
+# See the overlay: key below for the remove/modify diff and README.md for a
+# full walkthrough of what's added, removed, and modified compared to
+# "example".
+#
+# Note: extends: only ever accepts a SINGLE base target (optionally with an
+# explicit @version, or the structured {target, version, source} form). It
+# does NOT accept a comma-separated/list of multiple bases. To build a
+# multi-level chain, have each level extend exactly one parent (see
+# "overlay-example-chain", which extends this target).
+################################################################################
+extends: example
+
+################################################################################
+# gits: a brand new repository that "example" doesn't have at all. Since
+# it's new (not present in "example"), it's added directly here rather than
+# through the overlay: key.
+################################################################################
+gits:
+  - name: hello-world
+    url: https://github.com/octocat/Hello-World.git
+    commit: master
+    build: |
+      @echo "Building hello-world (added by overlay-example's own sdk.yml)"
+
+################################################################################
+# copy_files: a local file specific to this target, added the same way.
+################################################################################
+copy_files:
+  - source: overlay-notes.txt
+    dest: overlay-notes.txt
+
+################################################################################
+# install: a small install step of our own, demonstrating that install:
+# commands can reference variables.set below via the usual ${{ VAR }}
+# syntax.
+################################################################################
+install:
+  - name: overlay-greeting
+    sentinel: opt/.overlay-greeting-installed
+    commands: |
+      mkdir -p opt/overlay-greeting
+      echo "${{ OVERLAY_EXAMPLE_GREETING }}" > opt/overlay-greeting/README.txt
+
+################################################################################
+# variables: "example" doesn't define any variables at all, so this adds a
+# brand new one directly.
+################################################################################
+variables:
+  OVERLAY_EXAMPLE_GREETING: "Hello from overlay-example!"
+
+################################################################################
+# Scalar sections (build/test/clean/flash/envsetup/build_folder/
+# makefile_include/direnv/phases) are NOT part of overlay:. They can
+# still be overridden directly here, as a plain whole-value replacement of
+# the value inherited from "example". Here we override envsetup: to show
+# that, while build:/makefile_include:/etc. are all still inherited as-is
+# from "example" unchanged.
+################################################################################
+envsetup: |
+  @echo "Setting up CiM overlay-example (extends: example)"
+
+################################################################################
+# overlay: the remove/modify diff applied on top of the "example" target's
+# resolved manifest (see extends: example above).
+#
+# overlay: only ever removes or modifies content inherited from the
+# extends chain -- anything new and unique to this target goes directly in
+# the normal lists above instead (see hello-world/overlay-greeting/
+# overlay-notes.txt/OVERLAY_EXAMPLE_GREETING there).
+#
+# Merge order per section is always fixed: remove -> combine (base entries
+# plus this target's own new entries above) -> modify. Every remove/modify
+# must reference an entry that already exists in the combined result --
+# that's a hard error rather than a silent no-op.
+################################################################################
+overlay:
+  ##############################################################################
+  # gits: keep the inherited "git-sandbox" repo, but override only its build:
+  # field (everything else -- url, commit -- stays exactly as in "example").
+  ##############################################################################
+  gits:
+    modify:
+      - name: git-sandbox
+        build: |
+          @echo "Building git-sandbox (build: overridden by overlay-example)"
+
+  ##############################################################################
+  # toolchains: this target doesn't need the Rust toolchain from "example",
+  # so remove it. Note the identity here is the toolchain's *effective* name
+  # (ToolchainConfig::get_name()): since the Rust entry in example/sdk.yml has
+  # no explicit name: field, its name is derived from the URL's last path
+  # component, "sh.rustup.rs".
+  ##############################################################################
+  toolchains:
+    remove:
+      - sh.rustup.rs
+
+  ##############################################################################
+  # copy_files: drop the Scopy download (dest: is the identity key). The
+  # overlay-notes.txt file added by this target lives directly in the normal
+  # copy_files: list above instead, since it's new rather than a change to
+  # something inherited.
+  ##############################################################################
+  copy_files:
+    remove:
+      - downloads/scopy-v2.1.0.zip
+
+  ##############################################################################
+  # install: drop the Scopy install step (it depended on the file we just
+  # removed from copy_files above). The overlay-greeting install step added
+  # by this target lives directly in the normal install: list above instead.
+  ##############################################################################
+  install:
+    remove:
+      - scopy
+
