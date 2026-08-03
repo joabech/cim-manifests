@@ -1,0 +1,63 @@
+# overlay-example's own host OS dependencies.
+#
+# Each level of an extends: chain can have its own os-dependencies.yml.
+# cim copies every level's file into the workspace independently: this
+# target's own file keeps the bare "os-dependencies.yml" name, while
+# "example"'s (the base target this extends:) is copied alongside it as
+# "example-os-dependencies.yml". "cim install os-deps" processes every
+# os-dependencies.yml-family file found in the workspace, so packages from
+# both levels get installed -- it's fine (if a little wasteful) for the
+# same package to appear in more than one level's file.
+#
+# This file only adds "jq", a small tool used by overlay-greeting's
+# install step in a real target; "example"'s own os-dependencies.yml
+# already covers the common build tools.
+linux-x86_64:
+  ubuntu-26.04:
+    command: "apt install"
+    packages:
+      - jq
+  ubuntu-24.04:
+    command: "apt install"
+    packages:
+      - jq
+  ubuntu-22.04:
+    command: "apt install"
+    packages:
+      - jq
+  fedora-43:
+    command: "dnf install"
+    packages:
+      - jq
+  fedora-42:
+    command: "dnf install"
+    packages:
+      - jq
+
+linux-aarch64:
+  ubuntu-26.04:
+    command: "apt install"
+    packages:
+      - jq
+  ubuntu-24.04:
+    command: "apt install"
+    packages:
+      - jq
+  ubuntu-22.04:
+    command: "apt install"
+    packages:
+      - jq
+  fedora-43:
+    command: "dnf install"
+    packages:
+      - jq
+  fedora-42:
+    command: "dnf install"
+    packages:
+      - jq
+
+macos:
+  macos-any:
+    command: "brew install"
+    packages:
+      - jq
