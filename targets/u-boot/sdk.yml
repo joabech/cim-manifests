@@ -92,13 +92,9 @@ envsetup: |
   @echo "No environment setup needed in this build!"
 
 build:
-  depends_on:
-    - u-boot
-    - hello-world
-    - linux
-    - busybox
   commands: |
     @echo "Building main project"
+    $(MAKE) busybox-initramfs
     $(MAKE) linux-boot-script
 
 test:
