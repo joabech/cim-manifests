@@ -1,0 +1,6 @@
+This file is added by overlay-example-chain's own sdk.yml (copy_files:).
+
+It demonstrates that a target three levels deep in an extends: chain
+(example -> overlay-example -> overlay-example-chain) can still add its
+own new, level-specific files alongside everything inherited from its
+ancestors.
