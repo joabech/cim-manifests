@@ -1,0 +1,95 @@
+################################################################################
+# overlay-example-chain: demonstrates a 3-level extends:/overlay: chain.
+#
+# extends: only ever accepts a SINGLE base target per level -- it does NOT
+# accept a comma-separated/list of multiple bases (e.g. "a,b" is invalid,
+# it's parsed as one literal, nonexistent target name). To compose more
+# than one ancestor's content, chain single-parent levels instead:
+#
+#   example  ->  overlay-example  ->  overlay-example-chain (this target)
+#
+# Each arrow is a single `extends:` declaration. This target's merged
+# result therefore contains: everything from "example", plus everything
+# "overlay-example" added/removed/modified on top of that, plus whatever
+# this level adds/removes/modifies on top of THAT combined result.
+#
+#   - The normal gits:/copy_files: lists (below): entries unique to
+#     overlay-example-chain, added exactly as they would be in a target
+#     with no extends: at all.
+#   - overlay: (further down): only remove/modify operations against
+#     content inherited from the extends chain -- including content that
+#     was itself added two levels up, in "example" (proving overlay:
+#     reaches through the whole chain, not just the immediate parent).
+#
+# See the overlay: key below for the remove/modify diff and README.md for a
+# full walkthrough of what's added, removed, and modified at this level.
+################################################################################
+extends: overlay-example
+
+################################################################################
+# gits: a brand new repository that neither "example" nor "overlay-example"
+# has. Since it's new at this level, it's added directly here rather than
+# through the overlay: key.
+################################################################################
+gits:
+  - name: chain-note
+    url: https://github.com/octocat/Spoon-Knife.git
+    commit: main
+    build: |
+      @echo "Building chain-note (added by overlay-example-chain's own sdk.yml)"
+
+################################################################################
+# copy_files: a local file specific to this target, added the same way.
+################################################################################
+copy_files:
+  - source: chain-notes.txt
+    dest: chain-notes.txt
+
+################################################################################
+# Scalar sections (build/test/clean/flash/envsetup/build_folder/
+# makefile_include/direnv/phases) are NOT part of overlay:. They can
+# still be overridden directly here, as a plain whole-value replacement of
+# the value inherited from "overlay-example" (which itself overrode the
+# value inherited from "example"). This shows a 3rd override in the same
+# chain.
+################################################################################
+envsetup: |
+  @echo "Setting up CiM overlay-example-chain (extends: overlay-example)"
+
+################################################################################
+# overlay: the remove/modify diff applied on top of the merged
+# "overlay-example" result (see extends: overlay-example above), which
+# itself is already a merge of "overlay-example" on top of "example".
+#
+# overlay: only ever removes or modifies content inherited from the
+# extends chain -- anything new and unique to this target goes directly in
+# the normal lists above instead (see chain-note/chain-notes.txt above).
+#
+# Merge order per section is always fixed: remove -> combine (base entries
+# plus this target's own new entries above) -> modify. Every remove/modify
+# must reference an entry that already exists in the combined result --
+# that's a hard error rather than a silent no-op.
+################################################################################
+overlay:
+  ##############################################################################
+  # gits: "hello-world" was added directly by "overlay-example"'s own sdk.yml
+  # (one level up in the chain), not by "example". Modifying it here proves
+  # overlay: can act on content owned by the immediate parent level, not
+  # just the original base.
+  ##############################################################################
+  gits:
+    modify:
+      - name: hello-world
+        build: |
+          @echo "Building hello-world (build: overridden by overlay-example-chain)"
+
+  ##############################################################################
+  # toolchains: remove one of the LLVM toolchains that was defined two levels
+  # up, in "example"'s own sdk.yml (the Rust toolchain was already removed by
+  # "overlay-example"'s overlay: key, so this is a different entry). Proves
+  # overlay: reaches through the whole chain, not just the immediate
+  # parent.
+  ##############################################################################
+  toolchains:
+    remove:
+      - LLVM-22.1.1-Linux-X64.tar.xz
