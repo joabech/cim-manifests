@@ -33,8 +33,6 @@ toolchains:
 # FIXME: These patches is here for the time being - ideally they should be
 # in the git repos already.
 copy_files:
-  - source: patches/no-OS/00*.patch
-    dest: patches/no-OS
   - source: patches/msdk/00*.patch
     dest: patches/msdk
   # Ideally this should be in a git in the future.
@@ -57,9 +55,6 @@ copy_files:
 envsetup:
   commands: |
     ln -sfn ../../toolchains/aarch32-bm msdk/Tools/GNUTools
-    rm -rf no-OS/libraries/lwip/lwip && ln -sf ../../../lwip no-OS/libraries/lwip/lwip
-    rm -rf no-OS/libraries/lvgl/lvgl && ln -sf ../../../lvgl no-OS/libraries/lvgl/lvgl
-    cd no-OS && git am ../patches/no-OS/00*.patch || true
     cd msdk && git am ../patches/msdk/00*.patch || true
 
 test:
