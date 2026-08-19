@@ -158,27 +158,27 @@ build:
 		exit 1; \
 	fi
 	@echo "Building $(PROJECT_NAME)..."
-ifeq ($(IS_CMAKE_PROJECT),y)
-	@if [ -z "$(CONF)" ]; then \
-		echo "Error: no .conf file found in $(PROJECT_DIR)"; exit 1; \
-	fi
-	@if [ -z "$(BOARD)" ]; then \
-		echo "Error: no board .conf found in $(PROJECT_DIR)/boards/$(CONF)/"; exit 1; \
-	fi
-	@echo "  preset : $(BOARD)"
-	@echo "  conf   : $(CONF).conf"
-	@echo "  build  : $(CMAKE_BUILD_DIR)"
-	cd $(NO_OS_SRC) && \
-		MAXIM_LIBRARIES=$(MAXIM_LIBRARIES) cmake \
-			--preset $(BOARD) \
-			-B $(CMAKE_BUILD_DIR) \
-			-DPROJECT_DEFCONFIG=$(PROJECT_NAME)/$(CONF).conf \
-			$(EXTRA_ARGS)
-	cmake --build $(CMAKE_BUILD_DIR) --target $(PROJECT_NAME) -j$(shell nproc 2>/dev/null || echo 4)
-else
-	@echo "  flags  : $(PROJECT_BUILD_FLAGS)"
-	cd $(PROJECT_DIR) && MAXIM_LIBRARIES=$(MAXIM_LIBRARIES) $(MAKE) $(PROJECT_BUILD_FLAGS)
-endif
+	ifeq ($(IS_CMAKE_PROJECT),y)
+		@if [ -z "$(CONF)" ]; then \
+			echo "Error: no .conf file found in $(PROJECT_DIR)"; exit 1; \
+		fi
+		@if [ -z "$(BOARD)" ]; then \
+			echo "Error: no board .conf found in $(PROJECT_DIR)/boards/$(CONF)/"; exit 1; \
+		fi
+		@echo "  preset : $(BOARD)"
+		@echo "  conf   : $(CONF).conf"
+		@echo "  build  : $(CMAKE_BUILD_DIR)"
+		cd $(NO_OS_SRC) && \
+			MAXIM_LIBRARIES=$(MAXIM_LIBRARIES) cmake \
+				--preset $(BOARD) \
+				-B $(CMAKE_BUILD_DIR) \
+				-DPROJECT_DEFCONFIG=$(PROJECT_NAME)/$(CONF).conf \
+				$(EXTRA_ARGS)
+		cmake --build $(CMAKE_BUILD_DIR) --target $(PROJECT_NAME) -j$(shell nproc 2>/dev/null || echo 4)
+	else
+		@echo "  flags  : $(PROJECT_BUILD_FLAGS)"
+		cd $(PROJECT_DIR) && MAXIM_LIBRARIES=$(MAXIM_LIBRARIES) $(MAKE) $(PROJECT_BUILD_FLAGS)
+	endif
 	@echo "Build complete for $(PROJECT_NAME)"
 
 ################################################################################
@@ -192,19 +192,19 @@ clean:
 		echo "Error: Project '$(PROJECT_NAME)' not found at $(PROJECT_DIR)"; \
 		exit 1; \
 	fi
-ifeq ($(IS_CMAKE_PROJECT),y)
-	rm -rf $(CMAKE_BUILD_DIR)
-else
-	cd $(PROJECT_DIR) && MAXIM_LIBRARIES=$(MAXIM_LIBRARIES) $(MAKE) clean $(PROJECT_BUILD_FLAGS)
-	@if [ -d "$(PROJECT_DIR)/.vscode" ]; then \
-		echo "Removing generated IDE files..."; \
-		rm -rf "$(PROJECT_DIR)/.vscode"; \
-	fi
-	@if [ -d "$(PROJECT_DIR)/build" ]; then \
-		echo "Removing build directory..."; \
-		rm -rf "$(PROJECT_DIR)/build"; \
-	fi
-endif
+	ifeq ($(IS_CMAKE_PROJECT),y)
+		rm -rf $(CMAKE_BUILD_DIR)
+	else
+		cd $(PROJECT_DIR) && MAXIM_LIBRARIES=$(MAXIM_LIBRARIES) $(MAKE) clean $(PROJECT_BUILD_FLAGS)
+		@if [ -d "$(PROJECT_DIR)/.vscode" ]; then \
+			echo "Removing generated IDE files..."; \
+			rm -rf "$(PROJECT_DIR)/.vscode"; \
+		fi
+		@if [ -d "$(PROJECT_DIR)/build" ]; then \
+			echo "Removing build directory..."; \
+			rm -rf "$(PROJECT_DIR)/build"; \
+		fi
+	endif
 	@echo "Clean complete for $(PROJECT_NAME)"
 
 ################################################################################
