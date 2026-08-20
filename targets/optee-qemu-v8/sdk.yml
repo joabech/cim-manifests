@@ -150,7 +150,7 @@ gits:
   # buildroot git from common.xml
   - name: buildroot
     url: https://github.com/buildroot/buildroot.git
-    commit: 2025.05
+    commit: 2026.02.2
     build:
       - make -C build buildroot $(MAKEFLAGS)
 
