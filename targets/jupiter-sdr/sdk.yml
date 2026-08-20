@@ -1,10 +1,4 @@
 ################################################################################
-# Mirror configuration, can be overriden in the users config.toml.
-################################################################################
-mirror: $HOME/tmp/mirror
-
-
-################################################################################
 # Copy files from manifest target to workspace
 ################################################################################
 # Some pre-build binaries used when flashing the target.
