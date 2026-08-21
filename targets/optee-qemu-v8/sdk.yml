@@ -134,13 +134,10 @@ gits:
       - optee_os
       - optee_client
 
-  # buildroot git from common.xml, we have stepped this up a bit compared to
-  # what was used in the original 4.6.0 OP-TEE release. The reason being that
-  # now most distros use GCC 15.x and that give compiler errors with older
-  # build root version (m4, e2fs etc. to name a few.
+  # buildroot git from common.xml
   - name: buildroot
     url: https://github.com/buildroot/buildroot.git
-    commit: 7a07a9d155b8f601d68f07ee0ed1dc8d48907644
+    commit: refs/tags/2026.02.2
     build:
       - make -C build buildroot $(MAKEFLAGS)
 
