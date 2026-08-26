@@ -1,0 +1,80 @@
+################################################################################
+# Niobium Manifest
+#
+# Builds Niobium's open-source FHE client stack and the Niobium-integrated
+# fetch-by-similarity FHE benchmark submission:
+#
+#   niobium-client                  - https://github.com/NiobiumInc/niobium-client
+#   fetch-by-similarity-submission  - https://github.com/NiobiumInc/fetch-by-similarity-submission
+#
+# Both repos vendor OpenFHE (and other C++ dependencies) as git submodules,
+# and fetch-by-similarity-submission additionally vendors its own copy of
+# niobium-client as a submodule (submission/niobium-client) - it does not
+# reuse the top-level niobium-client checkout. cim clones each `gits:` entry
+# flat, without submodules, so every build step below runs its own
+# `git submodule update --init --recursive` first. Passing `--recursive`
+# once at the top of a repo also walks any submodules-of-submodules, so a
+# single call is enough even for fetch-by-similarity-submission's nested
+# niobium-client -> niobium-fhetch -> openfhe chain.
+#
+# Both trees are large once submodules are fetched (OpenFHE + its own
+# vendored cereal/google-benchmark/google-test/gperftools, ~850MB each) -
+# expect the first `cim init --install` / `make sdk-build` to take a while
+# and use significant disk space.
+################################################################################
+
+
+################################################################################
+# High-level Makefile targets
+################################################################################
+envsetup:
+  commands: |
+    @echo "Niobium build environment ready"
+
+build:
+  commands:
+    - $(MAKE) NIOBIUM_CLIENT_DIR $(MAKEFLAGS)
+    - $(MAKE) FETCH_BY_SIMILARITY_SUBMISSION_DIR $(MAKEFLAGS)
+  depends_on:
+    - sdk-envsetup
+
+test:
+  commands:
+    - $(MAKE) -C NIOBIUM_CLIENT_DIR test-simple-ops-release
+    - cd FETCH_BY_SIMILARITY_SUBMISSION_DIR && $(FETCH_BY_SIMILARITY_SUBMISSION_VENV)/bin/python3 harness/run_submission.py 0 --seed 12345 --count_only
+
+clean:
+  commands:
+    - $(MAKE) -C NIOBIUM_CLIENT_DIR clean
+    - rm -rf FETCH_BY_SIMILARITY_SUBMISSION_DIR/submission/build
+
+
+################################################################################
+# Gits for the project
+################################################################################
+gits:
+  - name: niobium-client
+    url: https://github.com/NiobiumInc/niobium-client.git
+    commit: main
+    build:
+      # `make sync` == git submodule update --init --recursive (fetches
+      # vendor/niobium-fhetch and its nested OpenFHE/json, skips the
+      # GPU-only niobium-haze submodule which the default build doesn't
+      # need). `make release` configures + builds OpenFHE, libnbfhetch,
+      # and the example binaries.
+      - cd NIOBIUM_CLIENT_DIR && $(MAKE) sync-fhetch && $(MAKE) release
+
+  - name: fetch-by-similarity-submission
+    url: https://github.com/NiobiumInc/fetch-by-similarity-submission.git
+    commit: main
+    # Only the harness (numpy for dataset/query generation) needs Python;
+    # `cim install pip` creates an isolated venv at .cim/<name>/.venv for it
+    # and cim generates a FETCH_BY_SIMILARITY_SUBMISSION_VENV Makefile var
+    # pointing at it.
+    python-deps: requirements.txt
+    build:
+      # This repo's own submission/niobium-client is a *separate* checkout
+      # from the sibling gits entry above - it is not shared.
+      - cd FETCH_BY_SIMILARITY_SUBMISSION_DIR && git submodule update --init --recursive
+      - $(MAKE) -C FETCH_BY_SIMILARITY_SUBMISSION_DIR/submission/niobium-client release
+      - cd FETCH_BY_SIMILARITY_SUBMISSION_DIR && ./scripts/build_task.sh ./submission ./submission/niobium-client/vendor/lib/openfhe

@@ -1,0 +1,78 @@
+# OS Dependencies for the Niobium client + fetch-by-similarity submission
+#
+# Both builds compile OpenFHE (vendored via git submodules) and link against
+# OpenSSL, so the native toolchain, CMake, git (for submodule fetches), and
+# OpenSSL dev headers are required on every platform.
+
+ubuntu_packages: &ubuntu_pkgs
+  - build-essential
+  - cmake
+  - git
+  - libssl-dev
+  - python3
+  - python3-pip
+
+fedora_packages: &fedora_pkgs
+  - cmake
+  - gcc
+  - gcc-c++
+  - git
+  - make
+  - openssl-devel
+  - python3
+  - python3-pip
+
+
+linux-x86_64:
+  ubuntu-26.04:
+    command: "apt install"
+    packages: *ubuntu_pkgs
+
+  ubuntu-24.04:
+    command: "apt install"
+    packages: *ubuntu_pkgs
+
+  ubuntu-22.04:
+    command: "apt install"
+    packages: *ubuntu_pkgs
+
+  fedora-43:
+    command: "dnf install"
+    packages: *fedora_pkgs
+
+  fedora-42:
+    command: "dnf install"
+    packages: *fedora_pkgs
+
+
+linux-aarch64:
+  ubuntu-26.04:
+    command: "apt install"
+    packages: *ubuntu_pkgs
+
+  ubuntu-24.04:
+    command: "apt install"
+    packages: *ubuntu_pkgs
+
+  ubuntu-22.04:
+    command: "apt install"
+    packages: *ubuntu_pkgs
+
+  fedora-43:
+    command: "dnf install"
+    packages: *fedora_pkgs
+
+  fedora-42:
+    command: "dnf install"
+    packages: *fedora_pkgs
+
+
+# macOS - Apple ships only LibreSSL, so OpenFHE needs Homebrew's OpenSSL
+# pointed at explicitly (see niobium-client's README: OPENSSL_ROOT_DIR).
+macos:
+  macos-any:
+    command: "brew install"
+    packages:
+      - cmake
+      - openssl@3
+      - python3
