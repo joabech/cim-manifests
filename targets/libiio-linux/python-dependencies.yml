@@ -1,0 +1,5 @@
+profiles:
+  dependencies:
+    packages:
+      - cffi
+default: dependencies

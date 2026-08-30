@@ -1,0 +1,103 @@
+ubuntu_packages: &ubuntu_pkgs
+  - build-essential
+  - cmake
+  - pkg-config
+  - bison
+  - flex
+  - libaio-dev
+  - libxml2-dev
+  - libusb-1.0-0-dev
+  - libavahi-client-dev
+  - libzstd-dev
+  - libserialport-dev
+  - libncurses-dev
+  - libcdk5-dev
+  - mono-complete
+  - python3-dev
+  - python3-pip
+  - python3-venv
+  - python3-setuptools
+
+fedora_packages: &fedora_pkgs
+  - gcc
+  - gcc-c++
+  - make
+  - cmake
+  - pkgconfig
+  - bison
+  - flex
+  - libaio-devel
+  - libxml2-devel
+  - libusb1-devel
+  - avahi-devel
+  - libzstd-devel
+  - libserialport-devel
+  - ncurses-devel
+  - cdk-devel
+  - mono-complete
+  - python3-devel
+  - python3-pip
+  - python3-setuptools
+
+linux-x86_64:
+  ubuntu-26.04:
+    command: "apt install"
+    packages: *ubuntu_pkgs
+
+  ubuntu-24.04:
+    command: "apt install"
+    packages: *ubuntu_pkgs
+
+  ubuntu-22.04:
+    command: "apt install"
+    packages: *ubuntu_pkgs
+
+  fedora-43:
+    command: "dnf install"
+    packages: *fedora_pkgs
+
+  fedora-42:
+    command: "dnf install"
+    packages: *fedora_pkgs
+
+linux-aarch64:
+  ubuntu-26.04:
+    command: "apt install"
+    packages: *ubuntu_pkgs
+
+  ubuntu-24.04:
+    command: "apt install"
+    packages: *ubuntu_pkgs
+
+  ubuntu-22.04:
+    command: "apt install"
+    packages: *ubuntu_pkgs
+
+  fedora-43:
+    command: "dnf install"
+    packages: *fedora_pkgs
+
+  fedora-42:
+    command: "dnf install"
+    packages: *fedora_pkgs
+
+linux:
+  ubuntu-26.04:
+    command: "apt install"
+    packages: *ubuntu_pkgs
+
+  ubuntu-24.04:
+    command: "apt install"
+    packages: *ubuntu_pkgs
+
+  ubuntu-22.04:
+    command: "apt install"
+    packages: *ubuntu_pkgs
+
+  fedora-43:
+    command: "dnf install"
+    packages: *fedora_pkgs
+
+  fedora-42:
+    command: "dnf install"
+    packages: *fedora_pkgs
