@@ -12,13 +12,41 @@ ifdef PROJ
 PROJECT_NAME := $(PROJ)
 endif
 
-# Path to the project directory
-PROJECT_DIR = ../no-OS/projects/$(PROJECT_NAME)
-
 # MAXIM_LIBRARIES path required for Maxim platform builds
 # Must be absolute path
 WORKSPACE_ROOT = $(shell cd .. && pwd)
 MAXIM_LIBRARIES = $(WORKSPACE_ROOT)/msdk/Libraries
+
+# Path to the project directory
+NO_OS_SRC = $(WORKSPACE_ROOT)/no-OS
+PROJECT_DIR = $(NO_OS_SRC)/projects/$(PROJECT_NAME)
+
+################################################################################
+# CMake: auto-derive CONF and BOARD when not supplied
+#
+#   CONF  — variant name, matches a <project>.conf file in the project dir
+#           Default: first .conf file found (alphabetical)
+#   BOARD — board preset name, matches a <board>.conf file under boards/<CONF>/
+#           Default: first .conf file found under boards/<CONF>/ (alphabetical)
+#
+# These can always be overridden on the command line:
+#   make PROJ=swiot1l CONF=swiot1l_static_ip BOARD=ad-swiot1l-sl
+################################################################################
+
+# Default CONF: stem of the first .conf in the project dir
+CONF ?= $(shell ls $(PROJECT_DIR)/*.conf 2>/dev/null | head -1 | xargs -I{} basename {} .conf)
+
+# Default BOARD: stem of the first .conf under boards/<CONF>/
+BOARD ?= $(shell ls $(PROJECT_DIR)/boards/$(CONF)/*.conf 2>/dev/null | head -1 | xargs -I{} basename {} .conf)
+
+CMAKE_BUILD_DIR = $(CURDIR)/cmake-$(PROJECT_NAME)
+
+# Detect whether the project uses CMake or legacy make
+IS_CMAKE_PROJECT := $(shell test -f $(PROJECT_DIR)/CMakeLists.txt && echo y || echo n)
+
+################################################################################
+# Legacy make: project-specific flags (only used when IS_CMAKE_PROJECT != y)
+################################################################################
 
 # Default platform and target for no-OS projects
 # Can be overridden via command line: make PLATFORM=maxim TARGET=max32665
@@ -130,7 +158,27 @@ build:
 		exit 1; \
 	fi
 	@echo "Building $(PROJECT_NAME)..."
-	cd $(PROJECT_DIR) && MAXIM_LIBRARIES=$(MAXIM_LIBRARIES) $(MAKE) $(PROJECT_BUILD_FLAGS)
+	ifeq ($(IS_CMAKE_PROJECT),y)
+		@if [ -z "$(CONF)" ]; then \
+			echo "Error: no .conf file found in $(PROJECT_DIR)"; exit 1; \
+		fi
+		@if [ -z "$(BOARD)" ]; then \
+			echo "Error: no board .conf found in $(PROJECT_DIR)/boards/$(CONF)/"; exit 1; \
+		fi
+		@echo "  preset : $(BOARD)"
+		@echo "  conf   : $(CONF).conf"
+		@echo "  build  : $(CMAKE_BUILD_DIR)"
+		cd $(NO_OS_SRC) && \
+			MAXIM_LIBRARIES=$(MAXIM_LIBRARIES) cmake \
+				--preset $(BOARD) \
+				-B $(CMAKE_BUILD_DIR) \
+				-DPROJECT_DEFCONFIG=$(PROJECT_NAME)/$(CONF).conf \
+				$(EXTRA_ARGS)
+		cmake --build $(CMAKE_BUILD_DIR) --target $(PROJECT_NAME) -j$(shell nproc 2>/dev/null || echo 4)
+	else
+		@echo "  flags  : $(PROJECT_BUILD_FLAGS)"
+		cd $(PROJECT_DIR) && MAXIM_LIBRARIES=$(MAXIM_LIBRARIES) $(MAKE) $(PROJECT_BUILD_FLAGS)
+	endif
 	@echo "Build complete for $(PROJECT_NAME)"
 
 ################################################################################
@@ -144,15 +192,19 @@ clean:
 		echo "Error: Project '$(PROJECT_NAME)' not found at $(PROJECT_DIR)"; \
 		exit 1; \
 	fi
-	cd $(PROJECT_DIR) && MAXIM_LIBRARIES=$(MAXIM_LIBRARIES) $(MAKE) clean $(PROJECT_BUILD_FLAGS)
-	@if [ -d "$(PROJECT_DIR)/.vscode" ]; then \
-		echo "Removing generated IDE files..."; \
-		rm -rf "$(PROJECT_DIR)/.vscode"; \
-	fi
-	@if [ -d "$(PROJECT_DIR)/build" ]; then \
-		echo "Removing build directory..."; \
-		rm -rf "$(PROJECT_DIR)/build"; \
-	fi
+	ifeq ($(IS_CMAKE_PROJECT),y)
+		rm -rf $(CMAKE_BUILD_DIR)
+	else
+		cd $(PROJECT_DIR) && MAXIM_LIBRARIES=$(MAXIM_LIBRARIES) $(MAKE) clean $(PROJECT_BUILD_FLAGS)
+		@if [ -d "$(PROJECT_DIR)/.vscode" ]; then \
+			echo "Removing generated IDE files..."; \
+			rm -rf "$(PROJECT_DIR)/.vscode"; \
+		fi
+		@if [ -d "$(PROJECT_DIR)/build" ]; then \
+			echo "Removing build directory..."; \
+			rm -rf "$(PROJECT_DIR)/build"; \
+		fi
+	endif
 	@echo "Clean complete for $(PROJECT_NAME)"
 
 ################################################################################
@@ -173,7 +225,7 @@ help:
 	@echo "Build system for no-OS projects"
 	@echo ""
 	@echo "Usage:"
-	@echo "  make [TARGET] [PROJ=<project_name>]"
+	@echo "  make [TARGET] [PROJ=<project_name>] [CONF=<variant>] [BOARD=<preset>]"
 	@echo ""
 	@echo "Targets:"
 	@echo "  all        - Build the project (default: swiot1l)"
@@ -184,11 +236,18 @@ help:
 	@echo ""
 	@echo "Variables:"
 	@echo "  PROJ       - Project to build (default: swiot1l)"
+	@echo "  CONF       - Variant .conf stem (default: auto)"
+	@echo "  BOARD      - CMake preset / board name (default: auto)"
+	@echo "  EXTRA_ARGS - Extra flags forwarded to new no-OS build system"
 	@echo ""
 	@echo "Examples:"
 	@echo "  make PROJ=swiot1l       - Build swiot1l project"
 	@echo "  make PROJ=adin1110      - Build adin1110 project"
 	@echo "  make clean PROJ=swiot1l - Clean swiot1l project"
+	@echo "  make PROJ=swiot1l CONF=swiot1l_static_ip BOARD=ad-swiot1l-sl"
+	@echo "  make PROJ=adin1110 CONF=frame_rx_tx BOARD=max32650fthr"
+	@echo "  make PROJ=max14906 CONF=iio BOARD=max32666fthr"
+	@echo "  make PROJ=apard32690 CONF=basic BOARD=ad-apard32690-sl"
 	@echo ""
 	@echo "Note: PROJ is used instead of PROJECT to avoid conflicts"
 	@echo "      with the no-OS build system's internal variables"
