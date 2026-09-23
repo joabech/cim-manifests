@@ -25,6 +25,9 @@ copy_files:
   - source: patches/
     dest: patches/
 
+  - source: README.md
+    dest: docs/README.md
+
 
 ################################################################################
 # Top-level Makefile targets
