@@ -31,6 +31,7 @@ ubuntu_packages: &ubuntu_pkgs
 
 fedora_packages: &fedora_pkgs
   - clang
+  - clang-tools-extra
   - cmake
   - curl
   - gcc
@@ -38,7 +39,7 @@ fedora_packages: &fedora_pkgs
   - git
   - glib2-devel
   - golang
-  - libusb-devel
+  - libusb1-devel
   - llvm
   - make
   - ninja-build
@@ -48,58 +49,59 @@ fedora_packages: &fedora_pkgs
   - python3
   - python3-devel
   - python3-pip
+  - yosys-devel
 
 # Linux x86_64 (Intel/AMD) dependencies
 linux-x86_64:
   ubuntu-26.04:
-    command: "apt install"
+    command: "apt-get install"
     packages: *ubuntu_pkgs
 
   ubuntu-24.04:
-    command: "apt install"
+    command: "apt-get install"
     packages: *ubuntu_pkgs
 
   ubuntu-22.04:
-    command: "apt install"
+    command: "apt-get install"
     packages: *ubuntu_pkgs
 
-  fedora-42:
+  fedora-44:
     command: "dnf install"
     packages: *fedora_pkgs
 
 # Linux ARM64 (Apple Silicon, ARM servers) dependencies
 linux-aarch64:
   ubuntu-26.04:
-    command: "apt install"
+    command: "apt-get install"
     packages: *ubuntu_pkgs
 
   ubuntu-24.04:
-    command: "apt install"
+    command: "apt-get install"
     packages: *ubuntu_pkgs
 
   ubuntu-22.04:
-    command: "apt install"
+    command: "apt-get install"
     packages: *ubuntu_pkgs
 
-  fedora-42:
+  fedora-44:
     command: "dnf install"
     packages: *fedora_pkgs
 
 # Backward compatibility - generic linux (defaults to x86_64 behavior)
 linux:
   ubuntu-26.04:
-    command: "apt install"
+    command: "apt-get install"
     packages: *ubuntu_pkgs
 
   ubuntu-24.04:
-    command: "apt install"
+    command: "apt-get install"
     packages: *ubuntu_pkgs
 
   ubuntu-22.04:
-    command: "apt install"
+    command: "apt-get install"
     packages: *ubuntu_pkgs
 
-  fedora-42:
+  fedora-44:
     command: "dnf install"
     packages: *fedora_pkgs
 
