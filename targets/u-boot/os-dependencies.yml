@@ -7,6 +7,7 @@
 #   - bison/flex for Kconfig
 #   - device-tree-compiler for DTB generation
 #   - OpenSSL for verified boot
+#   - GnuTLS for EFI capsule signing (tools/mkeficapsule)
 #
 # QEMU emulation:
 #   - qemu-system-arm (Ubuntu/Debian) or qemu-system-aarch64 (Fedora)
@@ -22,6 +23,7 @@ ubuntu_packages: &ubuntu_pkgs
   - device-tree-compiler  # dtc - device tree compiler
   - flex                  # Lexical analyzer (Kconfig)
   - git
+  - libgnutls28-dev       # For EFI capsule signing (mkeficapsule)
   - libncurses-dev        # For menuconfig
   - libssl-dev            # For crypto/verified boot support
   - make
@@ -41,6 +43,7 @@ fedora_packages: &fedora_pkgs
   - gcc
   - gcc-c++
   - git
+  - gnutls-devel          # For EFI capsule signing (mkeficapsule)
   - make
   - ncurses-devel
   - openssl-devel
@@ -139,6 +142,7 @@ macos:
       - dtc
       - flex
       - git
+      - gnutls    # Required for EFI capsule signing (mkeficapsule)
       - make
       - ncurses
       - openssl@3 # Required for U-Boot verified boot/image signing tools
