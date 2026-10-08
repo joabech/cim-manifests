@@ -1,0 +1,7 @@
+profiles:
+  default:
+    packages:
+      - west
+      - pyelftools
+
+default: default

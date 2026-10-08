@@ -1,0 +1,147 @@
+################################################################################
+# Alif Semiconductor Zephyr SDK (sdk-alif) Manifest
+#
+# sdk-alif is a *west manifest repository*, not a plain source tree: it only
+# carries the Alif-specific samples/boards/drivers plus a west.yml that pulls
+# in upstream Zephyr and several sibling modules (matter, mcuboot_alif,
+# cmsis_alif, hal_infineon, dave2d, aipl) as separate checkouts next to it.
+#
+# cim clones sdk-alif itself (as "alif", matching west.yml's self: path:
+# alif) and the "build" git below provides the build/alif.mk fragment. West
+# then manages the rest of the multi-repo checkout *inside* this same cim
+# workspace - see install: below. cim owns the outer workspace (gits,
+# toolchains, deps, Makefile), west owns Zephyr-specific operations within
+# it.
+#
+# Pinned to tag v2.4.0 (matches docs/user_guide.pdf). sdk-alif is an external
+# vendor repo we don't control, so pin a tag/commit rather than tracking main.
+################################################################################
+
+################################################################################
+# Toolchains section
+################################################################################
+toolchains:
+  # Zephyr SDK, minimal bundle (~25MB vs. ~11GB for the full bundle, which
+  # includes a prebuilt cross toolchain for every Zephyr-supported arch).
+  # Alif only needs arm-zephyr-eabi, so post_install_commands runs setup.sh
+  # to fetch just that one toolchain plus host tools (qemu, gdb, etc.).
+  # Deliberately skip setup.sh's "-c" (CMake package registration): it
+  # writes into $HOME/.cmake/packages, outside the workspace. Instead
+  # build/alif.mk points west at the SDK directly via ZEPHYR_SDK_INSTALL_DIR.
+  - name: zephyr-sdk-0.17.4_linux-x86_64_minimal.tar.xz
+    url: https://github.com/zephyrproject-rtos/sdk-ng/releases/download/v0.17.4/
+    destination: toolchains/zephyr-sdk
+    strip_components: 1
+    os: linux
+    arch: x86_64
+    post_install_commands: |
+      ./setup.sh -t arm-zephyr-eabi -h
+
+
+################################################################################
+# High-level Makefile targets - redirect to alif-* targets in build/alif.mk
+################################################################################
+envsetup:
+  commands: |
+    @echo "Alif Zephyr SDK build environment ready"
+    @echo "West:        $(CURDIR)/.venv/bin/west"
+    @echo "Zephyr SDK:  $(CURDIR)/toolchains/zephyr-sdk"
+
+build:
+  commands: |
+    $(MAKE) alif-build
+
+test:
+  commands: |
+    $(MAKE) alif-test
+
+clean:
+  commands: |
+    $(MAKE) alif-clean
+
+flash:
+  commands: |
+    $(MAKE) alif-flash
+
+
+################################################################################
+# Copy files section
+################################################################################
+copy_files:
+  - source: README.md
+    dest: README.md
+
+  - source: docs/user_guide.pdf
+    dest: docs/user_guide.pdf
+
+  # Alif Security Toolkit (SE_FW 1.112.00_DEV). Direct-download endpoint, not
+  # a filename-ending URL, so this must be a copy_files: entry (dest: picks
+  # the on-disk name) rather than a toolchains: entry - cim's toolchains
+  # downloader always appends/matches a filename onto url, which breaks
+  # against a flat endpoint like this one. See install: below for extraction.
+  - source: https://alifsemi.com/download/APFW0002
+    dest: downloads/app-release-exec-linux-SE_FW_1.112.00_DEV.tar
+    cache: true
+
+
+################################################################################
+# Installation section
+################################################################################
+install:
+  # Hand-writes .west/config instead of calling "west init -l": pure
+  # filesystem ops, no python/west binary needed, so it doesn't depend on
+  # the pip install step having run yet, and west commands become usable
+  # directly from $(WORKSPACE) right away. Sentinel: truly one-time.
+  - name: west-config
+    sentinel: true
+    depends_on_gits:
+      - alif
+    commands: |
+      $(MAKE) alif-west-config
+
+  # Fetches the sibling projects west.yml pins (zephyr, matter, mcuboot_alif,
+  # cmsis_alif, hal_infineon, dave2d, aipl) as directories next to "alif".
+  # No sentinel: "west update" is naturally incremental - safe (and
+  # necessary) to re-run if alif's pinned commit/tag moves.
+  #
+  # The actual shell logic lives in build/alif.mk (alif-west-sync etc.) -
+  # a plain Makefile recipe supports multi-line "&&"/"\" continuations
+  # naturally, where a commands: block here would run each line as its own
+  # separate shell.
+  - name: west-workspace-sync
+    depends_on:
+      - west-config
+    commands: |
+      $(MAKE) alif-west-sync
+
+  # zephyr/scripts/requirements.txt only exists after west update has fetched
+  # zephyr, so this can't be a static python-deps: entry on a git - it has to
+  # run as its own step, after west-workspace-sync.
+  - name: zephyr-pip-deps
+    depends_on:
+      - west-workspace-sync
+    commands: |
+      $(MAKE) alif-zephyr-pip-deps
+
+  # Extracts the Alif Security Toolkit tar fetched via copy_files above.
+  # strip_components=1 assumes the tar's root is a single top-level
+  # "app-release-exec-linux-SE_FW_*" directory (matching the path the
+  # upstream docs export ALIF_SE_TOOLS_DIR to) - verified in end-to-end
+  # testing (Step 7).
+  - name: alif-se-tools-extract
+    sentinel: true
+    commands: |
+      $(MAKE) alif-se-tools-extract
+
+
+################################################################################
+# Gits for the project
+################################################################################
+gits:
+  - name: alif
+    url: https://github.com/alifsemi/sdk-alif.git
+    commit: v2.4.0
+
+  - name: build
+    url: https://github.com/joabech/build.git
+    commit: alif
