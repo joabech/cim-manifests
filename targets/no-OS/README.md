@@ -2,12 +2,16 @@
 This target builds the artifacts for the no-OS project. It includes source code as well as build scripts and patches. Note that this setup requires a Linux or MacOS environment, i.e. it's not possible to compile this using native Windows. If you're on Windows, then it's recommended to use WSL or a VM.
 
 ## Build instructions
-The first time building a new target it's always a good idea to also install the host OS dependencies, hence we add the `--full` flag to the `init` command below. However, that is typically a step that you only do once. So, if you re-run the steps below and you successfully have installed the host OS dependencies, you can skip the `--full` flag.
+> [!NOTE]
+> The first time you set up this target, run `cim init` with `--full`: it also
+> installs the host OS dependencies, in addition to the toolchains, pip packages
+> and install targets. On subsequent runs, once the host OS dependencies are
+> installed, `--install` is sufficient.
 
 ### Setting up the workspace
 Here we setup the workspace, which will clone the source code, toolchains etc.
 ``` bash
-$ cim init --source https://github.com/joabech/cim-manifests.git --install -t no-OS
+$ cim init --source https://github.com/joabech/cim-manifests.git --full -t no-OS
 $ cd $HOME/dsdk-no-OS
 ```
 

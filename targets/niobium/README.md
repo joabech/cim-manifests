@@ -16,16 +16,15 @@ to take a while and use several GB of disk space.
 ### Setting up the workspace
 
 ```bash
-$ cim init --source https://github.com/joabech/cim-manifests.git --install -t niobium
+$ cim init --source https://github.com/joabech/cim-manifests.git --full -t niobium
 $ cd $HOME/dsdk-niobium
 ```
 
 > [!NOTE]
-> The first time building a new target it's always a good idea to also
-> install the host OS dependencies:
-> ```
-> $ cim install os-deps
-> ```
+> The first time you set up this target, run `cim init` with `--full`: it also
+> installs the host OS dependencies, in addition to the toolchains, pip packages
+> and install targets. On subsequent runs, once the host OS dependencies are
+> installed, `--install` is sufficient.
 
 ### Building the project
 

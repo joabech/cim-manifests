@@ -6,19 +6,23 @@ This is an alternative way to produce the same setup as the official [OP-TEE ins
 ## Build instructions
 **tl;dr**
 ``` bash
-$ cim init --source https://github.com/joabech/cim-manifests.git --install -t optee-qemu-v8
+$ cim init --source https://github.com/joabech/cim-manifests.git --full -t optee-qemu-v8
 $ cd $HOME/dsdk-optee-qemu-v8
 $ make sdk-envsetup
 $ make sdk-test -j12
 ```
 
 **Longer explanation**
-The first time building a new target it's always a good idea to also install the host OS dependencies, hence we add the `--full` flag to the `init` command below. However, that is typically a step that you only do once. So, if you re-run the steps below and you successfully have installed the host OS dependencies, you can skip the `--full` flag.
+> [!NOTE]
+> The first time you set up this target, run `cim init` with `--full`: it also
+> installs the host OS dependencies, in addition to the toolchains, pip packages
+> and install targets. On subsequent runs, once the host OS dependencies are
+> installed, `--install` is sufficient.
 
 ### Setting up the workspace
 Here we setup the workspace, which will clone all 20 source repositories and install toolchains.
 ``` bash
-$ cim init --source https://github.com/joabech/cim-manifests.git --install --full -t optee-qemu-v8
+$ cim init --source https://github.com/joabech/cim-manifests.git --full -t optee-qemu-v8
 $ cd $HOME/dsdk-optee-qemu-v8
 ```
 
