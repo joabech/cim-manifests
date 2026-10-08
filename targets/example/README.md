@@ -2,12 +2,16 @@
 This target is a minimal template demonstrating how to configure a `cim` manifest. It does not build real software — all build steps simply print messages to show the manifest structure and syntax. It works on both Linux and MacOS.
 
 ## Build instructions
-The first time building a new target it's always a good idea to also install the host OS dependencies, hence we add the `--full` flag to the `init` command below. However, that is typically a step that you only do once. So, if you re-run the steps below and you successfully have installed the host OS dependencies, you can skip the `--full` flag.
+> [!NOTE]
+> The first time you set up this target, run `cim init` with `--full`: it also
+> installs the host OS dependencies, in addition to the toolchains, pip packages
+> and install targets. On subsequent runs, once the host OS dependencies are
+> installed, `--install` is sufficient.
 
 ### Setting up the workspace
 Here we setup the workspace, which will download toolchains and set up the directory structure.
 ``` bash
-$ cim init --source https://github.com/joabech/cim-manifests.git --install -t example
+$ cim init --source https://github.com/joabech/cim-manifests.git --full -t example
 $ cd $HOME/dsdk-example
 ```
 

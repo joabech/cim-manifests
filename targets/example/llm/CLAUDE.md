@@ -44,11 +44,15 @@ The project uses a declarative YAML-based manifest approach defined in `sdk.yml`
 
 ### Initial Setup
 ```bash
-cim init --source https://github.com/joabech/cim-manifests.git --install -t example
+cim init --source https://github.com/joabech/cim-manifests.git --full -t example
 cd $HOME/dsdk-example
 ```
 
-The `--full` flag installs host OS dependencies; typically only needed once. Subsequent runs can omit it.
+> [!NOTE]
+> The first time you set up this target, run `cim init` with `--full`: it also
+> installs the host OS dependencies, in addition to the toolchains, pip packages
+> and install targets. On subsequent runs, once the host OS dependencies are
+> installed, `--install` is sufficient.
 
 ### Building
 ```bash

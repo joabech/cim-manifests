@@ -7,11 +7,11 @@ building, testing, and debugging U-Boot in QEMU.
 
 ## Build instructions
 
-The first time building a new target it's always a good idea to also install
-the host OS dependencies, hence we add the `--full` flag to the `init` command
-below. However, that is typically a step that you only do once. So, if you
-re-run the steps below and you successfully have installed the host OS
-dependencies, you can skip the `--full` flag.
+> [!NOTE]
+> The first time you set up this target, run `cim init` with `--full`: it also
+> installs the host OS dependencies, in addition to the toolchains, pip packages
+> and install targets. On subsequent runs, once the host OS dependencies are
+> installed, `--install` is sufficient.
 
 ### Setting up the workspace
 
@@ -19,7 +19,7 @@ Here we setup the workspace, which will download the U-Boot source and install
 the Arm64 GNU toolchain.
 
 ``` bash
-$ cim init --source https://github.com/joabech/cim-manifests.git --install -t u-boot
+$ cim init --source https://github.com/joabech/cim-manifests.git --full -t u-boot
 $ cd $HOME/dsdk-u-boot
 ```
 

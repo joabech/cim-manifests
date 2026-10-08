@@ -37,8 +37,14 @@ Config files:
 
 Idiomatic mirror + symlink setup:
 
+> [!NOTE]
+> The first time you set up this target, run `cim init` with `--full`: it also
+> installs the host OS dependencies, in addition to the toolchains, pip packages
+> and install targets. On subsequent runs, once the host OS dependencies are
+> installed, `--install` is sufficient.
+
 ```sh
-cim init -t optee-qemu-v8 --install --symlink --force
+cim init -t optee-qemu-v8 --full --symlink --force
 cd /path/to/workspace
 cim makefile
 make sdk-envsetup

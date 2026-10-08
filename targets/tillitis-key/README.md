@@ -5,16 +5,16 @@ so that the TKey can be emulated on the native host without Docker.
 
 ## Build instructions
 
-The first time building a new target it's always a good idea to also install
-the host OS dependencies, hence we add the `--full` flag to the `init` command
-below. However, that is typically a step that you only do once. So, if you
-re-run the steps below and you successfully have installed the host OS
-dependencies, you can skip the `--full` flag.
+> [!NOTE]
+> The first time you set up this target, run `cim init` with `--full`: it also
+> installs the host OS dependencies, in addition to the toolchains, pip packages
+> and install targets. On subsequent runs, once the host OS dependencies are
+> installed, `--install` is sufficient.
 
 ### Setting up the workspace
 
 ```bash
-$ cim init --source https://github.com/joabech/cim-manifests.git --install -t tillitis-key
+$ cim init --source https://github.com/joabech/cim-manifests.git --full -t tillitis-key
 $ cd $HOME/dsdk-tillitis-key
 ```
 

@@ -2,12 +2,16 @@
 This target builds the artifacts for the Jupiter SDR project. It include source code as well as prebuilt binaries and configuration. Note that this setup requires a Linux environment, i.e. it's not possible to compile this using native Windows or MacOS. If you're on Windows or MacOS, then it's recommend to use WSL or a VM.
 
 ## Build instructions
-The first time building a new target it's always a good idea to also install the host OS depdendencies, hence we add the flags `--full` flag to the `init` command below. However, tath is typically a step that you only do once. So, if you re-run the steps below and you successfully have installed the host OS dependencies, you can skip the `--full` flag.
+> [!NOTE]
+> The first time you set up this target, run `cim init` with `--full`: it also
+> installs the host OS dependencies, in addition to the toolchains, pip packages
+> and install targets. On subsequent runs, once the host OS dependencies are
+> installed, `--install` is sufficient.
 
 ### Setting up the workspace
 Here we setup the workspace, which will clone the source code, toolchains etc.
 ``` bash
-$ cim init --source https://github.com/joabech/cim-manifests.git --install -t jupiter-sdr
+$ cim init --source https://github.com/joabech/cim-manifests.git --full -t jupiter-sdr
 $ cd $HOME/dsdk-jupiter-sdr
 ```
 
