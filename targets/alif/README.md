@@ -3,9 +3,11 @@
 This target builds Zephyr RTOS applications for Alif Semiconductor's Ensemble
 and Balletto MCUs using
 [sdk-alif](https://github.com/alifsemi/sdk-alif), Alif's Zephyr SDK. The
-default build/test target is the `hello_world` sample for the Alif E7 DevKit
-(`alif_e7_dk/ae722f80f55d5xx/rtss_he`). See `docs/user_guide.pdf` (copied into
-the workspace) for the full upstream getting-started guide.
+default build/test target is the `hello_world` sample for the Alif E8 DevKit
+(`alif_e8_dk/ae822fa0e5597xx0/rtss_he`); the E7 DevKit
+(`alif_e7_dk/ae722f80f55d5xx/rtss_he`) is also supported via the
+`ALIF_BOARD` override below. See `docs/user_guide.pdf` (copied into the
+workspace) for the full upstream getting-started guide.
 
 sdk-alif is a *west manifest repository*: beyond its own samples/boards/
 drivers, it only carries a `west.yml` that pulls in upstream Zephyr and
@@ -36,12 +38,12 @@ $ cd $HOME/dsdk-alif
 $ make sdk-build
 ```
 
-This runs `west build -p always -b alif_e7_dk/ae722f80f55d5xx/rtss_he -d
+This runs `west build -p always -b alif_e8_dk/ae822fa0e5597xx0/rtss_he -d
 build/alif zephyr/samples/hello_world`. Override the board/sample by calling
-the underlying target directly, e.g.:
+the underlying target directly, e.g. to build for the E7 DevKit instead:
 
 ```bash
-$ make alif-build ALIF_BOARD=alif_e7_dk/ae722f80f55d5xx/rtss_hp ALIF_SAMPLE=zephyr/samples/hello_world
+$ make alif-build ALIF_BOARD=alif_e7_dk/ae722f80f55d5xx/rtss_he ALIF_SAMPLE=zephyr/samples/hello_world
 ```
 
 ### Running tests
@@ -98,9 +100,12 @@ delegate to.
 Three `install:` steps run the west/Zephyr-specific setup that can't be
 expressed as plain `gits:`/`toolchains:` entries:
 
-- `west-workspace-sync` — runs `west init -l alif` + `west update`, which
-  fetches Zephyr and the other west.yml-pinned sibling repos into the
-  workspace.
+- `west-workspace-sync` — runs `west init -l alif` + `west update
+  --auto-cache $(ALIF_WEST_CACHE)`, which fetches Zephyr and the other
+  west.yml-pinned sibling repos into the workspace. `ALIF_WEST_CACHE`
+  (default `~/tmp/mirror/.alifcache/west/git`) is a local cache of those
+  repos shared across workspaces, so a fresh `alif` workspace doesn't
+  re-download the whole west-managed tree from the internet every time.
 - `zephyr-pip-deps` — installs `zephyr/scripts/requirements.txt`; this can
   only run after `west-workspace-sync` has actually fetched zephyr.
 - `alif-se-tools-extract` — extracts the Alif Security Toolkit tar (fetched

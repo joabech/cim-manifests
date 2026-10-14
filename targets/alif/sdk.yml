@@ -18,10 +18,21 @@
 ################################################################################
 
 ################################################################################
+# Manifest variables - reusable across the manifest
+################################################################################
+variables:
+  # Build output directory, used by build/alif.mk's ALIF_BUILD_DIR. Kept
+  # separate from the auto-generated BUILD_DIR (the "build" git's checkout
+  # dir below) so Zephyr's build output doesn't live inside that git's
+  # working tree.
+  OUTPUT_DIR: "${{ WORKSPACE }}/out"
+
+
+################################################################################
 # Toolchains section
 ################################################################################
 toolchains:
-  # Zephyr SDK, minimal bundle (~25MB vs. ~11GB for the full bundle, which
+  # Zephyr SDK, minimal bundle (~75MB vs. ~11GB for the full bundle, which
   # includes a prebuilt cross toolchain for every Zephyr-supported arch).
   # Alif only needs arm-zephyr-eabi, so post_install_commands runs setup.sh
   # to fetch just that one toolchain plus host tools (qemu, gdb, etc.).
@@ -39,29 +50,17 @@ toolchains:
 
 
 ################################################################################
-# High-level Makefile targets - redirect to alif-* targets in build/alif.mk
+# High-level Makefile targets - build/test/clean/flash need no commands here:
+# build/alif.mk's alif-build/alif-test/alif-clean/alif-flash targets are
+# auto-wired as sdk-<phase>'s prerequisite purely from the <git>-<phase>
+# naming convention, so a "$(MAKE) alif-build" commands: block here would
+# just invoke the same recipe a second time.
 ################################################################################
 envsetup:
   commands: |
     @echo "Alif Zephyr SDK build environment ready"
     @echo "West:        $(CURDIR)/.venv/bin/west"
     @echo "Zephyr SDK:  $(CURDIR)/toolchains/zephyr-sdk"
-
-build:
-  commands: |
-    $(MAKE) alif-build
-
-test:
-  commands: |
-    $(MAKE) alif-test
-
-clean:
-  commands: |
-    $(MAKE) alif-clean
-
-flash:
-  commands: |
-    $(MAKE) alif-flash
 
 
 ################################################################################
