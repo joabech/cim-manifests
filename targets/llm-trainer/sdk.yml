@@ -1,0 +1,67 @@
+################################################################################
+# llm-trainer Manifest
+#
+# Fine-tunes a chat-format (chatml "messages") dataset into a base LLM and
+# exports a quantized GGUF for llama.cpp/Ollama/LM Studio. One pipeline
+# on macOS and Linux (build/finetune.py: Hugging Face trl + peft), training
+# on CUDA, Apple Silicon's GPU (MPS) or CPU, whichever the host has.
+#
+#   cim install pip
+#   make finetune-low MODEL=<path-or-hf-repo> DATASET=<chatml.jsonl>
+#
+# Never downloads a base model on its own: MODEL= is always required.
+################################################################################
+
+variables:
+  # llama-quantize type. Q5_K_M keeps exact factual recall better than the
+  # more common Q4_K_M, at a modest size increase.
+  QUANT: Q5_K_M
+  # Validation fraction when a raw DATASET= is split.
+  VAL_SPLIT: "0.1"
+  # Shuffle/training seed.
+  SEED: "42"
+
+# Not auto-discovered: no git is named "finetune".
+makefile_include:
+  - include build/finetune.mk
+
+# No build:/test: on purpose -- cim bootstrap's default phases must never
+# start a real training run.
+phases: ["run"]
+
+envsetup:
+  commands: |
+    @echo "Ready. Run 'make sdk-help' for profiles, required variables and models."
+
+help:
+  commands: |
+    $(MAKE) --no-print-directory finetune-help
+
+clean:
+  commands: |
+    $(MAKE) finetune-clean
+
+copy_files:
+  - source: README.md
+    dest: README.md
+
+  - source: CLAUDE.md
+    dest: CLAUDE.md
+
+gits:
+  # finetune.mk/finetune.py/profiles/llama.cpp.mk. Its requirements.txt
+  # holds every Python dependency (training + GGUF conversion), installed
+  # into one per-workspace venv, .cim/build/.venv ($(BUILD_VENV)).
+  - name: build
+    url: https://github.com/joabech/build.git
+    commit: llm-trainer
+    python-deps: requirements.txt
+
+  # Built locally by build/llama.cpp.mk for llama-quantize/llama-cli and
+  # used for convert_hf_to_gguf.py. Pinned for reproducibility; it runs
+  # under build/requirements.txt's transformers (5.x), newer than the
+  # 4.57.6 llama.cpp's own requirements pin, so re-test a GGUF export
+  # when bumping.
+  - name: llama.cpp
+    url: https://github.com/ggml-org/llama.cpp
+    commit: b11627
