@@ -125,18 +125,24 @@ copy_files:
   #    location to the dest location (relative to the workspace root)
   # - sha256: The sha256 field is optional but recommended to ensure file
   #    integrity.
+  # - os: optional, same values as in the toolchains section (darwin, linux,
+  #    windows). The file is only downloaded on a matching host. Entries
+  #    without os (like the ones above) are processed on every host.
   - source: https://github.com/analogdevicesinc/scopy/archive/refs/tags/v2.1.0.zip
     dest: downloads/scopy-v2.1.0.zip
     cache: true
     symlink: true
     sha256: 99a706082b2ecd3b7ba95329b10987df3c687a940646d96c8aeb3000fce14fbd
+    os: darwin
 
 ################################################################################
 # Installation section - binaries etc, with specific install commands
 ################################################################################
 # Example: Install libarmlm.so to opt/libarmlm directory and create sentinel
 # file to mark installation complete.
-# Note. This goes hand in hand with the copy_files section above.
+# Note. This goes hand in hand with the copy_files section above. Like the
+# scopy download, this step is restricted to macOS hosts with os: darwin, on
+# other hosts it is left out of the generated Makefile.
 install:
   - name: scopy
     sentinel: opt/.scopy-installed
@@ -145,3 +151,4 @@ install:
       INSTALL_DIR="opt/scopy"
       mkdir -p $$INSTALL_DIR
       unzip -a $$DOWNLOADS/scopy-v2.1.0.zip -d $$INSTALL_DIR/
+    os: darwin
